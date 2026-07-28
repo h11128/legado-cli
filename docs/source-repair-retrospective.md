@@ -408,6 +408,13 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 |-------|-----|
 | POST `/search/` 空结果页（短词还 alert≥10字）；首页仍有书 | **disable/skip** §16 |
 
+
+## 38. miao.qimao.com 奇妙小说 (2026-07-28)
+
+| Issue | Fix |
+|-------|-----|
+| Vue SSR 搜索空壳（known） | **disable/skip** |
+
 ## Close-out 标准（每轮）
 
 1. **诊断证据**：`diagnose` + phone `debug_source` / fetch → ledger + retro.msg  
