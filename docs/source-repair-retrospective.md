@@ -429,6 +429,14 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 |-------|-----|
 | `/wap/index/search` 与 `/www/search` 均 404 | **disable/skip** §16 |
 
+
+## 41. ihuaben.com 话本小说 (2026-07-28)
+
+| Issue | Fix |
+|-------|-----|
+| `/app/search` 带过期 `tokenId`；bookList 路径 | 去掉 token；`bookList=$..pageList[*]`；bookUrl HTML；tocUrl CDN chapters |
+| 校验 | **校验成功** 2659ms |
+
 ## Close-out 标准（每轮）
 
 1. **诊断证据**：`diagnose` + phone `debug_source` / fetch → ledger + retro.msg  
