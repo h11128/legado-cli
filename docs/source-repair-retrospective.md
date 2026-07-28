@@ -364,6 +364,13 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 | `queue refresh-index` 后 progress 候选=0 | MCP 字段是 `bookSourceGroup`/`bookSourceName`，progress/rt 只读 `group`/`name` → 别名写入 index + 双读 |
 | `http://api.xingliangglobal.com##@遇知` 丁丁/猫眼 | debug+verify（keyword=斗破）**校验成功** 1227ms；无规则补丁（旧「搜索失效」多为限流/关键词 flake） |
 
+## 32. yqk.net 言情小说 (2026-07-28)
+
+| Issue | Fix |
+|-------|-----|
+| POST `search.php`+gb2312 常「找不到结果」；首页 form 是 **GET** | `searchUrl=/search.php?searchkey={{key}}&page={{page}},{"charset":"GBK"}`；`concurrentRate=1/10000` |
+| 校验关键词 | 用「言情」（短词/穿越易空）；**校验成功** 23715ms |
+
 ## Close-out 标准（每轮）
 
 1. **诊断证据**：`diagnose` + phone `debug_source` / fetch → ledger + retro.msg  
