@@ -422,6 +422,13 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 |-------|-----|
 | search.aspx 返回 `inte_base64` WAF 壳；列表空 | **disable/skip** |
 
+
+## 40. wenxue.bkneng.com 可能世界 (2026-07-28)
+
+| Issue | Fix |
+|-------|-----|
+| `/wap/index/search` 与 `/www/search` 均 404 | **disable/skip** §16 |
+
 ## Close-out 标准（每轮）
 
 1. **诊断证据**：`diagnose` + phone `debug_source` / fetch → ledger + retro.msg  
