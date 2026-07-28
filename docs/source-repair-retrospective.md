@@ -371,6 +371,13 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 | POST `search.php`+gb2312 常「找不到结果」；首页 form 是 **GET** | `searchUrl=/search.php?searchkey={{key}}&page={{page}},{"charset":"GBK"}`；`concurrentRate=1/10000` |
 | 校验关键词 | 用「言情」（短词/穿越易空）；**校验成功** 23715ms |
 
+
+## 33. yqk.net#♤yc 言情小说一程 (2026-07-28)
+
+| Issue | Fix |
+|-------|-----|
+| 同站另一 fragment，仍为 POST 搜索 | 同 #yc1101：GET+GBK + concurrentRate；**校验成功** 23360ms |
+
 ## Close-out 标准（每轮）
 
 1. **诊断证据**：`diagnose` + phone `debug_source` / fetch → ledger + retro.msg  
