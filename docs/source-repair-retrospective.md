@@ -415,6 +415,13 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 |-------|-----|
 | Vue SSR 搜索空壳（known） | **disable/skip** |
 
+
+## 39. wap2.xinbiquge.org 笔趣阁 (2026-07-28)
+
+| Issue | Fix |
+|-------|-----|
+| search.aspx 返回 `inte_base64` WAF 壳；列表空 | **disable/skip** |
+
 ## Close-out 标准（每轮）
 
 1. **诊断证据**：`diagnose` + phone `debug_source` / fetch → ledger + retro.msg  
