@@ -86,6 +86,33 @@ const WEBVIEW_FIELDS: &[(&str, &[&str])] = &[
     ("ruleContent", &["nextContentUrl", "content"]),
 ];
 
+/// 17mb / xinbanzhu: 「查看目录」→ empty `…/index.html`; real catalog is `/html/{dir}/{id}_1/`.
+pub const TOC_17MB_STATIC: &str =
+    r#"@js:m=baseUrl.match(/(\d+)_(\d+)/);result='/html/'+m[1]+'/'+m[2]+'_1/';"#;
+
+/// True when tocUrl looks like 17mb "查看目录" / index.html shell (not already static `/html/…_1/`).
+pub fn is_17mb_empty_index_toc(toc_url: &str) -> bool {
+    let t = toc_url.trim();
+    if t.is_empty() {
+        return false;
+    }
+    if t.contains("/html/") && t.contains("_1/") {
+        return false;
+    }
+    let lower = t.to_ascii_lowercase();
+    t.contains("查看目录")
+        || (lower.contains("index.html")
+            && (t.contains("text.") || t.contains("@href") || t.contains("##")))
+}
+
+/// Rewrite empty-index tocUrl to static `/html/{dir}/{id}_1/` @js.
+pub fn fix_17mb_empty_index_toc(toc_url: &str) -> (String, bool) {
+    if !is_17mb_empty_index_toc(toc_url) {
+        return (toc_url.to_string(), false);
+    }
+    (TOC_17MB_STATIC.to_string(), true)
+}
+
 /// Apply non-destructive learned fixes. Mutates `source`; returns change labels.
 pub fn apply_safe_rule_fixes(source: &mut BookSource) -> Vec<String> {
     let mut changes = Vec::new();
@@ -126,6 +153,15 @@ pub fn apply_safe_rule_fixes(source: &mut BookSource) -> Vec<String> {
             if bu_changed {
                 rs.insert("bookUrl".into(), Value::String(fixed_bu));
                 changes.push("bookUrl_class_space".into());
+            }
+        }
+    }
+    if let Some(info) = root.get_mut("ruleBookInfo").and_then(|v| v.as_object_mut()) {
+        if let Some(toc) = info.get("tocUrl").and_then(|v| v.as_str()) {
+            let (fixed_toc, toc_changed) = fix_17mb_empty_index_toc(toc);
+            if toc_changed {
+                info.insert("tocUrl".into(), Value::String(fixed_toc));
+                changes.push("17mb_empty_index_tocUrl".into());
             }
         }
     }
@@ -178,6 +214,13 @@ pub fn smell_rules(source: &BookSource) -> Vec<serde_json::Value> {
             "hint": "tocUrl may point at content page; clear or retarget catalog",
         }));
     }
+    if is_17mb_empty_index_toc(toc) {
+        smells.push(json!({
+            "field": "ruleBookInfo.tocUrl",
+            "issue": "17mb_empty_index_unapproved",
+            "hint": "「查看目录」/index.html often empty; use /html/{dir}/{id}_1/; verify key≠我的 if first hit 未经审核",
+        }));
+    }
     smells
 }
 
@@ -210,5 +253,34 @@ mod tests {
         let (fixed, changed) = fix_bookurl_class_space("class.item a@href||@js:baseUrl");
         assert!(changed);
         assert_eq!(fixed, "class.item@tag.a@href");
+    }
+
+    #[test]
+    fn seventeen_mb_empty_index_toc() {
+        assert!(is_17mb_empty_index_toc("text.查看目录@href"));
+        assert!(!is_17mb_empty_index_toc(TOC_17MB_STATIC));
+        let mut src = BookSource::new(json!({
+            "bookSourceUrl": "http://i.xinbanzhu.net/",
+            "ruleBookInfo": { "tocUrl": "text.查看目录@href" }
+        }));
+        let ch = apply_safe_rule_fixes(&mut src);
+        assert!(ch.iter().any(|c| c == "17mb_empty_index_tocUrl"));
+        assert_eq!(
+            src.as_value()["ruleBookInfo"]["tocUrl"].as_str(),
+            Some(TOC_17MB_STATIC)
+        );
+        let smells = smell_rules(&src);
+        assert!(
+            !smells.iter().any(|s| s["issue"] == "17mb_empty_index_unapproved"),
+            "after fix smell should clear"
+        );
+        let mut dirty = BookSource::new(json!({
+            "bookSourceUrl": "http://m.xinbanzhu.net/",
+            "ruleBookInfo": { "tocUrl": "text.查看目录@href" }
+        }));
+        assert!(smell_rules(&dirty)
+            .iter()
+            .any(|s| s["issue"] == "17mb_empty_index_unapproved"));
+        let _ = &mut dirty;
     }
 }

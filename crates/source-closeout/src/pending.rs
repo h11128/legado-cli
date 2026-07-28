@@ -2,6 +2,7 @@
 
 use serde_json::{json, Value};
 
+use crate::improve::gate_script_fix;
 use crate::jsonl::read_jsonl;
 use crate::paths::{norm_url, CloseoutPaths};
 use crate::skill::{skill_in_sync, sync_skill_to_cursor};
@@ -108,6 +109,31 @@ pub fn pending_closeout(paths: &CloseoutPaths) -> (bool, Vec<String>, PendingDet
                 );
             }
         }
+    }
+
+    let script_fix = retro
+        .get("script_fix")
+        .and_then(|v| v.as_str())
+        .unwrap_or("")
+        .to_string();
+    extra["script_fix"] = json!(script_fix);
+    if let Err(sf_errs) = gate_script_fix(&script_fix, skill_fix) {
+        errors.extend(sf_errs);
+        extra["ok"] = json!(false);
+        extra["improve_gate"] = json!("fail");
+        return (
+            false,
+            errors,
+            PendingDetail {
+                ok: false,
+                reason: None,
+                url: Some(url),
+                extra,
+            },
+        );
+    }
+    if skill_fix {
+        extra["improve_gate"] = json!("pass");
     }
 
     if skill_fix && !skill_in_sync(paths) {

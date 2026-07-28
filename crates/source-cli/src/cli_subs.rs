@@ -11,6 +11,8 @@ pub enum CloseoutSub {
         trap: String,
         #[arg(long, default_value_t = false)]
         skill_fix: bool,
+        #[arg(long, default_value = "")]
+        script_fix: String,
     },
     SyncSkill,
     Status,

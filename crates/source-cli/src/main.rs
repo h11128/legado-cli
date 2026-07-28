@@ -201,21 +201,29 @@ fn main() -> ExitCode {
                 cmd: "pending".into(),
                 trap: None,
                 skill_fix: false,
+                script_fix: String::new(),
             }),
-            CloseoutSub::Gate { trap, skill_fix } => run_closeout(CloseoutArgs {
+            CloseoutSub::Gate {
+                trap,
+                skill_fix,
+                script_fix,
+            } => run_closeout(CloseoutArgs {
                 cmd: "gate".into(),
                 trap: Some(trap),
                 skill_fix,
+                script_fix,
             }),
             CloseoutSub::SyncSkill => run_closeout(CloseoutArgs {
                 cmd: "sync-skill".into(),
                 trap: None,
                 skill_fix: false,
+                script_fix: String::new(),
             }),
             CloseoutSub::Status => run_closeout(CloseoutArgs {
                 cmd: "status".into(),
                 trap: None,
                 skill_fix: false,
+                script_fix: String::new(),
             }),
         },
         Cmd::Retro { cmd } => match cmd {

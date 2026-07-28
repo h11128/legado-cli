@@ -72,17 +72,33 @@ Budget clock starts at **pick**. Diagnose+patch **2–3 min**; hard stop **5 min
 
 User standing preference (this repo): **every** oneshot (fixed / skip / fail) must:
 
-1. **Document** — append ledger; add a short entry to `docs/source-repair-retrospective.md`
-   (or a dated `docs/source-repair-retro-*.md` when the note is long).
-2. **Reflect** — `source-cli retro append --url … --status … --trap …`
-3. **Improve** — see `docs/repair-closeout-gate.md`
+1. **Document** — append ledger; short note in `docs/source-repair-retrospective.md`.
+2. **Reflect** — `source-cli retro append --url … --status … --trap … --script-fix …`
+3. **Improve** — decision tree below (gate enforces it).
+
+### Improve decision tree (enforced)
+
+```
+trap 已在 SKILL Traps / known:… ?
+├─ YES → skill_fix=0；可不改 Rust（script_fix 可写 MCP 手工补丁说明）
+└─ NO（novel）→ 必须同时完成，再 retro：
+   A) SKILL Traps 加一行（Action 含 Harness: 落点或 no_auto）
+   B) 改 harness + 测，或显式放弃自动修：
+      · 规则可自动修 → source_patch（smell / apply_safe_rule_fixes）
+      · 诊断会误导 → diagnose_tips（或 L2 / probe）
+      · 仅人工例外 → script_fix="no_auto:<≥8字理由>"
+   C) retro --skill-fix --script-fix 'source_patch/…'（或 no_auto:…）
+```
+
+**Gate（写死，不是散文）：** `skill_fix=1` 时 `--script-fix` 必须命中
+`source_patch` / `diagnose_tips` / `crates/…` 等，或 `no_auto:<理由>`。
+只加 SKILL 行、script_fix 写「MCP save…」→ `retro append` / `closeout pending` **拒绝**。
 
 ```bash
-source-cli closeout gate --trap SLUG --skill-fix false
-source-cli check channel
-source-cli progress next
-source-cli diagnose --url URL --key 我的
-source-cli repair --mode oneshot --url URL
+source-cli closeout gate --trap SLUG --skill-fix --script-fix 'source_patch/smells.rs'
+source-cli retro append --url URL --status fixed --trap SLUG \
+  --script-fix 'source_patch/smells.rs:…' --skill-fix
+source-cli progress next   # 先跑 closeout pending
 ```
 
 ## Traps
@@ -141,6 +157,7 @@ source-cli repair --mode oneshot --url URL
 | **目录 href 伪装 (gaysay)** | 全部 `<a href="/book/id/">`；真 URL 在 `data-c8dcb4a` base64 | `chapterUrl` `@js:java.base64Decode(result.attr('data-c8dcb4a'))`；`chapterName` `@data-cf3b593` |
 | **POST /sa 搜索空 (yoduzw)** | phone POST 200 list=0；分类页有书 | **disable** §16 |
 | **小米浏览器书城 (miui)** | `reader.browser.miui.com` API 搜索 list=0；L2 body 0；需 App 签名 | **disable/skip** — 非公开 HTML 书源 |
+| **17mb 空 index + 未审书 (xinbanzhu)** (17mb_empty_index_unapproved) | 「查看目录」→`…/index.html`/`zx.js` 空壳；新书「未经审核」首条 TocEmpty | toc=`/html/{dir}/{id}_1/` 静态；校验勿用易撞空书的「我的」。Harness：`apply_safe_rule_fixes`→`17mb_empty_index_tocUrl`；diagnose TOC tip |
 
 ## Worked examples
 
@@ -166,6 +183,7 @@ source-cli repair --mode oneshot --url URL
 | 破万卷 powanjuan | 清空 `tocUrl`；详情页 catalog + ruleToc；keyword=斗罗 校验成功 |
 | 基友 gaysay | toc `data-c8dcb4a` base64 chapterUrl；641 章 + 正文 OK |
 | 淘小说 tybook | COS 403 → `/tf/chapter_list` signed tocUrl |
+| 第一版主 xinbanzhu | migrate `m→i`；toc `/html/{dir}/{id}_1/`；content `#nr1`+`pb_next`；校验 keyword=斗破 |
 
 ## Scripts / CLI
 

@@ -6,6 +6,7 @@ use std::io::Write;
 use chrono::Utc;
 use serde_json::{json, Value};
 
+use crate::improve::gate_script_fix;
 use crate::paths::{norm_url, CloseoutPaths};
 use crate::trap::gate_trap;
 
@@ -35,6 +36,7 @@ pub fn append_retro(paths: &CloseoutPaths, opts: RetroAppendOpts) -> Result<Retr
     if !trap.is_empty() {
         gate_trap(paths, trap, opts.skill_fix, &[], false)?;
     }
+    gate_script_fix(&opts.script_fix, opts.skill_fix)?;
 
     let row = json!({
         "ts": Utc::now().to_rfc3339(),

@@ -29,6 +29,12 @@ pub fn layer_tips(diag: &DiagnoseResult) -> Vec<String> {
                 "TRAP tocUrl_read_link: span.read/first-chapter href → clear tocUrl; use detail-page catalog"
                     .into(),
             );
+            tips.push(
+                "TRAP 17mb_empty_index_unapproved: 「查看目录」→…/index.html or zx.js ad shell — \
+                 tocUrl=@js → /html/{dir}/{id}_1/ (static li); first hit of key=我的 may be 未经审核 empty — \
+                 verify with 斗破/其他实书"
+                    .into(),
+            );
         }
         Layer::Content => {
             tips.push("TOC OK — fix ruleContent.content against chapter HTML".into());
@@ -95,5 +101,12 @@ mod tests {
         d.fake_detail = Some(true);
         let tips = layer_tips(&d);
         assert!(tips.iter().any(|t| t.contains("fake_detail")));
+    }
+
+    #[test]
+    fn toc_17mb_tip() {
+        let d = DiagnoseResult::new(Url::new("http://i.xinbanzhu.net/").unwrap(), Layer::Toc);
+        let tips = layer_tips(&d);
+        assert!(tips.iter().any(|t| t.contains("17mb_empty_index_unapproved")));
     }
 }

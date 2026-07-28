@@ -37,25 +37,24 @@ Standing rules for any 书源 fix / validate / bulk-check work in this workspace
        + `source-cli ledger append` / `source-cli retro append`.
     2. **Reflect**: `source-cli retro append` with `trap` / `harness` / `script_fix` /
        `skill_fix` filled honestly (what burned time, what the agent missed).
-    3. **Improve**: **only when novel trap or harness gap** — patch SKILL and/or Rust then.
-       Do **not** change skill/Rust if trap already in SKILL Traps table (skill_fix=0 is correct).
-       `source-cli retro append` **validates trap at write**; `skill_fix` **auto-syncs** Cursor SKILL.
-       `source-cli progress next` **blocks** until `source-cli closeout pending` passes
-       (see `docs/repair-closeout-gate.md`). Skipping doc/retro is a process failure;
-       skipping skill/Rust on **known** traps is **correct**.
-17. **Structural close-out** — enforced by Rust (`source-closeout`), not prose alone:
- - `source-cli retro append` rejects invalid trap/skill_fix
- - CLI `source-cli retro append --status fail|skip` seals a `final:true` ledger row
- - Automated batch loops use `--no-seal` equivalent (library `seal=false`) — fails stay retryable
- - `source-cli progress next` calls closeout pending first
-18. **Auto-commit before next URL** — after close-out, if SKILL / scripts / Rust /
-    retrospective docs changed this URL, `git commit` those files **before**
-    `progress next`. Do not leave skill/script fixes uncommitted across sources.
+    3. **Improve**: novel trap → SKILL 行 **且** harness（`source_patch` / `diagnose_tips`…）或
+       `script_fix=no_auto:<理由>`。`skill_fix=1` 时 gate **强制**有效 `script_fix`
+       （只改 SKILL、script_fix 写 MCP 手工 → retro/pending 拒绝）。
+       known trap → `skill_fix=0`，可不改 Rust。
+       `source-cli retro append` 校验 trap + script_fix；`skill_fix` 会 sync Cursor SKILL。
 15. **Never pass `--l0-only` on live progress / diagnose / repair.** L0-only skips L2 dead/wall
     sniff and burns phone/probe time on dead hosts (dcrsu 2026-07-27). Use full gate.
 16. **If site search API is empty but browse still works:** **disable** by default. Do **not**
     fake search by filtering homepage/榜单 HTML. Optional Bing/Google `site:host {{key}}` is
     experimental only (see KB `ddxsmf`); not the default repair path.
+17. **Structural close-out** — enforced by Rust (`source-closeout`), not prose alone:
+ - `source-cli retro append` rejects invalid trap/skill_fix **and** skill_fix without harness script_fix
+ - CLI `source-cli retro append --status fail|skip` seals a `final:true` ledger row
+ - Automated batch loops use `--no-seal` equivalent (library `seal=false`) — fails stay retryable
+ - `source-cli progress next` calls closeout pending first
+18. **Auto-commit before next URL** — after close-out, if SKILL / scripts / Rust /
+ retrospective docs changed this URL, `git commit` those files **before**
+ `progress next`. Do not leave skill/script fixes uncommitted across sources.
 
 ## Types (do not confuse)
 

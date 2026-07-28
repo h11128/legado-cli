@@ -2,6 +2,7 @@
 //!
 //! Rust port of `scripts/repair_closeout.py` + `scripts/repair_retro.py`.
 
+mod improve;
 mod jsonl;
 mod paths;
 mod pending;
@@ -10,6 +11,7 @@ mod session_index;
 mod skill;
 mod trap;
 
+pub use improve::{gate_script_fix, script_fix_ok};
 pub use jsonl::{read_jsonl, JsonRow};
 pub use paths::CloseoutPaths;
 pub use pending::{pending_closeout, PendingDetail};

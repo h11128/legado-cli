@@ -319,6 +319,28 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 而排队只认「校验成功」/`fixed:`，**修好的源会被无限重挑**。
 现在 `source-types::LEDGER_VERIFY_OK` 是唯一写法，`oneshot_ok.rs` / `apply.rs` 都用它。
 
+## 26. manmanapp.com 漫漫漫画 (2026-07-28)
+
+| Issue | Fix |
+|-------|-----|
+| `/search/word-{{key}}.html` 404；www 搜索已迁 m 域 | `searchUrl=https://m.manmanapp.com/search/search.html?keyword={{key}}`；`ruleSearch` 改 `.classification_list li` / `h3` / `.author` / `.story_plot` → **校验成功** 3422ms |
+
+## 27. www.ireader.com 掌阅书城 (2026-07-28)
+
+| Issue | Action |
+|-------|--------|
+| 全站 HTTP 202 + `probe.js` 反爬壳；browse/search 均无 DOM；m.zhangyue 亦腾讯 WAF | **disable** — 非公开 HTML 书源（同 miui / qiufeng 类） |
+
+## 28. xinbanzhu 第一版主 (2026-07-28)
+
+| Issue | Fix |
+|-------|-----|
+| `m.xinbanzhu.net` JS 劫持死域 | migrate → `http://i.xinbanzhu.net/` |
+| 「查看目录」→`…/index.html` 空壳；`zx.js` 是广告不是目录加载器 | tocUrl=`/html/{dir}/{id}_1/` 静态 li；去掉 webView |
+| 关键词「我的」首条常是「未经审核」空书 → TocEmpty 误判规则坏 | 校验用「斗破」；`#nr1`+`pb_next` 正文分页 |
+| 设备校验 | **校验成功** 7255ms（keyword=斗破） |
+| Harness 补齐（同会话后补） | `source_patch` smell+auto `17mb_empty_index_tocUrl`；`diagnose_tips` TOC trap |
+
 ## Close-out 标准（每轮）
 
 1. **诊断证据**：`diagnose` + phone `debug_source` / fetch → ledger + retro.msg  

@@ -4,14 +4,15 @@ use std::process::ExitCode;
 
 use serde_json::json;
 use source_closeout::{
-    ensure_ready_for_next, gate_trap, pending_closeout, skill_in_sync, sync_skill_to_cursor,
-    CloseoutPaths,
+    ensure_ready_for_next, gate_script_fix, gate_trap, pending_closeout, skill_in_sync,
+    sync_skill_to_cursor, CloseoutPaths,
 };
 
 pub struct CloseoutArgs {
     pub cmd: String,
     pub trap: Option<String>,
     pub skill_fix: bool,
+    pub script_fix: String,
 }
 
 pub fn run_closeout(args: CloseoutArgs) -> ExitCode {
@@ -48,17 +49,29 @@ pub fn run_closeout(args: CloseoutArgs) -> ExitCode {
         },
         "gate" => {
             let trap = args.trap.unwrap_or_default();
-            match gate_trap(&paths, &trap, args.skill_fix, &[], false) {
-                Ok(()) => {
-                    println!("{}", json!({"ok": true, "trap": trap}));
-                    ExitCode::SUCCESS
+            let mut errs = Vec::new();
+            if let Err(e) = gate_trap(&paths, &trap, args.skill_fix, &[], false) {
+                errs.extend(e);
+            }
+            if let Err(e) = gate_script_fix(&args.script_fix, args.skill_fix) {
+                errs.extend(e);
+            }
+            if errs.is_empty() {
+                println!(
+                    "{}",
+                    json!({
+                        "ok": true,
+                        "trap": trap,
+                        "skill_fix": args.skill_fix,
+                        "script_fix": args.script_fix,
+                    })
+                );
+                ExitCode::SUCCESS
+            } else {
+                for e in errs {
+                    eprintln!("close-out gate FAIL: {e}");
                 }
-                Err(errs) => {
-                    for e in errs {
-                        eprintln!("close-out gate FAIL: {e}");
-                    }
-                    ExitCode::from(1)
-                }
+                ExitCode::from(1)
             }
         }
         "sync-skill" => match sync_skill_to_cursor(&paths) {
