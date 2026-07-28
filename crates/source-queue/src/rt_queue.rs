@@ -25,7 +25,11 @@ pub fn build_rt_queue(
     let mut out = Vec::new();
     if let Some(by) = index.get("by_url").and_then(|v| v.as_object()) {
         for (url, meta) in by {
-            let group = meta.get("group").and_then(|v| v.as_str()).unwrap_or("");
+            let group = meta
+                .get("group")
+                .or_else(|| meta.get("bookSourceGroup"))
+                .and_then(|v| v.as_str())
+                .unwrap_or("");
             if !group.contains(group_contains) {
                 continue;
             }
@@ -57,11 +61,23 @@ pub fn write_rt_queue(
         .iter()
         .take(limit)
         .map(|i| {
+            let name = i
+                .meta
+                .get("name")
+                .or_else(|| i.meta.get("bookSourceName"))
+                .cloned()
+                .unwrap_or(json!(null));
+            let group = i
+                .meta
+                .get("group")
+                .or_else(|| i.meta.get("bookSourceGroup"))
+                .cloned()
+                .unwrap_or(json!(null));
             json!({
                 "url": i.url,
                 "respondTime": i.respond_time,
-                "name": i.meta.get("name").cloned().unwrap_or(json!(null)),
-                "group": i.meta.get("group").cloned().unwrap_or(json!(null)),
+                "name": name,
+                "group": group,
             })
         })
         .collect();

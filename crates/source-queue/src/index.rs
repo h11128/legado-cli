@@ -57,7 +57,21 @@ pub fn refresh_phone_index(out: Option<PathBuf>) -> Result<RefreshIndexResult, P
         if url.is_empty() {
             continue;
         }
-        by_url.insert(url.to_string(), row.clone());
+        // Alias MCP field names so progress/rt_queue (group/name) keep working.
+        let mut row = row.clone();
+        if let Some(obj) = row.as_object_mut() {
+            if !obj.contains_key("group") {
+                if let Some(g) = obj.get("bookSourceGroup").cloned() {
+                    obj.insert("group".into(), g);
+                }
+            }
+            if !obj.contains_key("name") {
+                if let Some(n) = obj.get("bookSourceName").cloned() {
+                    obj.insert("name".into(), n);
+                }
+            }
+        }
+        by_url.insert(url.to_string(), row);
     }
     let payload = json!({
         "schema_version": 1,

@@ -357,6 +357,13 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 | 手工迁域后 `progress next` 仍挑 `m.xinbanzhu.net` | 根因：`repair_serial100_queue.json` 陈旧 + `phone_source_index` 未刷仍含旧 URL；migrate 未封 ledger |
 | Harness | `progress`：queue ∩ `by_url`；`migrate`：`skip:migrated_to:` + `refresh_phone_index`；ledger 认 `migrated to`/`migrated_to`；SKILL trap `stale_queue_after_migrate` |
 
+## 31. phone index `bookSourceGroup` 别名 + 丁丁小说 (2026-07-28)
+
+| Issue | Fix |
+|-------|-----|
+| `queue refresh-index` 后 progress 候选=0 | MCP 字段是 `bookSourceGroup`/`bookSourceName`，progress/rt 只读 `group`/`name` → 别名写入 index + 双读 |
+| `http://api.xingliangglobal.com##@遇知` 丁丁/猫眼 | debug+verify（keyword=斗破）**校验成功** 1227ms；无规则补丁（旧「搜索失效」多为限流/关键词 flake） |
+
 ## Close-out 标准（每轮）
 
 1. **诊断证据**：`diagnose` + phone `debug_source` / fetch → ledger + retro.msg  

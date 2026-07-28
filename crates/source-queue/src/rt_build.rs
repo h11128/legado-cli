@@ -196,11 +196,15 @@ pub fn build_rt_queue_full(index_path: &Path, opts: &RtBuildOpts) -> Result<Valu
         if seen_hosts.contains(&hk) {
             continue;
         }
-        let group = meta.get("group").and_then(|v| v.as_str()).unwrap_or("");
+        let group = meta
+            .get("group")
+            .or_else(|| meta.get("bookSourceGroup"))
+            .and_then(|v| v.as_str())
+            .unwrap_or("");
         if DEAD_GROUP.iter().any(|g| group.contains(g)) {
             continue;
         }
-        if opts.search_tag_only && !SEARCH_HINTS.iter().any(|h| group.contains(h)) {
+        if opts.search_tag_only && !SEARCH_HINTS.iter().any(|h| group.contains(*h)) {
             continue;
         }
         let enabled = meta.get("enabled");
@@ -217,9 +221,14 @@ pub fn build_rt_queue_full(index_path: &Path, opts: &RtBuildOpts) -> Result<Valu
             continue;
         }
         seen_hosts.insert(hk);
+        let name = meta
+            .get("name")
+            .or_else(|| meta.get("bookSourceName"))
+            .cloned()
+            .unwrap_or(json!(null));
         rows.push(json!({
             "url": url,
-            "name": meta.get("name").cloned().unwrap_or(json!(null)),
+            "name": name,
             "group": group,
             "enabled": enabled.cloned().unwrap_or(json!(null)),
             "respondTime": rt,

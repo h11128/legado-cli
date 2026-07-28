@@ -98,6 +98,15 @@ fn candidates_from_queue(
     out
 }
 
+fn meta_str<'a>(meta: &'a Value, keys: &[&str]) -> &'a str {
+    for k in keys {
+        if let Some(s) = meta.get(*k).and_then(|v| v.as_str()) {
+            return s;
+        }
+    }
+    ""
+}
+
 fn candidate_urls(index: &Value, queue: Option<&Value>) -> Vec<(String, Value)> {
     let blocked = ledger_blocked();
     let on_phone = phone_url_set(index);
@@ -110,7 +119,7 @@ fn candidate_urls(index: &Value, queue: Option<&Value>) -> Vec<(String, Value)> 
     let mut out = Vec::new();
     if let Some(by) = index.get("by_url").and_then(|v| v.as_object()) {
         for (url, meta) in by {
-            let g = meta.get("group").and_then(|v| v.as_str()).unwrap_or("");
+            let g = meta_str(meta, &["group", "bookSourceGroup"]);
             if !g.contains("搜索失效") {
                 continue;
             }
@@ -210,8 +219,12 @@ pub fn run_progress(args: ProgressArgs) -> ExitCode {
                 json!({
                     "next": {
                         "url": url,
-                        "name": meta.get("name"),
-                        "group": meta.get("group"),
+                        "name": meta
+                            .get("name")
+                            .or_else(|| meta.get("bookSourceName")),
+                        "group": meta
+                            .get("group")
+                            .or_else(|| meta.get("bookSourceGroup")),
                         "respondTime": meta.get("respondTime"),
                         "l2_gate": g,
                         "status": "candidate",
