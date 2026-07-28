@@ -451,6 +451,13 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 |-------|-----|
 | 同站 fragment | 克隆 `#♤yc`；**校验成功** 5168ms |
 
+
+## 44. manmanapp.com#♤Haxc 漫漫漫画 (2026-07-28)
+
+| Issue | Fix |
+|-------|-----|
+| 同站 fragment | 克隆 `#♤yc`；**校验成功** 5152ms — **goal 100** |
+
 ## Close-out 标准（每轮）
 
 1. **诊断证据**：`diagnose` + phone `debug_source` / fetch → ledger + retro.msg  
