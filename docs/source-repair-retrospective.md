@@ -378,6 +378,15 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 |-------|-----|
 | 同站另一 fragment，仍为 POST 搜索 | 同 #yc1101：GET+GBK + concurrentRate；**校验成功** 23360ms |
 
+
+## 34. m.1qxs.com 一七小说 (2026-07-28)
+
+| Issue | Fix |
+|-------|-----|
+| `search.html?kw=` 丢参；列表选择器过期 | `searchUrl=/search?kw={{key}}&p={{page}}`；`bookList=.show ul a` |
+| `/catalog_*` 返回错误页「刷新」（WAF） | 清空 tocUrl；目录用详情 `.catalog .show li a` |
+| 设备校验 | **校验成功** 1240ms（keyword=斗破） |
+
 ## Close-out 标准（每轮）
 
 1. **诊断证据**：`diagnose` + phone `debug_source` / fetch → ledger + retro.msg  
