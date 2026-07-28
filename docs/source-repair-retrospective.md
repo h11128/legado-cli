@@ -394,6 +394,13 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 |-------|-----|
 | 同站另一 fragment | 克隆一七修复；**校验成功** 1215ms |
 
+
+## 36. m.88xiaoshuo.net 变化说网 (2026-07-28)
+
+| Issue | Fix |
+|-------|-----|
+| `/search.html` POST 稳定 HTTP 500；首页浏览仍有书 | **disable/skip**（§16 搜索口挂了） |
+
 ## Close-out 标准（每轮）
 
 1. **诊断证据**：`diagnose` + phone `debug_source` / fetch → ledger + retro.msg  
