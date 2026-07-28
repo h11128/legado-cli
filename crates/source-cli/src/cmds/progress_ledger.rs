@@ -17,10 +17,12 @@ pub fn is_fixed_row(step: &str, result: &str) -> bool {
 
 pub fn is_attempt_closed(step: &str, result: &str) -> bool {
     step == "skip"
+        || step == "migrate"
         || result.starts_with("skip:")
         || result.starts_with("repurposed:")
         || result.starts_with("disable:")
         || result.starts_with("fail:")
+        || result.contains("migrated_to")
         || (step == "check" && (result.starts_with("disable") || result.starts_with("fail")))
 }
 
@@ -34,9 +36,12 @@ pub fn is_retryable_reason(reason: &str) -> bool {
         || reason.starts_with("skip:dead")
         || reason.starts_with("skip:wall")
         || reason.starts_with("skip:park")
+        || reason.starts_with("skip:migrated")
         || reason.starts_with("repurposed:")
         || reason.starts_with("skip:jieqi")
         || reason.starts_with("skip:biquge")
+        || reason.contains("migrated_to")
+        || reason.contains("migrated to")
         || reason.contains("search_empty")
         || reason.contains("search_index_empty")
         || reason.contains("http_dead")
@@ -161,5 +166,34 @@ mod tests {
         let lines = [row("https://c.test/", "check", "fail:dead")];
         let blocked = blocked_from_lines(lines.iter().map(String::as_str));
         assert!(blocked.contains("https://c.test"));
+    }
+
+    #[test]
+    fn migrated_from_url_is_hard_blocked() {
+        let lines = [row(
+            "http://m.old.test/",
+            "skip",
+            "skip:migrated_to:http://i.new.test/",
+        )];
+        let blocked = blocked_from_lines(lines.iter().map(String::as_str));
+        assert!(blocked.contains("http://m.old.test"));
+    }
+
+    #[test]
+    fn migrate_step_is_attempt_closed() {
+        let lines = [row("http://m.old.test", "migrate", "migrated_to:http://i.new.test")];
+        let blocked = blocked_from_lines(lines.iter().map(String::as_str));
+        assert!(blocked.contains("http://m.old.test"));
+    }
+
+    #[test]
+    fn migrated_to_with_spaces_is_hard() {
+        let lines = [row(
+            "http://m.xinbanzhu.net/",
+            "skip",
+            "skip: migrated to i.xinbanzhu.net (phone deleted)",
+        )];
+        let blocked = blocked_from_lines(lines.iter().map(String::as_str));
+        assert!(blocked.contains("http://m.xinbanzhu.net"));
     }
 }

@@ -350,6 +350,13 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 
 同轮：`jyapi.jyacg.com` TLS 过期 +「站点已暂停」→ disable/skip；队列 `m.xinbanzhu` 残留 → skip。
 
+## 30. stale_queue_after_migrate (2026-07-28)
+
+| Issue | Fix |
+|-------|-----|
+| 手工迁域后 `progress next` 仍挑 `m.xinbanzhu.net` | 根因：`repair_serial100_queue.json` 陈旧 + `phone_source_index` 未刷仍含旧 URL；migrate 未封 ledger |
+| Harness | `progress`：queue ∩ `by_url`；`migrate`：`skip:migrated_to:` + `refresh_phone_index`；ledger 认 `migrated to`/`migrated_to`；SKILL trap `stale_queue_after_migrate` |
+
 ## Close-out 标准（每轮）
 
 1. **诊断证据**：`diagnose` + phone `debug_source` / fetch → ledger + retro.msg  

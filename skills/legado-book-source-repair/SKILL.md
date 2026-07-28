@@ -149,6 +149,7 @@ source-cli progress next   # 先跑 closeout pending
 | **域名改行 (jinyongwang)** | title=「…专业生产厂家」；搜索 placeholder=查询的产品 | L2 deadish → **skip/disable** |
 | **ac.qq 移动↔桌面分流 (acqq_mobile_chapter_redirect)** | m 搜索 302 丢 query→列表空；OkHttp 读章节 302→桌面 ComicView，原 `@js` 解密读不到 `data:` | 搜索改 `ac.qq.com/Comic/searchList`+桌面 selectors；详情/目录用 desktop `works-*`；章节 URL 仍指 m；正文需 `java.get(…).body()`+移动 UA 或后续 API 研究 — **未完全修** |
 | **progress next 卡死** | 候选按 URL 字母序 → 永远先 `api.*`；index 无 RT | 优先 `queues/repair_serial100_queue.json` `items` |
+| **stale_queue_after_migrate** | 迁域/删旧源后 `progress next` 仍挑到旧 URL（serial 快照未刷；`phone_source_index` 过期仍含旧域） | queue 候选必须仍在 `phone_source_index.by_url`；`migrate` 成功后 ledger `skip:migrated_to:` 封 `from_url` **并** `refresh_phone_index`。手工 MCP 迁域后同样要 `queue refresh-index` + ledger skip。Harness：`progress.rs` + `migrate.rs` + `progress_ledger` |
 | **App JSON 搜索空壳 (ihuaben)** | `/app/search`→`{}`；L2 首页仍小说站；listv2/CDN 可能仍活 | 试 `so.` / 站内 HTML 搜索；**勿**因 API 空就 disable；TOC/正文可继续走 CDN JSON |
 | **重复 phone pull (serial)** | 每批 `refresh_phone_index` 全量 list_sources ~55s | 用 `repair_state.sqlite` + TTL；`repair_refresh_phone_index --force` 才重拉；`get_source` 走 snapshot cache |
 | **Vue SSR 搜索空 (qimao miao)** | `/search/index/` 200 但无 `ul.qm-pic-txt`；`__NUXT__` 壳；phone list=0 | api-miao 无公开 search 端点 → **disable**（browse/shuku OK，§16） |

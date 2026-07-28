@@ -13,6 +13,7 @@ CLI: `source-cli closeout` · `source-cli retro`
 | 双份 SKILL | `skill_fix` → `closeout sync-skill` |
 | progress 跳过收尾 | `progress next` 先跑 `closeout pending` |
 | fail 重挑 | `retro append --status fail` seals `final:true` ledger |
+| 迁域后仍挑旧 URL | `migrate` 写 `skip:migrated_to:` + 刷 `phone_source_index`；`progress` queue ∩ on_phone |
 
 ## Improve / script_fix（硬规则）
 

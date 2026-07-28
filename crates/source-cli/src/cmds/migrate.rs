@@ -7,11 +7,14 @@ use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
 
+use chrono::Utc;
 use serde_json::json;
-use source_mcp::{FsChannelPort, McpClient, McpEndpoint, McpSourceRepository, McpVerifyPort};
+use source_mcp::{
+    DualLedgerPort, FsChannelPort, McpClient, McpEndpoint, McpSourceRepository, McpVerifyPort,
+};
 use source_migrate::migrate_book_source;
-use source_ports::{ChannelPort, SourceRepository, VerifyPort};
-use source_types::{CheckOpts, SourceKey};
+use source_ports::{ChannelPort, LedgerPort, SourceRepository, VerifyPort};
+use source_types::{CheckOpts, LedgerRow, LedgerStep, SourceKey, Url};
 
 pub struct MigrateArgs {
     pub from_url: String,
@@ -93,6 +96,17 @@ pub fn run_migrate(args: MigrateArgs) -> ExitCode {
     if !args.keep_old {
         let _ = repo.delete(&[SourceKey::new(args.from_url.trim())]);
     }
+    // Seal *from* URL so stale serial/RT queues cannot re-pick the old domain.
+    seal_migrated_from(&args.from_url, &args.to_url);
+    // Refresh phone index so queue ∩ on_phone drops the deleted from_url.
+    match source_queue::refresh_phone_index(None) {
+        Ok(r) => eprintln!(
+            "migrate: refreshed phone index {} (total={})",
+            r.path.display(),
+            r.total
+        ),
+        Err(e) => eprintln!("migrate: warn: phone index refresh failed: {e}"),
+    }
     let mut report = json!({
         "schema_version": "1",
         "capability": "migrate",
@@ -124,6 +138,25 @@ pub fn run_migrate(args: MigrateArgs) -> ExitCode {
     }
     print_report(&report, args.out.as_ref());
     ExitCode::SUCCESS
+}
+
+fn seal_migrated_from(from_url: &str, to_url: &str) {
+    let Ok(ledger) = DualLedgerPort::from_defaults() else {
+        eprintln!("migrate: warn: could not open ledger to seal from_url");
+        return;
+    };
+    let Ok(u) = Url::new(from_url.trim()) else {
+        return;
+    };
+    let row = LedgerRow::new(
+        Utc::now().to_rfc3339(),
+        u,
+        LedgerStep::Skip,
+        format!("skip:migrated_to:{}", to_url.trim()),
+    );
+    if let Err(e) = ledger.append(&row) {
+        eprintln!("migrate: warn: ledger seal from_url: {e}");
+    }
 }
 
 fn print_report(report: &serde_json::Value, out: Option<&PathBuf>) {

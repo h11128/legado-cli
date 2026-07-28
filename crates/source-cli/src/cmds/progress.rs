@@ -1,11 +1,12 @@
 //! Progress status/next — L2-gated candidates from phone index / RT queue.
 
+use std::collections::HashSet;
 use std::path::PathBuf;
 use std::process::ExitCode;
 
+use super::progress_goal::goal_status;
 use super::progress_ledger;
 use super::progress_ledger::ledger_blocked;
-use super::progress_goal::goal_status;
 use serde_json::{json, Value};
 use source_gate::{classify_one_l0, load_rules, SkipRule};
 
@@ -50,30 +51,63 @@ fn load_json(path: &PathBuf) -> Result<Value, String> {
     serde_json::from_str(&raw).map_err(|e| e.to_string())
 }
 
-fn candidate_urls(index: &Value, queue: Option<&Value>) -> Vec<(String, Value)> {
-    let blocked = ledger_blocked();
-    let mut out = Vec::new();
-    if let Some(q) = queue {
-        if let Some(arr) = q
-            .get("items")
-            .or_else(|| q.get("urls"))
-            .and_then(|v| v.as_array())
-        {
-            for row in arr {
-                let url = row
-                    .get("url")
-                    .and_then(|v| v.as_str())
-                    .unwrap_or("")
-                    .to_string();
-                if url.starts_with("http") && !blocked.contains(&progress_ledger::norm_url(&url)) {
-                    out.push((url, row.clone()));
-                }
-            }
-            if !out.is_empty() {
-                return out;
-            }
+fn phone_url_set(index: &Value) -> HashSet<String> {
+    let mut set = HashSet::new();
+    if let Some(by) = index.get("by_url").and_then(|v| v.as_object()) {
+        for url in by.keys() {
+            set.insert(progress_ledger::norm_url(url));
         }
     }
+    set
+}
+
+/// Queue items must still exist on phone when index is non-empty (stale serial
+/// snapshots keep migrated/deleted URLs). Empty `on_phone` skips that filter
+/// so unit tests / broken index paths can still use queue-only mode.
+fn candidates_from_queue(
+    queue: &Value,
+    on_phone: &HashSet<String>,
+    blocked: &HashSet<String>,
+) -> Vec<(String, Value)> {
+    let mut out = Vec::new();
+    let Some(arr) = queue
+        .get("items")
+        .or_else(|| queue.get("urls"))
+        .and_then(|v| v.as_array())
+    else {
+        return out;
+    };
+    for row in arr {
+        let url = row
+            .get("url")
+            .and_then(|v| v.as_str())
+            .unwrap_or("")
+            .to_string();
+        if !url.starts_with("http") {
+            continue;
+        }
+        let nu = progress_ledger::norm_url(&url);
+        if !on_phone.is_empty() && !on_phone.contains(&nu) {
+            continue;
+        }
+        if blocked.contains(&nu) {
+            continue;
+        }
+        out.push((url, row.clone()));
+    }
+    out
+}
+
+fn candidate_urls(index: &Value, queue: Option<&Value>) -> Vec<(String, Value)> {
+    let blocked = ledger_blocked();
+    let on_phone = phone_url_set(index);
+    if let Some(q) = queue {
+        let from_q = candidates_from_queue(q, &on_phone, &blocked);
+        if !from_q.is_empty() {
+            return from_q;
+        }
+    }
+    let mut out = Vec::new();
     if let Some(by) = index.get("by_url").and_then(|v| v.as_object()) {
         for (url, meta) in by {
             let g = meta.get("group").and_then(|v| v.as_str()).unwrap_or("");
@@ -192,4 +226,42 @@ pub fn run_progress(args: ProgressArgs) -> ExitCode {
         json!({"next": null, "hint": "no verify-pass candidate in first 40"})
     );
     ExitCode::SUCCESS
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+    use std::collections::HashSet;
+
+    #[test]
+    fn queue_drops_urls_not_on_phone() {
+        let index = json!({
+            "by_url": {
+                "http://i.new.test/": {"group": "搜索失效", "enabled": true}
+            }
+        });
+        let queue = json!({
+            "items": [
+                {"url": "http://m.old.test/"},
+                {"url": "http://i.new.test/"}
+            ]
+        });
+        let on_phone = phone_url_set(&index);
+        let blocked = HashSet::new();
+        let cands = candidates_from_queue(&queue, &on_phone, &blocked);
+        assert_eq!(cands.len(), 1);
+        assert_eq!(cands[0].0, "http://i.new.test/");
+    }
+
+    #[test]
+    fn empty_phone_set_keeps_queue_items() {
+        let queue = json!({
+            "items": [{"url": "http://stale.only.in.queue/"}]
+        });
+        let on_phone = HashSet::new();
+        let blocked = HashSet::new();
+        let cands = candidates_from_queue(&queue, &on_phone, &blocked);
+        assert_eq!(cands.len(), 1);
+    }
 }
