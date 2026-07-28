@@ -401,6 +401,13 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 |-------|-----|
 | `/search.html` POST 稳定 HTTP 500；首页浏览仍有书 | **disable/skip**（§16 搜索口挂了） |
 
+
+## 37. m.shoujix.com 手机小说 (2026-07-28)
+
+| Issue | Fix |
+|-------|-----|
+| POST `/search/` 空结果页（短词还 alert≥10字）；首页仍有书 | **disable/skip** §16 |
+
 ## Close-out 标准（每轮）
 
 1. **诊断证据**：`diagnose` + phone `debug_source` / fetch → ledger + retro.msg  
