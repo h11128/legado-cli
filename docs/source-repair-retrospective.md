@@ -437,6 +437,13 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 | `/app/search` 带过期 `tokenId`；bookList 路径 | 去掉 token；`bookList=$..pageList[*]`；bookUrl HTML；tocUrl CDN chapters |
 | 校验 | **校验成功** 2659ms |
 
+
+## 42. manmanapp.com#Haxc1107 漫漫漫画 (2026-07-28)
+
+| Issue | Fix |
+|-------|-----|
+| 旧 PC 搜索 URL | 克隆 `#♤yc` 的 m 域搜索；**校验成功** 5120ms |
+
 ## Close-out 标准（每轮）
 
 1. **诊断证据**：`diagnose` + phone `debug_source` / fetch → ledger + retro.msg  
