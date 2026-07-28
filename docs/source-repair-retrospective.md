@@ -387,6 +387,13 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 | `/catalog_*` 返回错误页「刷新」（WAF） | 清空 tocUrl；目录用详情 `.catalog .show li a` |
 | 设备校验 | **校验成功** 1240ms（keyword=斗破） |
 
+
+## 35. m.1qxs.com#🎃 包七小说 (2026-07-28)
+
+| Issue | Fix |
+|-------|-----|
+| 同站另一 fragment | 克隆一七修复；**校验成功** 1215ms |
+
 ## Close-out 标准（每轮）
 
 1. **诊断证据**：`diagnose` + phone `debug_source` / fetch → ledger + retro.msg  
