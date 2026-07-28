@@ -341,6 +341,15 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 | 设备校验 | **校验成功** 7255ms（keyword=斗破） |
 | Harness 补齐（同会话后补） | `source_patch` smell+auto `17mb_empty_index_tocUrl`；`diagnose_tips` TOC trap |
 
+## 29. paper027.com 卧龙小说 (2026-07-28)
+
+| Issue | Fix |
+|-------|-----|
+| `/search?keyword=` 404；站点已改 API | `searchUrl=/api/v1/books/search?q={{key}}` + `$.data.data`；toc `/chapter/{id}`；正文 `.chapter-html-content` |
+| 旧 URL `http://…#🎃` | migrate → `https://www.paper027.com`；**校验成功** 3241ms |
+
+同轮：`jyapi.jyacg.com` TLS 过期 +「站点已暂停」→ disable/skip；队列 `m.xinbanzhu` 残留 → skip。
+
 ## Close-out 标准（每轮）
 
 1. **诊断证据**：`diagnose` + phone `debug_source` / fetch → ledger + retro.msg  
