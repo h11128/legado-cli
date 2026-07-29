@@ -83,9 +83,15 @@ audit-hooks harness verify-change --full-audit
 audit-hooks harness review mdc:book-source-repair-discipline
 ```
 
-`verify-change` runs `cargo fmt` / `cargo test` from the repo root, but this repo's Rust
-workspace lives in `crates/`, so those two steps report `os error 267`. Run them manually:
+`verify-change` discovers the cargo workspace under `audit-hooks/`, root
+`Cargo.toml`, or `crates/` (legadoSkill layout) and skips cleanly when none exist.
+Codex push resolves component sources under agent-memory first, then falls back
+to `--project` so consumer-repo skills (e.g. `legado-book-source-repair`) sync
+on Windows without WSL-only path hardcoding.
 
 ```bash
 cd crates && cargo fmt --all -- --check && cargo test -p source_closeout
 ```
+
+This manual fallback is no longer required for `harness verify-change` after the
+2026-07-29 `repo_locate` fix in agent-memory/audit-hooks.
