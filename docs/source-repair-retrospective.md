@@ -660,6 +660,12 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 | `m.ixs7.com` host reset | disable |
 | `m.88xiaoshuo` §16 | already disabled |
 
+## 72. m.jjjxsw.com 久久小说 (2026-07-29)
+
+| Issue | Fix |
+|-------|-----|
+| tocUrl `{'webView': true}`；设备曾超时 | `{"webView":true}`；`show=title`；**校验成功** 32178ms |
+
 ## Close-out 标准（每轮）
 
 1. **诊断证据**：`diagnose` + phone `debug_source` / fetch → ledger + retro.msg  
