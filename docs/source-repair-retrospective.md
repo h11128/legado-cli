@@ -830,6 +830,11 @@ Device **校验成功** (~3.2s). Trap `known:toc_href_obfuscation`; skill_fix=0.
 Empire CMS 模板换皮：`.atts`/`.co-by`→`.tbtls`/`.conbd`；搜索 POST 仍可用；分页 TOC JS OK。
 补 `https://`。Device **校验成功** (~1.2s). skill_fix=0.
 
+## 99. www.ijjxsxzw.com 爱久小说 — fixed (2026-07-29)
+
+旧 `m.jjjjxs.com` 搜索规则失效；同域 POST `#searchList@.searchTopic`；详情/目录换皮（`.kv` + `.chapter-list`）；清 `nextContentUrl`（页=章）。
+Device **校验成功** (~3.2s). skill_fix=0.
+
 ## Close-out 标准（每轮）
 
 
