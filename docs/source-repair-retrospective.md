@@ -542,6 +542,13 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 | title=`没有找到站点` 但 L2 `action=verify` | `DEADISH_HINTS` 缺该串；已补 + 单测 |
 | 源 | 已 `enabled=false`；ledger skip |
 
+## 54. pilisf.com CF search wall (2026-07-29)
+
+| Issue | Action |
+|-------|--------|
+| diagnose `layer=search`；probe `/s.php` score=5 | phone POST → CF「Just a moment」list=0 |
+| | **disable/skip**（搜索墙，非选择器） |
+
 ## Close-out 标准（每轮）
 
 1. **诊断证据**：`diagnose` + phone `debug_source` / fetch → ledger + retro.msg  
