@@ -825,6 +825,11 @@ Schemeless URL + TOC href 伪装（`data-c9e6f9f` base64，tantan/gaysay 孪生�
 `chapterList=.BCsectionTwo-top-chapter@tag.a` + base64Decode；cover `@_src`。
 Device **校验成功** (~3.2s). Trap `known:toc_href_obfuscation`; skill_fix=0.
 
+## 98. www.fuxs1.com 腐小说网 — fixed (2026-07-29)
+
+Empire CMS 模板换皮：`.atts`/`.co-by`→`.tbtls`/`.conbd`；搜索 POST 仍可用；分页 TOC JS OK。
+补 `https://`。Device **校验成功** (~1.2s). skill_fix=0.
+
 ## Close-out 标准（每轮）
 
 
