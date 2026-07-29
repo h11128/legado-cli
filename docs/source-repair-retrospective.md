@@ -851,6 +851,16 @@ Device **校验成功** (~3.2s). skill_fix=0.
 
 同 wwxsc：补 `https://`；清可能串章的 `nextContentUrl`。Device **校验成功** (~2.9s). skill_fix=0.
 
+## 104. serial deep_batch100 — triage (2026-07-29)
+
+`source-cli serial --urls-file deep_batch100.txt --limit 100` (~17.5 min)。
+Reports **94/100**：disabled 59 / skipped 17 / failed 13 / migrated 4 / **fixed 1** (`m.shoujix.com#`)。
+死站占比高（hunt_empty）；失败队列见 `temp/full_fix/queues/deep_batch100_failed.txt`。
+
+## 105. m.tongrenquan.org/ 同人圈 — fixed (2026-07-29)
+
+serial 报搜索失效；debug 实则 OK。`classid=`→`classid=0`（对齐表单）。Device **校验成功** (~2.2s). skill_fix=0.
+
 ## Close-out 标准（每轮）
 
 
