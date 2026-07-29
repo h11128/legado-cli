@@ -575,6 +575,12 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 |-------|-----|
 | `bookSourceUrl=blnovel.cc` 无 scheme | migrate `https://blnovel.cc`；**校验成功** |
 
+## 59. m.liehuozw.com https migrate (2026-07-29)
+
+| Issue | Fix |
+|-------|-----|
+| layer=ok / 校验超时 | http→https；**校验成功** |
+
 ## Close-out 标准（每轮）
 
 1. **诊断证据**：`diagnose` + phone `debug_source` / fetch → ledger + retro.msg  
