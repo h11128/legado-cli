@@ -458,6 +458,61 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 |-------|-----|
 | 同站 fragment | 克隆 `#♤yc`；**校验成功** 5152ms — **goal 100** |
 
+## 45. Batch50 close-out (2026-07-28)
+
+处理 **50** 个失效标签书源（目标 goal 150 的下一批）：
+
+| 结果 | 数量 | 说明 |
+|------|------|------|
+| **fixed（设备校验成功）** | 3 | `manmanapp.com#一程`；`m.1qxs.com/`；`yqk.net/`（clone `#yc1101`，keyword 言情） |
+| skip / disable | 48 | 死站 L2、晋江/铁血签名 API、爱奇艺/起点非 HTML、假详情 timebox、Vue SSR 等 |
+
+**过程坑（已修驱动脚本，未改 SKILL）：**
+1. `source verify` JSON 后跟 cooldown 日志 → `json.loads` 整段失败，误判成功为失败（改 `raw_decode`）。
+2. diagnose tips 常同时带 `fake_detail` + `vue_ssr` 模板句 → 误 disable 贼吧等（改：fake_detail 时不按 vue_ssr disable）。
+3. `progress next` 只取前 40 且要求 L2=`verify`；剩余候选全是 disable/skip/migrate → `NO_CANDIDATE`（改：自建候选队列 `batch_repair50b.py`）。
+4. 非法 trap 名 `假详情页` → retro BLOCK 卡住 closeout（改用 SKILL 已有 `假详情`）。
+
+摘要：`temp/batch50/summary.jsonl`。goal：见 `progress status --goal 150`。
+
+## 46. dead_skip_without_hunt policy align (2026-07-28)
+
+| Gap | Fix |
+|-----|-----|
+| Gate `l1_unreachable` / `l2_http_dead` → Disable；batch 直接关站 | → `GateAction::Hunt`；oneshot `resolve_hunt` 后再 migrate/disable |
+| wave 把 hunt 当 final skip 写 ledger | hunt 只进 report，不 seal |
+| SKILL/discipline 未写死「先 hunt」 | 加 serial rule + checklist 2b + trap `dead_skip_without_hunt`；`docs/domain-hunt-trial` 改 CLI SOT |
+
+## 47. Hang prevention harness (2026-07-29)
+
+根因：serial 进程内 oneshot 卡在手机 MCP；Windows `pid_alive` 恒 true → 死锁占锁最长 6h；Agent 对整批 AwaitShell 空等约 11h。
+
+| Layer | Fix |
+|-------|-----|
+| Channel | Win32 `OpenProcess` 判死 PID；repair stale **15m** / bulk **2h**；`check channel --force-clear` |
+| MCP client | HTTP 超时 120→**90s** |
+| serial | 默认子进程 oneshot + `--url-timeout-s 120`；杀挂续跑；`serial_heartbeat.json` + 每 URL 刷 `serial_last.json` |
+| Agent | discipline §19–20；SKILL traps `serial_await_idle` / `serial_url_timeout` / `mcp_lock_zombie` |
+
+## 48. MCP timeout SOT in mcp_defaults.json (2026-07-29)
+
+| Field | Default | Used by |
+|-------|---------|---------|
+| `http_timeout_s` | 90 | `McpClient` ureq（get/save/check…） |
+| `debug_timeout_s` | 45 | 仅 `tools_call("debug_source")` |
+| `verify_timeout_ms` | 45000 | `start_check_sources` |
+| `verify_max_wait_s` | 90 | `get_check_progress` 轮询上限 |
+
+`source-cli discover` 重写 URL 时 **保留** 上述字段。Harness：`crates/source-mcp/src/timeouts.rs`。
+
+## 49. so.ihuaben.com 搜索目录失效副本 (2026-07-29)
+
+| Issue | Fix |
+|-------|-----|
+| `bookSourceUrl` 误存搜索 URL；`tocUrl=text.章节目录@href` + HTML `-.chapters p` | 克隆已修 `#🎃`：CDN `tocUrl` + `$..chapters[*]` + `$..content` |
+| diagnose | `layer=toc`；CDN chapters/chapter 仍 200 |
+| 校验 | **校验成功** 4447ms；`skill_fix=0`（已知 trap） |
+
 ## Close-out 标准（每轮）
 
 1. **诊断证据**：`diagnose` + phone `debug_source` / fetch → ledger + retro.msg  
