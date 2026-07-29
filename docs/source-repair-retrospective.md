@@ -776,6 +776,49 @@ TOC empty. **disable** (CF wall on detail, not selector). skill_fix=0.
 L2 200 but body is SPA shell「精选推荐」(6944B all paths). Not a novel site; search list=0.
 Comment’s `18shuwu.com` SSL dead. **disable** parked. skill_fix=0.
 
+## 87. www.qiufengshuwu.com 秋风书屋 — skip (2026-07-29)
+
+POST `/s.html` → **403** (phone+PC); sort/browse OK. **disable** §16. skill_fix=0.
+
+## 88. www.tantanread.com/ 探探书屋 — fixed (2026-07-29)
+
+TOC `href` fake → real URL in `data-c8dcb4a` base64 (gaysay); name `@data-cf3b593`.
+Content plaintext `RBGsectionThree-content` (AES `@js` obsolete). Cleared `nextContentUrl`
+(was chaining all chapters as pages). Device **校验成功** (~3s). skill_fix=0.
+
+## 89. www.woo16.vip#🎃 原創市集 — fixed (2026-07-29)
+
+GBK POST search OK; ~30s/stage CF-slow. concurrentRate + verify 180s → **校验成功** (~121s).
+Trap `known:cf_slow_check_needs_180s`; skill_fix=0.
+
+## 90. www.xguolu88.com#🎃 — skip (2026-07-29)
+
+search.php **404**; browse OK. **disable** §16. skill_fix=0.
+
+## 91. www.yodu.org##出版 — skip (2026-07-29)
+
+POST `/sa` list=0 without login cookie; stripped stored password cookie. **disable**. skill_fix=0.
+
+## 92. www.zei8.vip — skip (2026-07-29)
+
+type=3 TXT download; `downloadUrls` JS IndexOutOfBounds. **disable**. skill_fix=0.
+
+## 93. w.heiyan.com — fixed (2026-07-29)
+
+Oneshot: layer=ok → device **校验成功** (~2s). Trap `known:layer_ok_device_verify`. skill_fix=0.
+
+## 94. m2.tyvvxw.cc — skip (2026-07-29)
+
+Search→bqg123 SPA; TocEmpty; webView single-quote JSON. **disable**. skill_fix=0.
+
+## 95. wap.hanwujinian.com## — skip (2026-07-29)
+
+Search API `uid=0` → list=0 (auth). **disable**. skill_fix=0.
+
+## 96. www.178xs.cc — skip (2026-07-29)
+
+`178yhr` search 404/empty → 178xs. **disable** §16. skill_fix=0.
+
 ## Close-out 标准（每轮）
 
 
