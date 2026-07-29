@@ -166,7 +166,7 @@ source-cli progress next   # 先跑 closeout pending
 | **progress next 卡死** | 候选按 URL 字母序 → 永远先 `api.*`；index 无 RT | 优先 `queues/repair_serial100_queue.json` `items` |
 | **stale_queue_after_migrate** | 迁域/删旧源后 `progress next` 仍挑到旧 URL（serial 快照未刷；`phone_source_index` 过期仍含旧域） | queue 候选必须仍在 `phone_source_index.by_url`；`migrate` 成功后 ledger `skip:migrated_to:` 封 `from_url` **并** `refresh_phone_index`。手工 MCP 迁域后同样要 `queue refresh-index` + ledger skip。Harness：`progress.rs` + `migrate.rs` + `progress_ledger` |
 | **phone_index_group_alias** | `refresh-index` 后 progress/rt 候选变 0 | MCP 行是 `bookSourceGroup`/`bookSourceName`；index 写 `group`/`name` 别名，progress/rt **双读**。Harness：`source-queue/index.rs` + `rt_queue.rs` + `progress.rs` |
-| **App JSON 搜索空壳 (ihuaben)** | `/app/search`→`{}`；L2 首页仍小说站；listv2/CDN 可能仍活 | 试 `so.` / 站内 HTML 搜索；**勿**因 API 空就 disable；TOC/正文可继续走 CDN JSON |
+| **App JSON 搜索空壳 (ihuaben)** | `/search` HTML 404；旧 `$.pageUtil` 规则把 HTML 当 JSON → `$.book` 吃到 String | `so.ihuaben.com/search?keyword=` + `.searchresult`；bookUrl 正则映射 `/book/{id}.html`→`/book/app/book?bookId=`；tocUrl `cdn/chapters/{{id}}/{{Date.now()}}`（勿 `java.time()`） |
 | **重复 phone pull (serial)** | 每批 `refresh_phone_index` 全量 list_sources ~55s | 用 `repair_state.sqlite` + TTL；`repair_refresh_phone_index --force` 才重拉；`get_source` 走 snapshot cache |
 | **Vue SSR 搜索空 (qimao miao)** | `/search/index/` 200 但无 `ul.qm-pic-txt`；`__NUXT__` 壳；phone list=0 | api-miao 无公开 search 端点 → **disable**（browse/shuku OK，§16） |
 | **tocUrl 阅读链 (powanjuan)** | `tocUrl span.read a`→首章；误走 `index/1.html` 目录空 | **清空 tocUrl**；详情页 `div.catalog` + 已有 `ruleToc` |
@@ -199,7 +199,7 @@ source-cli progress next   # 先跑 closeout pending
 | 金庸 jinyongwang | 域名改行工业风机站 → disable/skip |
 | 稻草 dcrsu | L2 HTTP timeout → disable/skip |
 | 免费小说 b483 | search.php 空索引 → **disable**（勿首页过滤 workaround） |
-| 话本 ihuaben | `/app/search`→`{}` → `so.ihuaben.com/search?keyword=` + `.searchresult`；toc CDN `cdn/chapters`；校验成功 |
+| 话本 ihuaben | `so.ihuaben.com` HTML 搜 + app book JSON + CDN toc/content；`Date.now()` tocUrl；校验成功 ~3.5s |
 | 破万卷 powanjuan | 清空 `tocUrl`；详情页 catalog + ruleToc；keyword=斗罗 校验成功 |
 | 基友 gaysay | toc `data-c8dcb4a` base64 chapterUrl；641 章 + 正文 OK |
 | 淘小说 tybook | COS 403 → `/tf/chapter_list` signed tocUrl |

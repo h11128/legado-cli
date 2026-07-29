@@ -867,6 +867,17 @@ serial 报搜索失效；debug 实则 OK。`classid=`→`classid=0`（对齐表�
 - pilisf：17mb articlename+GBK 仍 list=0  
 - po18yq：L2 dead + hunt empty  
 
+## 107. www.ihuaben.com 话本小说 — fixed (2026-07-29)
+
+旧 `/search` JSON 规则失效（HTML 404 + `$.book` 吃到 String）。
+改 `so.ihuaben.com/search` HTML → bookId 映射 app JSON；`tocUrl` 用 `Date.now()`。
+Device **校验成功** (~3.5s). skill_fix=0.
+
+## 108. pending dead batch — skip (2026-07-29)
+
+96biquge admin shell / xiaoshuo1-sm empty / miui signed / pyzht SPA /
+qiufeng 403 / xguolu 404 / noveltri CF / 88xiaoshuo search 500. skill_fix=0.
+
 ## Close-out 标准（每轮）
 
 
