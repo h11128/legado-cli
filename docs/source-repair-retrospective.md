@@ -614,6 +614,12 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 |-------|--------|
 | search 空列表；`$.data` 为 String；plate `params exception` | **disable** |
 
+## 65. app.shubl.com 书耽 (2026-07-29)
+
+| Issue | Action |
+|-------|--------|
+| search 可解；TOC/详情 AES `BadPadding`；login_token 过期 | **disable**（需登录） |
+
 ## Close-out 标准（每轮）
 
 1. **诊断证据**：`diagnose` + phone `debug_source` / fetch → ledger + retro.msg  
