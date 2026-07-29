@@ -750,6 +750,12 @@ JSON API already worked for search/toc/content; bookInfo lacked name/author; old
 Device **校验成功** (~4s). Novel trap `json_api_bookinfo_fields` → SKILL + diagnose_tips.
 skill_fix=1.
 
+## 82. wap.biquluo.info 壁落小说 — fixed (2026-07-29)
+
+Search→www.biquluo.info already OK; debug ~2s full path. Fail was 45s timeout flake +
+missing bookInfo name. Added `//div[@id='info']/h1` + concurrentRate → **校验成功** (~2s).
+Trap `known:cf_slow_check_needs_180s`; skill_fix=0.
+
 ## Close-out 标准（每轮）
 
 
