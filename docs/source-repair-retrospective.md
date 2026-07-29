@@ -569,6 +569,12 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 |-------|-----|
 | diagnose `layer=ok`；旧标签校验超时 | http→https migrate；**校验成功** |
 
+## 58. blnovel.cc schemeless→https (2026-07-29)
+
+| Issue | Fix |
+|-------|-----|
+| `bookSourceUrl=blnovel.cc` 无 scheme | migrate `https://blnovel.cc`；**校验成功** |
+
 ## Close-out 标准（每轮）
 
 1. **诊断证据**：`diagnose` + phone `debug_source` / fetch → ledger + retro.msg  
