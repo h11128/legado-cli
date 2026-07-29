@@ -771,6 +771,11 @@ Gate `l1_unreachable` (tcp timeout). `hunt --probe` → `action=empty` (no seeds
 Search `/zh-cn/search?q=` OK (36 hits). Book detail GET → **403** (phone HTTP log + PC);
 TOC empty. **disable** (CF wall on detail, not selector). skill_fix=0.
 
+## 86. www.pyzht.com — skip (2026-07-29)
+
+L2 200 but body is SPA shell「精选推荐」(6944B all paths). Not a novel site; search list=0.
+Comment’s `18shuwu.com` SSL dead. **disable** parked. skill_fix=0.
+
 ## Close-out 标准（每轮）
 
 
