@@ -168,7 +168,8 @@ source-cli progress next   # 先跑 closeout pending
 | **phone_index_group_alias** | `refresh-index` 后 progress/rt 候选变 0 | MCP 行是 `bookSourceGroup`/`bookSourceName`；index 写 `group`/`name` 别名，progress/rt **双读**。Harness：`source-queue/index.rs` + `rt_queue.rs` + `progress.rs` |
 | **App JSON 搜索空壳 (ihuaben)** | `/search` HTML 404；旧 `$.pageUtil` 规则把 HTML 当 JSON → `$.book` 吃到 String | `so.ihuaben.com/search?keyword=` + `.searchresult`；bookUrl 正则映射 `/book/{id}.html`→`/book/app/book?bookId=`；tocUrl `cdn/chapters/{{id}}/{{Date.now()}}`（勿 `java.time()`） |
 | **重复 phone pull (serial)** | 每批 `refresh_phone_index` 全量 list_sources ~55s | 用 `repair_state.sqlite` + TTL；`repair_refresh_phone_index --force` 才重拉；`get_source` 走 snapshot cache |
-| **Vue SSR 搜索空 (qimao miao)** | `/search/index/` 200 但无 `ul.qm-pic-txt`；`__NUXT__` 壳；phone list=0 | api-miao 无公开 search 端点 → **disable**（browse/shuku OK，§16） |
+| **Vue SSR 搜索空 (qimao miao)** | `/search/index/` 200 但无 `ul.qm-pic-txt`；`__NUXT__` 壳；phone list=0 | `searchUrl=https://miao.qimao.com/api/search/result?keyword={{key}}`；`bookList=$.data.search_list[*]`；bookUrl `@js` put bid→`api-miao…/chapter-list`；content `.article@html` |
+| **inte_base64 搜索壳 (xinbiquge)** (inte_base64_search) | `search.aspx` 体为 `inte_base64:{"c":base64}`，选择器打空 | `bookList` `@js`: 先 strip `inte_base64:` → `JSON.parse` + `java.base64Decode(o.c)` + `java.setContent` → `div.hot_sale`；规则本身常仍可用。Harness：`diagnose_tips` |
 | **tocUrl 阅读链 (powanjuan)** | `tocUrl span.read a`→首章；误走 `index/1.html` 目录空 | **清空 tocUrl**；详情页 `div.catalog` + 已有 `ruleToc` |
 | **COS toc 403 (tybook)** | `chapters/{bid}.json` 403 | 改 signed `/tf/chapter_list?` @js |
 | **sticky_host_header_cdn (tybook)** | `header.Host` 钉死 API 域；`/tf/chapter_list` 302→`scdn…/chapters/{bid}.json` 后列表空 | **去掉 Host**（或克隆无 Host 的 sibling UA）；不要只改 tocUrl。Harness：`diagnose_tips` |

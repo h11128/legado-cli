@@ -889,6 +889,17 @@ Trap `known:empire_cms_host_redirect`; skill_fix=0.
 23 URL 全 gate 非 verify：L0 shutdown/parked/non_book、safebrowse/CF/密码墙、
 451/521/444/401/502 + hunt empty。skill_fix=0.
 
+## 111. miao.qimao.com 奇妙中文 — fixed (2026-07-29)
+
+先前 §38 disable（Vue SSR 空）。真搜索：`/api/search/result?keyword=` JSON；
+toc 仍 `api-miao…/chapter-list`；正文 `.article@html`。Device **校验成功** (~1.5s).
+Trap `vue_ssr_search`；skill_fix=0（已知 tip 已扩）。
+
+## 112. wap2.xinbiquge.org 新笔趣阁2 — fixed (2026-07-29)
+
+先前 §39 skip（`inte_base64`）。`bookList` `@js` base64Decode → `div.hot_sale`。
+Device **校验成功** (~0.8s). skill_fix=1 + diagnose_tips.
+
 ## Close-out 标准（每轮）
 
 

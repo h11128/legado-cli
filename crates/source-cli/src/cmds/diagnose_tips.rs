@@ -19,7 +19,14 @@ pub fn layer_tips(diag: &DiagnoseResult) -> Vec<String> {
                     .into(),
             );
             tips.push(
-                "TRAP vue_ssr_search: HTML 200 but no result nodes — check __NUXT__/CSR; api search may differ from page URL"
+                "TRAP vue_ssr_search: HTML 200 but no result nodes — check __NUXT__/CSR; \
+                 try /api/search/result?keyword= (qimao) or site JSON search before disable"
+                    .into(),
+            );
+            tips.push(
+                "TRAP inte_base64_search: body starts with inte_base64:{\"c\":…} — \
+                 bookList @js: strip 'inte_base64:' then JSON.parse + java.base64Decode(o.c) \
+                 + java.setContent; then getElements (xinbiquge). Do not treat as empty WAF-only"
                     .into(),
             );
             tips.push(
