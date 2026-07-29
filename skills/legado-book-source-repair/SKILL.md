@@ -42,10 +42,12 @@ while fixed_n < 100:
 2. **No empty-probe verify** — `require_patch=True`；探针无补丁 → `no_patch_skip`（不烧设备校验）。
 3. **One host one candidate** in queue; scheme-less URLs normalized; `host_key` works without `http://`.
 4. migrate_to must pass L2; `search_endpoint_dead` → skip.
-5. After each URL: `source-cli retro append` + ledger；新 trap 立刻写 skill。
+5. **Dead/timeout → hunt before disable** — L2 `l1_unreachable` / `l2_http_dead` → `action=hunt`；`source-cli repair` / `hunt --probe` 查 seeds；有活后继 → migrate+verify；`shutdown`/无种子/探针全死 → 才 disable。确认关站（L0 `dead_site_shutdown_confirmed`）与域名停车/广告劫持 **不** hunt。
+6. After each URL: `source-cli retro append` + ledger；新 trap 立刻写 skill。
 
 **Anti-pattern (banned):** classify/probe 20–50 tagged fails to “find a good one”.
 That burned minutes and violated the 2–3 min budget. Pick → diagnose → patch → verify.
+**Also banned:** batch/oneshot 对 `l2_http_dead` / timeout **直接 disable** 而不跑 hunt（见 trap `dead_skip_without_hunt`）。
 
 ## Report modes (both supported)
 
@@ -53,6 +55,7 @@ That burned minutes and violated the 2–3 min budget. Pick → diagnose → pat
 |------|------|---------------------------|
 | **oneshot** 修一个报一个 | 默认深修、用户要盯进度 | `source-cli diagnose` → `source-cli repair --mode oneshot --url URL`。必须走 layer；假详情不修 toc |
 | **batch** 批量 | 用户明确说「批量 / 做 N 个」 | `source-cli repair --mode batch --urls-file … --limit N`；勿整批 AwaitShell |
+| **serial** 串行 | 批量深修队列 | `source-cli serial --urls-file … --limit N`（默认 `--url-timeout-s 120` 子进程杀挂）；**禁止** AwaitShell 等整批结束；短轮询 `temp/full_fix/serial_heartbeat.json` / `serial_last.json` mtime |
 
 ## Deep-fix checklist (one URL)
 
@@ -62,6 +65,9 @@ Budget clock starts at **pick**. Diagnose+patch **2–3 min**; hard stop **5 min
 [ ] 0  channel idle
 [ ] 1  progress next  (script L2-gates walls/parked; ≤~20s)
 [ ] 2  if next.l2_gate.action=migrate → migrate first
+[ ] 2b if action=hunt (l1_unreachable / l2_http_dead / L0 timeout_cluster) →
+       `source-cli hunt --url … --probe`（repair oneshot 已自动跑）→
+       migrate | disable(no_mirror/none_alive/empty) | skip(weak)
 [ ] 3  diagnose --url URL   # also L2-failfast BEFORE phone debug
 [ ] 4  if layer=skip → ledger already done → close-out (§ below) → **立刻汇报**
 [ ] 5  else patch ONLY layer → ONE verify → ledger
@@ -113,13 +119,18 @@ source-cli progress next   # 先跑 closeout pending
 | debug=ok / tagged fail | flake or 发现-only | harvest/verify; don't over-patch |
 | API 目录要登录 | 认证失败 / device 必填 | **skip** |
 | 验证码搜索 | getcode / yzm / actyzm | **skip** |
-| 域名停车/过期 | L2 GET 正文含 for sale/出售/域名到期 / Redirecting shell | **disable/skip**（勿当搜索规则坏） |
+| 域名停车/过期 | L2 GET 正文含 for sale/出售/域名到期 / Redirecting shell | **disable/skip**（勿当搜索规则坏；**不** hunt） |
+| **dead_skip_without_hunt** | batch/agent 对 `l1_unreachable`/`l2_http_dead` 直接 disable | **禁止** — 先 `hunt --probe` / oneshot 自动 hunt；无后继再 disable。Harness：`classify.rs`→`Hunt`；`oneshot_live` resolve；wave 不把 hunt ledger 成 final skip |
+| **serial_await_idle** | Agent 对整批 `serial`/`batch` 长 AwaitShell（数小时） | **禁止** — 最多短轮询 60–90s；看 `serial_heartbeat.json` / `serial_last.json` mtime；心跳停滞 > `url-timeout-s+30` → kill 父进程、`check channel --force-clear`、续跑。Harness：`serial_cmd`/`serial_spawn` |
+| **serial_url_timeout** | 单源 MCP/debug 卡住超墙钟 | serial 杀子进程 → `skip:url_timeout` + ledger；继续下一 URL。Harness：`--url-timeout-s`（默认 120） |
+| **mcp_lock_zombie** | Windows 死 PID 仍占 `mcp_channel.lock`（旧实现永远 alive） | `check channel` 自动清；repair stale **15m**；Win32 `OpenProcess`。Harness：`channel.rs`/`channel_pid.rs`；卡死活进程用 `--force-clear` |
+| **mcp_timeout_sot** | 超时写死在代码 / 找不到配置 | 改 `config/mcp_defaults.json`：`http_timeout_s`（默认90）、`debug_timeout_s`（默认45，仅 `debug_source`）、`verify_timeout_ms` / `verify_max_wait_s`。Harness：`timeouts.rs`；discover 重写 URL 会保留这些字段 |
+| 主机跳转 | bookSourceUrl host ≠ final host（如 .org→.com） | **migrate** 再修搜索 |
 | **没有找到站点 (521danmei)** | title=`没有找到站点` / 空壳 | L2 `deadish:没有找到站点` → **skip** |
 | **nginx 空站 (cstxt)** | title=`Welcome to nginx!` | L2 `deadish:welcome to nginx` → **skip** |
 | **域名广告劫持 (pyzht)** | title=精选推荐 / `gg_card` / 18+广告壳 | L2 deadish 广告标记 → **skip** |
 | **Empire 搜索体 (fuxsb)** | debug 有书但 check「搜索失效」；`show=a,b,c` 体 | 简化 `keyboard={{key}}&show=title&tempid=1` + Referer；正文 `.co-by`→`.conbd` |
 | **webView 在 bookUrl** | `##$##,{'webView': true}` | `apply_safe_rule_fixes` 现修 ruleSearch.bookUrl（不仅 chapterUrl） |
-| 主机跳转 | bookSourceUrl host ≠ final host（如 .org→.com） | **migrate** 再修搜索 |
 | URL 前导空格 | `get_source` 失败但 list 能见到 | trim `bookSourceUrl` 再 get/migrate |
 | bookbenx 换域 | `.item` + `/search81.html?searchkey=`（新书迷楼→shukuai99） | 固定 searchUrl，勿依赖 ajax 抽 form |
 | 假首页搜索 (爱丽丝) | form=`/?keyword=` 但结果=首页壳；真入口 `/search.php?q=` | **继续修** — rank；换真 searchUrl |
@@ -156,6 +167,7 @@ source-cli progress next   # 先跑 closeout pending
 | **Vue SSR 搜索空 (qimao miao)** | `/search/index/` 200 但无 `ul.qm-pic-txt`；`__NUXT__` 壳；phone list=0 | api-miao 无公开 search 端点 → **disable**（browse/shuku OK，§16） |
 | **tocUrl 阅读链 (powanjuan)** | `tocUrl span.read a`→首章；误走 `index/1.html` 目录空 | **清空 tocUrl**；详情页 `div.catalog` + 已有 `ruleToc` |
 | **COS toc 403 (tybook)** | `chapters/{bid}.json` 403 | 改 signed `/tf/chapter_list?` @js |
+| **sticky_host_header_cdn (tybook)** | `header.Host` 钉死 API 域；`/tf/chapter_list` 302→`scdn…/chapters/{bid}.json` 后列表空 | **去掉 Host**（或克隆无 Host 的 sibling UA）；不要只改 tocUrl。Harness：`diagnose_tips` |
 | **目录 href 伪装 (gaysay)** | 全部 `<a href="/book/id/">`；真 URL 在 `data-c8dcb4a` base64 | `chapterUrl` `@js:java.base64Decode(result.attr('data-c8dcb4a'))`；`chapterName` `@data-cf3b593` |
 | **POST /sa 搜索空 (yoduzw)** | phone POST 200 list=0；分类页有书 | **disable** §16 |
 | **小米浏览器书城 (miui)** | `reader.browser.miui.com` API 搜索 list=0；L2 body 0；需 App 签名 | **disable/skip** — 非公开 HTML 书源 |

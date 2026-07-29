@@ -520,6 +520,14 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 | 同站 `#` 副本，旧 HTML TOC | 同 §49 CDN 克隆 |
 | 校验 | **校验成功** 13974ms |
 
+## 51. tybook.taoyuewenhua.net sticky Host (2026-07-29)
+
+| Issue | Fix |
+|-------|-----|
+| COS 403 已知；只改 signed `chapter_list` 仍 TocEmpty | debug：`Host: tybook…` 跟随 302→scdn 后列表空 |
+| 修法 | 克隆 `#` 规则并去掉 sticky Host；校验成功 4454ms |
+| harness | SKILL trap `sticky_host_header_cdn` + `diagnose_tips` |
+
 ## Close-out 标准（每轮）
 
 1. **诊断证据**：`diagnose` + phone `debug_source` / fetch → ledger + retro.msg  

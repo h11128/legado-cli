@@ -35,6 +35,11 @@ pub fn layer_tips(diag: &DiagnoseResult) -> Vec<String> {
                  verify with 斗破/其他实书"
                     .into(),
             );
+            tips.push(
+                "TRAP sticky_host_header_cdn: header Host=api-host + chapter_list 302→CDN \
+                 → TocEmpty; drop Host / clone sibling UA. Harness: diagnose_tips"
+                    .into(),
+            );
         }
         Layer::Content => {
             tips.push("TOC OK — fix ruleContent.content against chapter HTML".into());
