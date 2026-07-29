@@ -620,6 +620,18 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 |-------|--------|
 | search 可解；TOC/详情 AES `BadPadding`；login_token 过期 | **disable**（需登录） |
 
+## 66. m.123yuzhaiwu.com 肉文阁 (2026-07-29)
+
+| Issue | Fix |
+|-------|-----|
+| diagnose `layer=ok` | 无补丁重校验；**校验成功** 18514ms |
+
+## 67. book.mywebos.cn 国学書库 (2026-07-29)
+
+| Issue | Action |
+|-------|--------|
+| diagnose skip；`unexpected end of stream` | **disable** |
+
 ## Close-out 标准（每轮）
 
 1. **诊断证据**：`diagnose` + phone `debug_source` / fetch → ledger + retro.msg  
