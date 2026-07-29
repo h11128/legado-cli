@@ -602,6 +602,12 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 | `@JSon:` + 正文 `replace(/\<…/` Rhino SyntaxError / ContentEmpty | `bookList/chapterList=$.data`；`content=$.data.content`；去坏 @js |
 | 设备校验 | **校验成功** 1334ms |
 
+## 63. m.nshkedu.com 文趣阁 (2026-07-29)
+
+| Issue | Action |
+|-------|--------|
+| Loading JWT 跳转 → 广告/威胁页；search 回 HTML | decrypt JS `Unexpected token <`；**disable**（广告劫持，不 hunt） |
+
 ## Close-out 标准（每轮）
 
 1. **诊断证据**：`diagnose` + phone `debug_source` / fetch → ledger + retro.msg  
