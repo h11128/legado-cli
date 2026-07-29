@@ -67,6 +67,11 @@ pub fn append_retro(paths: &CloseoutPaths, opts: RetroAppendOpts) -> Result<Retr
     } else {
         None
     };
+    // Any terminal retro seals deep_active so progress next is not stuck.
+    let status = opts.status.trim().to_lowercase();
+    if matches!(status.as_str(), "fixed" | "fail" | "skip") {
+        let _ = crate::active::seal_active(paths, &opts.url, &status);
+    }
     Ok(RetroRow { row, sealed })
 }
 

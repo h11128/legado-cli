@@ -112,6 +112,14 @@ pub fn run_diagnose(args: DiagnoseArgs) -> ExitCode {
         }
     };
 
+    // Claim deep_active so progress next / turn end cannot skip close-out.
+    if let Ok(paths) = source_closeout::CloseoutPaths::from_repo() {
+        match source_closeout::claim_active(&paths, url.as_str(), "diagnose") {
+            Ok(_) => {}
+            Err(e) => eprintln!("diagnose: warn: deep_active claim: {e}"),
+        }
+    }
+
     if gate_blocks_diagnose(&gate) {
         let mut d = diagnose_gate_skip(url, gate);
         d.tips = layer_tips(&d);

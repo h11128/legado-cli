@@ -32,6 +32,10 @@ pub fn count_fixed(ledger_path: Option<&Path>) -> usize {
             continue;
         }
         if result.contains("校验成功") || result.starts_with("fixed") {
+            // Do not inflate goal with hedged fake success rows.
+            if source_closeout::ledger_result_blocked(result).is_some() {
+                continue;
+            }
             fixed.insert(url.to_string());
         }
     }

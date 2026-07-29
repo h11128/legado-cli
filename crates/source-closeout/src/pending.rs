@@ -2,8 +2,10 @@
 
 use serde_json::{json, Value};
 
+use crate::active::{gate_active_unsealed, read_active};
 use crate::improve::gate_script_fix;
 use crate::jsonl::read_jsonl;
+use crate::ledger_gate::ledger_result_blocked;
 use crate::paths::{norm_url, CloseoutPaths};
 use crate::skill::{skill_in_sync, sync_skill_to_cursor};
 use crate::trap::gate_trap;
@@ -36,6 +38,28 @@ pub fn latest_retro_for_url(paths: &CloseoutPaths, url: &str) -> Option<Value> {
 
 pub fn pending_closeout(paths: &CloseoutPaths) -> (bool, Vec<String>, PendingDetail) {
     let mut errors = Vec::new();
+
+    // Hard gate: unsealed deep_active blocks next pick (agent_turn_stall).
+    if let Err(active_errs) = gate_active_unsealed(paths) {
+        errors.extend(active_errs);
+        let active = read_active(paths).unwrap_or(json!({}));
+        let url = norm_url(active.get("url").and_then(|v| v.as_str()).unwrap_or(""));
+        return (
+            false,
+            errors,
+            PendingDetail {
+                ok: false,
+                reason: Some("deep_active_unsealed".into()),
+                url: if url.is_empty() { None } else { Some(url) },
+                extra: json!({
+                    "ok": false,
+                    "missing": "deep_active_seal",
+                    "active": active,
+                }),
+            },
+        );
+    }
+
     let Some(last) = last_terminal_ledger(paths) else {
         return (
             true,
@@ -44,17 +68,43 @@ pub fn pending_closeout(paths: &CloseoutPaths) -> (bool, Vec<String>, PendingDet
                 ok: true,
                 reason: Some("no_terminal_ledger".into()),
                 url: None,
-                extra: json!({}),
+                extra: json!({
+                    "active": read_active(paths),
+                }),
             },
         );
     };
 
     let url = norm_url(last.get("url").and_then(|v| v.as_str()).unwrap_or(""));
+    let ledger_result = last
+        .get("result")
+        .and_then(|v| v.as_str())
+        .unwrap_or("")
+        .to_string();
     let mut extra = json!({
         "url": url,
         "ledger_step": last.get("step"),
-        "ledger_result": last.get("result"),
+        "ledger_result": ledger_result.clone(),
+        "active": read_active(paths),
     });
+
+    if let Some(msg) = ledger_result_blocked(&ledger_result) {
+        errors.push(format!(
+            "last terminal ledger result blocked for {url:?}: {msg}"
+        ));
+        extra["ok"] = json!(false);
+        extra["missing"] = json!("honest_ledger_result");
+        return (
+            false,
+            errors,
+            PendingDetail {
+                ok: false,
+                reason: Some("hedged_ledger".into()),
+                url: Some(url),
+                extra,
+            },
+        );
+    }
 
     let Some(retro) = latest_retro_for_url(paths, &url) else {
         errors.push(format!(

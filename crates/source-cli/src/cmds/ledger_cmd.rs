@@ -2,6 +2,7 @@
 
 use std::process::ExitCode;
 
+use source_closeout::gate_ledger_result;
 use source_mcp::{default_jsonl_path, DualLedgerPort};
 use source_ports::LedgerPort;
 use source_types::{LedgerRow, LedgerStep, Url};
@@ -35,6 +36,10 @@ pub fn run_ledger(cmd: LedgerCmd) -> ExitCode {
             note,
             waste,
         } => {
+            if let Err(msg) = gate_ledger_result(&result) {
+                eprintln!("ledger BLOCK: {msg}");
+                return ExitCode::from(1);
+            }
             let u = match Url::new(url.trim()) {
                 Ok(u) => u,
                 Err(e) => {
@@ -59,6 +64,10 @@ pub fn run_ledger(cmd: LedgerCmd) -> ExitCode {
             if let Err(e) = port.append(&row) {
                 eprintln!("ledger: append: {e}");
                 return ExitCode::from(2);
+            }
+            // Heartbeat deep_active if this URL is claimed.
+            if let Ok(paths) = source_closeout::CloseoutPaths::from_repo() {
+                let _ = source_closeout::heartbeat_active(&paths);
             }
             println!("{}", serde_json::to_string(&row).unwrap_or_default());
             ExitCode::SUCCESS

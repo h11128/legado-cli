@@ -16,6 +16,22 @@ pub enum CloseoutSub {
     },
     SyncSkill,
     Status,
+    /// Claim current deep-diagnose URL (blocks progress next until release/retro).
+    Claim {
+        #[arg(long)]
+        url: String,
+        #[arg(long, default_value = "manual")]
+        note: String,
+    },
+    Heartbeat,
+    /// Seal deep_active without full retro (escape hatch; prefer retro append).
+    Release {
+        #[arg(long, default_value = "")]
+        url: String,
+        #[arg(long, default_value = "skip")]
+        status: String,
+    },
+    ClearActive,
 }
 
 #[derive(Subcommand)]
@@ -180,7 +196,12 @@ pub enum SourceSub {
         #[arg(long)]
         index: PathBuf,
     },
-    Channel,
+    Channel {
+        #[arg(long, default_value_t = false)]
+        clear_stale: bool,
+        #[arg(long, default_value_t = false)]
+        force_clear: bool,
+    },
 }
 
 #[derive(Subcommand)]

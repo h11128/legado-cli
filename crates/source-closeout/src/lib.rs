@@ -2,8 +2,10 @@
 //!
 //! Rust port of `scripts/repair_closeout.py` + `scripts/repair_retro.py`.
 
+mod active;
 mod improve;
 mod jsonl;
+mod ledger_gate;
 mod paths;
 mod pending;
 mod retro;
@@ -11,8 +13,12 @@ mod session_index;
 mod skill;
 mod trap;
 
+pub use active::{
+    claim_active, clear_active, gate_active_unsealed, heartbeat_active, read_active, seal_active,
+};
 pub use improve::{gate_script_fix, script_fix_ok};
 pub use jsonl::{read_jsonl, JsonRow};
+pub use ledger_gate::{gate_ledger_result, ledger_result_blocked};
 pub use paths::CloseoutPaths;
 pub use pending::{pending_closeout, PendingDetail};
 pub use retro::{append_retro, RetroAppendOpts, RetroRow};

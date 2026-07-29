@@ -1,10 +1,11 @@
-//! Close-out gate CLI — pending / gate / sync-skill / status.
+//! Close-out gate CLI — pending / gate / sync-skill / status / claim / release.
 
 use std::process::ExitCode;
 
 use serde_json::json;
 use source_closeout::{
-    ensure_ready_for_next, gate_script_fix, gate_trap, pending_closeout, skill_in_sync,
+    claim_active, clear_active, ensure_ready_for_next, gate_script_fix, gate_trap,
+    heartbeat_active, pending_closeout, read_active, seal_active, skill_in_sync,
     sync_skill_to_cursor, CloseoutPaths,
 };
 
@@ -13,6 +14,9 @@ pub struct CloseoutArgs {
     pub trap: Option<String>,
     pub skill_fix: bool,
     pub script_fix: String,
+    pub url: Option<String>,
+    pub status: Option<String>,
+    pub note: Option<String>,
 }
 
 pub fn run_closeout(args: CloseoutArgs) -> ExitCode {
@@ -90,6 +94,7 @@ pub fn run_closeout(args: CloseoutArgs) -> ExitCode {
             if let Some(obj) = out.as_object_mut() {
                 obj.insert("skill_in_sync".into(), json!(skill_in_sync(&paths)));
                 obj.insert("errors".into(), json!(errors));
+                obj.insert("active".into(), json!(read_active(&paths)));
             }
             println!("{}", serde_json::to_string_pretty(&out).unwrap_or_default());
             if ok {
@@ -98,6 +103,54 @@ pub fn run_closeout(args: CloseoutArgs) -> ExitCode {
                 ExitCode::from(1)
             }
         }
+        "claim" => {
+            let url = args.url.unwrap_or_default();
+            let note = args.note.unwrap_or_else(|| "manual".into());
+            match claim_active(&paths, &url, &note) {
+                Ok(v) => {
+                    println!("{}", v);
+                    ExitCode::SUCCESS
+                }
+                Err(e) => {
+                    eprintln!("closeout claim: {e}");
+                    ExitCode::from(1)
+                }
+            }
+        }
+        "heartbeat" => match heartbeat_active(&paths) {
+            Ok(v) => {
+                println!("{}", v);
+                ExitCode::SUCCESS
+            }
+            Err(e) => {
+                eprintln!("closeout heartbeat: {e}");
+                ExitCode::from(1)
+            }
+        },
+        "release" => {
+            let url = args.url.unwrap_or_default();
+            let status = args.status.unwrap_or_else(|| "skip".into());
+            match seal_active(&paths, &url, &status) {
+                Ok(v) => {
+                    println!("{}", v);
+                    ExitCode::SUCCESS
+                }
+                Err(e) => {
+                    eprintln!("closeout release: {e}");
+                    ExitCode::from(1)
+                }
+            }
+        }
+        "clear-active" => match clear_active(&paths) {
+            Ok(()) => {
+                println!("{}", json!({"ok": true, "cleared": true}));
+                ExitCode::SUCCESS
+            }
+            Err(e) => {
+                eprintln!("closeout clear-active: {e}");
+                ExitCode::from(1)
+            }
+        },
         other => {
             eprintln!("closeout: unknown subcmd {other}");
             ExitCode::from(2)

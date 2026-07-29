@@ -673,7 +673,16 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 | 全局 app 头 → search 空体；catalog 无 app 头 → 版本不再支持；auth-code 过期 | header 仅 `KuJiang` UA；toc/read 选项加 app 头；**校验成功** 4774ms |
 | trap | `kujiang_header_split` |
 
+## 74. Full anti-stall harness (2026-07-29)
+
+| Layer | Control |
+|-------|---------|
+| Rust | `deep_active` claim；pending/progress deny unsealed；`ledger_gate` 拒假成功；goal 不计 hedged |
+| Hook | `legado_hedged_ledger_success` deny；long sleep warn；hooks.json stop/ask |
+| Docs | `docs/deep-diagnose-anti-stall.md`；discipline §21–23；SKILL traps |
+
 ## Close-out 标准（每轮）
+
 
 1. **诊断证据**：`diagnose` + phone `debug_source` / fetch → ledger + retro.msg  
 2. **反思**：`repair_retro.py append`（trap / harness / script_fix / **skill_fix 如实**）  

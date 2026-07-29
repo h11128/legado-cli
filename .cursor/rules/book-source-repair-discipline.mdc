@@ -73,6 +73,15 @@ Standing rules for any 书源 fix / validate / bulk-check work in this workspace
       **PC probe + MCP `debug_source`/`start_check_sources`**, or `skip:mcp_transient` + next URL.
     - Soft warn still **4 min**; hard stop **5 min** per URL. Prefer finishing N closes over
       polishing one hard auth source.
+22. **Structural anti-stall (enforced, not prose):**
+    - `diagnose` / `repair oneshot` **claim** `temp/full_fix/deep_active.json`.
+    - `source-cli progress next` / `closeout pending` **DENY** while deep_active is unsealed.
+    - `retro append --status fixed|skip|fail` **seals** deep_active.
+    - Escape: `source-cli closeout release --url … --status skip` (then still write honest ledger/retro).
+    - `ledger append` **rejects** hedged results (`校验成功或见上` / `见上` / ambiguous 成功).
+    - Goal counter ignores hedged 「校验成功*」 rows.
+23. **Honest verify ledger only:** after migrate/verify, write `校验成功` **iff** `verify_ok:true`;
+    else `fail:…` / `skip:…`. Never copy shell `tee` into a fake success line.
 
 ## Types (do not confuse)
 
