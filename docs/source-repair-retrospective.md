@@ -756,6 +756,11 @@ Search→www.biquluo.info already OK; debug ~2s full path. Fail was 45s timeout 
 missing bookInfo name. Added `//div[@id='info']/h1` + concurrentRate → **校验成功** (~2s).
 Trap `known:cf_slow_check_needs_180s`; skill_fix=0.
 
+## 83. www.88xiaoshuo.net 宝贝小说 — skip (2026-07-29)
+
+POST `/search.html` → HTTP 500 for all keywords (PC); phone list=0. Homepage browse still
+has `/book/…`. **disable** per §16 (same cluster as m.88xiaoshuo §36). skill_fix=0.
+
 ## Close-out 标准（每轮）
 
 
