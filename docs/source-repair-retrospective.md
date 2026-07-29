@@ -703,6 +703,12 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 - Codex projection 里 skill 路径写死成 WSL 的 `/root/Projects/agent-memory\...`，
   Windows 侧 push 全部 conflict（os error 3）。
 
+
+## 75. m.longtengxiaoshuo.org — fixed (2026-07-29)
+
+Diagnose `layer=ok` after L0–L2 gate pass. Oneshot device verify → `校验成功` (~7s).
+Prep only: concurrentRate→1000. Trap `known:layer_ok_device_verify`; skill_fix=0.
+
 ## Close-out 标准（每轮）
 
 
