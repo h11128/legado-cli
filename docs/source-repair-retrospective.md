@@ -563,6 +563,12 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 | 迁域 | `https://m.tongrenquan.org`；去掉 sticky Host；**校验成功** 755ms |
 | harness | trap `apex_no_a_try_m` + seeds + diagnose_tips |
 
+## 57. m.diyibanzhu.buzz https migrate (2026-07-29)
+
+| Issue | Fix |
+|-------|-----|
+| diagnose `layer=ok`；旧标签校验超时 | http→https migrate；**校验成功** |
+
 ## Close-out 标准（每轮）
 
 1. **诊断证据**：`diagnose` + phone `debug_source` / fetch → ledger + retro.msg  
