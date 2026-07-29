@@ -709,6 +709,15 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 Diagnose `layer=ok` after L0–L2 gate pass. Oneshot device verify → `校验成功` (~7s).
 Prep only: concurrentRate→1000. Trap `known:layer_ok_device_verify`; skill_fix=0.
 
+## 76. m.mpo18.com PO18脸红心跳 — fixed (2026-07-29)
+
+Root cause: 17mb-style search — GET `s.php?s=` empty; real search is **POST** `s`+`type=articlename`+**GBK**;
+result nodes `class.searchresult@p.sone`. Also filled bookInfo name/author (`cataloginfo@h3` /
+`infotype@p.0@a`). Device `debug_source` search/detail/toc/content OK; first check timed out at 90s
+(CF slow); recheck `timeoutMs=180000` → **校验成功** (~130s).
+
+Novel trap `17mb_post_gbk_search` → SKILL + `diagnose_tips` Search/GBK tip. skill_fix=1.
+
 ## Close-out 标准（每轮）
 
 

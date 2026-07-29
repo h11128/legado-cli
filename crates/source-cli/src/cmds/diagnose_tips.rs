@@ -28,6 +28,12 @@ pub fn layer_tips(diag: &DiagnoseResult) -> Vec<String> {
                  Seeds: domain_hunt_seeds.json"
                     .into(),
             );
+            tips.push(
+                "TRAP 17mb_post_gbk_search: GET s.php?s= often empty — POST \
+                 body s={{key}}&type=articlename + {\"charset\":\"GBK\"}; \
+                 bookList=class.searchresult@p.sone||class.sone; CF hosts may need check timeout≥180s"
+                    .into(),
+            );
         }
         Layer::Toc => {
             tips.push("Search OK — do NOT rewrite search. Fix tocUrl + ruleToc.".into());
@@ -87,6 +93,11 @@ pub fn enrich_with_live_probe(diag: &mut DiagnoseResult, live: &LiveProbeResult)
         if live.gbk {
             diag.tips
                 .push("GBK meta detected — append ,{\"charset\":\"GBK\"} on searchUrl".into());
+            diag.tips.push(
+                "TRAP 17mb_post_gbk_search: if GET s= returns empty, switch to POST \
+                 s={{key}}&type=articlename + GBK; bookList class.searchresult@p.sone"
+                    .into(),
+            );
         }
     } else if diag.layer == Layer::Search && !live.search_endpoint_dead {
         if let Some(f) = live.offline.forms.first() {
@@ -118,6 +129,15 @@ mod tests {
     fn toc_17mb_tip() {
         let d = DiagnoseResult::new(Url::new("http://i.xinbanzhu.net/").unwrap(), Layer::Toc);
         let tips = layer_tips(&d);
-        assert!(tips.iter().any(|t| t.contains("17mb_empty_index_unapproved")));
+        assert!(tips
+            .iter()
+            .any(|t| t.contains("17mb_empty_index_unapproved")));
+    }
+
+    #[test]
+    fn search_17mb_post_gbk_tip() {
+        let d = DiagnoseResult::new(Url::new("https://m.mpo18.com/").unwrap(), Layer::Search);
+        let tips = layer_tips(&d);
+        assert!(tips.iter().any(|t| t.contains("17mb_post_gbk_search")));
     }
 }
