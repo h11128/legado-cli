@@ -595,6 +595,13 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 | search 仍 15 本；详情/目录 `认证失败` code 4005 | JWT `exp`≈2025-09 已过期；三备份同病；需第三方 openid |
 | | **disable/skip**（SKILL：猫眼 / API 目录要登录） |
 
+## 62. app.wanshu.com 绾书文学网 (2026-07-29)
+
+| Issue | Fix |
+|-------|-----|
+| `@JSon:` + 正文 `replace(/\<…/` Rhino SyntaxError / ContentEmpty | `bookList/chapterList=$.data`；`content=$.data.content`；去坏 @js |
+| 设备校验 | **校验成功** 1334ms |
+
 ## Close-out 标准（每轮）
 
 1. **诊断证据**：`diagnose` + phone `debug_source` / fetch → ledger + retro.msg  
