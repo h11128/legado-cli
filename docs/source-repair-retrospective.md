@@ -884,6 +884,11 @@ qiufeng 403 / xguolu 404 / noveltri CF / 88xiaoshuo search 500. skill_fix=0.
 复用 `.conbd` + 分页 TOC；删旧 www/#Toshiko。Device **校验成功** (~1.2s).
 Trap `known:empire_cms_host_redirect`; skill_fix=0.
 
+## 110. deep_verify_pending remainder — skip (2026-07-29)
+
+23 URL 全 gate 非 verify：L0 shutdown/parked/non_book、safebrowse/CF/密码墙、
+451/521/444/401/502 + hunt empty。skill_fix=0.
+
 ## Close-out 标准（每轮）
 
 
