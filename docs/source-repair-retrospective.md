@@ -549,6 +549,12 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 | diagnose `layer=search`；probe `/s.php` score=5 | phone POST → CF「Just a moment」list=0 |
 | | **disable/skip**（搜索墙，非选择器） |
 
+## 55. mianfei22.com SPA detail down (2026-07-29)
+
+| Issue | Action |
+|-------|--------|
+| search 18 本 OK；详情 webView 文案「遇到故障,在修复中」 | TocEmpty → **skip/disable** |
+
 ## Close-out 标准（每轮）
 
 1. **诊断证据**：`diagnose` + phone `debug_source` / fetch → ledger + retro.msg  
