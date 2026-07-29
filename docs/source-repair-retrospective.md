@@ -761,6 +761,11 @@ Trap `known:cf_slow_check_needs_180s`; skill_fix=0.
 POST `/search.html` → HTTP 500 for all keywords (PC); phone list=0. Homepage browse still
 has `/book/…`. **disable** per §16 (same cluster as m.88xiaoshuo §36). skill_fix=0.
 
+## 84. www.biqugeabc.com — skip (2026-07-29)
+
+Gate `l1_unreachable` (tcp timeout). `hunt --probe` → `action=empty` (no seeds).
+**disable**. Trap `known:dead_skip_without_hunt` (hunt done); skill_fix=0.
+
 ## Close-out 标准（每轮）
 
 
