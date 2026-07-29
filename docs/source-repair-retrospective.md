@@ -766,6 +766,11 @@ has `/book/…`. **disable** per §16 (same cluster as m.88xiaoshuo §36). skill
 Gate `l1_unreachable` (tcp timeout). `hunt --probe` → `action=empty` (no seeds).
 **disable**. Trap `known:dead_skip_without_hunt` (hunt done); skill_fix=0.
 
+## 85. www.noveltri.com/zh-cn/ 三叠书阁 — skip (2026-07-29)
+
+Search `/zh-cn/search?q=` OK (36 hits). Book detail GET → **403** (phone HTTP log + PC);
+TOC empty. **disable** (CF wall on detail, not selector). skill_fix=0.
+
 ## Close-out 标准（每轮）
 
 
