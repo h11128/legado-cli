@@ -1,0 +1,131 @@
+[
+  {
+    "id": "legado_hedged_ledger_success",
+    "source": "book-source-repair-discipline §23 (deep-diagnose anti-stall 2026-07-29)",
+    "events": ["beforeShellExecution"],
+    "severity": "violation",
+    "message": "Hedged ledger success is banned. Write 校验成功 only when verify_ok=true; otherwise fail:<reason> / skip:<reason>.",
+    "check": {
+      "type": "all_of",
+      "checks": [
+        {
+          "type": "regex",
+          "field": "command",
+          "pattern": "ledger\\s+append|repair_session_ledger\\.jsonl"
+        },
+        {
+          "type": "regex",
+          "field": "command",
+          "pattern": "校验成功或见上|成功或见上|或见上|见上|校验成功或|see above|verify_ok\\s*:\\s*false"
+        }
+      ]
+    },
+    "intercept": {
+      "events": ["beforeShellExecution"],
+      "action": "deny",
+      "agent_message": "DENY: hedged ledger success (discipline §23). Use exact 校验成功 only when verify_ok=true, else fail:<reason> or skip:<reason>. Same gate exists in Rust: source_closeout::ledger_result_blocked.",
+      "user_message": null,
+      "plugin": null
+    },
+    "side_effect": null,
+    "always_record": null,
+    "order": 10,
+    "min_length": 0,
+    "min_length_field": "",
+    "disabled": false,
+    "trial_until": null,
+    "platform": null,
+    "experiment": null,
+    "workspace_filter": null,
+    "file_pattern_exclude": null,
+    "version": 2,
+    "created_at": "2026-07-29",
+    "reviewed_at": null,
+    "reviewed_version": null
+  },
+  {
+    "id": "legado_l0_only_live_repair",
+    "source": "book-source-repair-discipline §15 (dcrsu 2026-07-27)",
+    "events": ["beforeShellExecution"],
+    "severity": "violation",
+    "message": "--l0-only on live progress/diagnose/repair skips the L2 dead/wall sniff and burns phone time on dead hosts.",
+    "check": {
+      "type": "all_of",
+      "checks": [
+        {
+          "type": "regex",
+          "field": "command",
+          "pattern": "source-cli"
+        },
+        {
+          "type": "regex",
+          "field": "command",
+          "pattern": "\\b(progress|diagnose|repair|oneshot)\\b"
+        },
+        {
+          "type": "regex",
+          "field": "command",
+          "pattern": "(?:^|[\\s;&|])--l0-only(?:\\s|$|[;&|])"
+        }
+      ]
+    },
+    "intercept": {
+      "events": ["beforeShellExecution"],
+      "action": "deny",
+      "agent_message": "DENY: --l0-only on live progress/diagnose/repair (discipline §15). Run the full gate instead.",
+      "user_message": null,
+      "plugin": null
+    },
+    "side_effect": null,
+    "always_record": null,
+    "order": 11,
+    "min_length": 0,
+    "min_length_field": "",
+    "disabled": false,
+    "trial_until": null,
+    "platform": null,
+    "experiment": null,
+    "workspace_filter": null,
+    "file_pattern_exclude": null,
+    "version": 2,
+    "created_at": "2026-07-29",
+    "reviewed_at": null,
+    "reviewed_version": null
+  },
+  {
+    "id": "legado_serial_long_await",
+    "source": "book-source-repair-discipline §19/§21 (deep-diagnose anti-stall 2026-07-29)",
+    "events": ["beforeShellExecution"],
+    "severity": "warn",
+    "message": "Long blocking wait (>=120s). Poll temp/full_fix/serial_heartbeat.json every <=90s and seal deep_active before ending the turn.",
+    "check": {
+      "type": "regex",
+      "field": "command",
+      "pattern": "(?i)(?:\\bsleep\\b|Start-Sleep)\\s+(?:-Seconds\\s+)?(1[2-9][0-9]|[2-9][0-9]{2}|[0-9]{4,})\\b",
+      "ignorecase": true,
+      "multiline": false
+    },
+    "intercept": {
+      "events": ["beforeShellExecution"],
+      "action": "ask",
+      "agent_message": "ASK: long sleep (>=120s) detected. Book-source repair must poll serial_heartbeat.json <=90s (discipline §19) and never end a turn with an unsealed deep_active (§21-22).",
+      "user_message": null,
+      "plugin": null
+    },
+    "side_effect": null,
+    "always_record": null,
+    "order": 12,
+    "min_length": 0,
+    "min_length_field": "",
+    "disabled": false,
+    "trial_until": null,
+    "platform": null,
+    "experiment": null,
+    "workspace_filter": null,
+    "file_pattern_exclude": null,
+    "version": 2,
+    "created_at": "2026-07-29",
+    "reviewed_at": null,
+    "reviewed_version": null
+  }
+]

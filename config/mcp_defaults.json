@@ -2,7 +2,11 @@
   "mcp_url": "http://10.0.0.139:1236/mcp",
   "token": "1234",
   "web_api": "http://10.0.0.139:1122",
-  "updated": "2026-07-26",
-  "note": "Single SOT for phone LAN endpoint. Prefer scripts/mcp_discover.py over hard-coding DHCP IPs; skills/scripts should read this file.",
-  "discovered_via": "adb"
+  "updated": "2026-07-29",
+  "note": "Single SOT for phone LAN endpoint + MCP timeouts. Prefer source-cli discover over hard-coding DHCP IPs; skills/scripts should read this file.",
+  "discovered_via": "adb",
+  "http_timeout_s": 90,
+  "debug_timeout_s": 45,
+  "verify_timeout_ms": 45000,
+  "verify_max_wait_s": 90
 }

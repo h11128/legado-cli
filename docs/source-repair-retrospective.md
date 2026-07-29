@@ -2,10 +2,10 @@
 
 ## Verdict
 
-**修好一个可救书源，正常应是 2–5 分钟，不是 15 分钟。**  
+**修好一个可救书源，正常应是 2–5 分钟，不是 15 分钟。**
 「15 分钟」只是硬停上限，被误当成合理工期。壁钟时间主要被 **过程浪费** 吃掉，不是选择器本身难。
 
-破万卷 / 爱久久有效改动都很小；设备单源校验各约 **2–3 秒**。详见会话全记录：  
+破万卷 / 爱久久有效改动都很小；设备单源校验各约 **2–3 秒**。详见会话全记录：
 `docs/source-repair-session-log-2026-07-26.md` + `temp/full_fix/repair_session_index.json`。
 
 ---
@@ -27,8 +27,8 @@
 
 ## 2. What actually broke (technical)
 
-1. **破万卷**：`tocUrl` → content page → no `.catalog`. Fix: clear `tocUrl`.  
-2. **爱久久**：broad `a@href##regex##` → homepage; `name` mixed `||`+`##`; **20s** search gap.  
+1. **破万卷**：`tocUrl` → content page → no `.catalog`. Fix: clear `tocUrl`.
+2. **爱久久**：broad `a@href##regex##` → homepage; `name` mixed `||`+`##`; **20s** search gap.
 3. **book18**：pagination/`name` (verified earlier in `verify_fixed.json`).
 
 Once the *resolved* toc URL was inspected, fixes were minutes of work — not quarter-hours.
@@ -113,13 +113,13 @@ triage → fetch → 1–2 field edit → cooldown verify → log
 
 ## 6. Process bans
 
-1. No “fixed” without `repair_source.py verify` (or equivalent single-URL check).  
-2. No fix agent while bulk runner owns MCP.  
-3. No rewriting searchUrl on rate-limit HTML.  
-4. No `||` + `##` on the same field.  
-5. No broad `a@href##…##` tocUrl without checking resolved URL.  
-6. No treating 15 min as target (≤5 target, 10 hard stop).  
-7. No new `inspect_*.py` for a one-off if `fetch` covers it.  
+1. No “fixed” without `repair_source.py verify` (or equivalent single-URL check).
+2. No fix agent while bulk runner owns MCP.
+3. No rewriting searchUrl on rate-limit HTML.
+4. No `||` + `##` on the same field.
+5. No broad `a@href##…##` tocUrl without checking resolved URL.
+6. No treating 15 min as target (≤5 target, 10 hard stop).
+7. No new `inspect_*.py` for a one-off if `fetch` covers it.
 8. No ignoring legadoSkill docs on TOC/CSS failures.
 
 ---
@@ -264,7 +264,7 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 | Ledger grep-only / progress re-read JSONL | no indexed store | dual-write JSONL + `ledger_events` via `repair_db.append_ledger_row` |
 | HTML/host_stats whole-file rewrite | race + no query | `repair_cache` still writes files; also upserts `html_cache_meta` / `host_stats` tables |
 
-**Ops:** `python scripts/repair_db_cli.py migrate|status|import-ledger|import-cache|export-phone-index`  
+**Ops:** `python scripts/repair_db_cli.py migrate|status|import-ledger|import-cache|export-phone-index`
 **DB:** `temp/full_fix/repair_state.sqlite` (gitignored via `temp/`). Rust `source-cli ledger` + oneshot use `DualLedgerPort` (JSONL + SQLite). Python `scripts/repair_db.py` is the live access layer until §12 cutover.
 
 ## 18. tybook.taoyuewenhua.net (2026-07-28)
@@ -678,14 +678,36 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 | Layer | Control |
 |-------|---------|
 | Rust | `deep_active` claim；pending/progress deny unsealed；`ledger_gate` 拒假成功；goal 不计 hedged |
-| Hook | `legado_hedged_ledger_success` deny；long sleep warn；hooks.json stop/ask |
+| Hook | `legado_hedged_ledger_success` / `legado_l0_only_live_repair` deny；`legado_serial_long_await` ask |
 | Docs | `docs/deep-diagnose-anti-stall.md`；discipline §21–23；SKILL traps |
+
+### 74b. Harness 复核发现（同日，跑 `harness verify-change` 才看到）
+
+写完组件不等于生效。按 agent-harness 流程复核后改掉三处：
+
+1. **HookRule 放错位置**：规则先写进 `~/.cursor/audit-logs/custom_rules.json`，
+   Windows `audit-hooks hook` 根本不读这个文件 → 三条规则全程没触发。
+   证据：塞一条 `ZZPROBEZZ` deny 探针进去，hook 回 `allow`。
+   移到 `<repo>/.cursor/audit-hooks/custom_rules.json` 后 deny/ask 全部命中。
+   另一个坑：`intercept` 里必须再写一遍 `events`，否则只记录不拦截。
+2. **规则没进 git**：`.gitignore` 屏蔽了 `.cursor/audit-hooks/`，换机器就没有护栏。
+   已取消忽略并同步到 `legado`（原来只有 legadoSkill 有 §21–23）。
+3. **prompt hook 误伤**：`.cursor/hooks.json` 里的 LLM prompt hook 会匹配 agent 自己写的
+   测试文本，把自测命令也拦下。确定性规则接管后删掉，只留 `stop` 那条。
+
+仍未解决（工具侧，不在本仓）：
+
+- `harness register` 不扫描项目级 `custom_rules.json`，HookRule 在 `harness audit` 里看不到。
+- `harness verify-change` 在仓库根跑 `cargo fmt/test`，本仓 workspace 在 `crates/` → `os error 267`；
+  需手动 `cd crates && cargo fmt --all -- --check && cargo test -p source_closeout`。
+- Codex projection 里 skill 路径写死成 WSL 的 `/root/Projects/agent-memory\...`，
+  Windows 侧 push 全部 conflict（os error 3）。
 
 ## Close-out 标准（每轮）
 
 
-1. **诊断证据**：`diagnose` + phone `debug_source` / fetch → ledger + retro.msg  
-2. **反思**：`repair_retro.py append`（trap / harness / script_fix / **skill_fix 如实**）  
-3. **文档**：本节或 dated retro  
+1. **诊断证据**：`diagnose` + phone `debug_source` / fetch → ledger + retro.msg
+2. **反思**：`repair_retro.py append`（trap / harness / script_fix / **skill_fix 如实**）
+3. **文档**：本节或 dated retro
 4. **改进**：新 trap → patch SKILL + Rust/Python **再** next URL（2026-07-28 补：thread trap + `diagnose_tips.rs`）
 

@@ -80,6 +80,9 @@ Standing rules for any 书源 fix / validate / bulk-check work in this workspace
     - Escape: `source-cli closeout release --url … --status skip` (then still write honest ledger/retro).
     - `ledger append` **rejects** hedged results (`校验成功或见上` / `见上` / ambiguous 成功).
     - Goal counter ignores hedged 「校验成功*」 rows.
+    - HookRules `legado_hedged_ledger_success` / `legado_l0_only_live_repair` (deny) and
+      `legado_serial_long_await` (ask) live in `.cursor/audit-hooks/custom_rules.json`.
+    - Full matrix + how to verify a rule actually fires: `docs/deep-diagnose-anti-stall.md`.
 23. **Honest verify ledger only:** after migrate/verify, write `校验成功` **iff** `verify_ok:true`;
     else `fail:…` / `skip:…`. Never copy shell `tee` into a fake success line.
 
