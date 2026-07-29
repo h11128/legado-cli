@@ -861,6 +861,12 @@ Reports **94/100**：disabled 59 / skipped 17 / failed 13 / migrated 4 / **fixed
 
 serial 报搜索失效；debug 实则 OK。`classid=`→`classid=0`（对齐表单）。Device **校验成功** (~2.2s). skill_fix=0.
 
+## 106. www.shoujix.com / pilisf / po18yq — skip (2026-07-29)
+
+- shoujix：www/m 搜索均空 → disable §16  
+- pilisf：17mb articlename+GBK 仍 list=0  
+- po18yq：L2 dead + hunt empty  
+
 ## Close-out 标准（每轮）
 
 
