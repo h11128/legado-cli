@@ -645,6 +645,21 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 |-------|--------|
 | POST `/search.html` 500（§36） | 已 disable；本轮补 ledger/retro |
 
+## 70. m.3322t.com 珀包文学 (2026-07-29)
+
+| Issue | Action |
+|-------|--------|
+| PC 搜索 18 本；设备校验 timeout~90s（搜索 alone~31s） | **disable**（慢站/墙钟） |
+
+## 71. skip batch (2026-07-29)
+
+| URL | Action |
+|-----|--------|
+| `m.ac.qq.com` type=2 漫画 | disable |
+| `m.gushiwen.cn` captcha | disable |
+| `m.ixs7.com` host reset | disable |
+| `m.88xiaoshuo` §16 | already disabled |
+
 ## Close-out 标准（每轮）
 
 1. **诊断证据**：`diagnose` + phone `debug_source` / fetch → ledger + retro.msg  
