@@ -177,6 +177,7 @@ source-cli progress next   # 先跑 closeout pending
 | **小米浏览器书城 (miui)** | `reader.browser.miui.com` API 搜索 list=0；L2 body 0；需 App 签名 | **disable/skip** — 非公开 HTML 书源 |
 | **17mb 空 index + 未审书 (xinbanzhu)** (17mb_empty_index_unapproved) | 「查看目录」→`…/index.html`/`zx.js` 空壳；新书「未经审核」首条 TocEmpty | toc=`/html/{dir}/{id}_1/` 静态；校验勿用易撞空书的「我的」。Harness：`apply_safe_rule_fixes`→`17mb_empty_index_tocUrl`；diagnose TOC tip |
 | **17mb POST+GBK 搜索 (mpo18)** (17mb_post_gbk_search) | GET `s.php?s=` 空；真搜索是 POST `s`+`type=articlename`+GBK；结果在 `p.sone`；CF 单源校验易 90s 超时 | `searchUrl=…/s.php,{"charset":"GBK","method":"POST","body":"s={{key}}&type=articlename"}`；`bookList=class.searchresult@p.sone`；补 bookInfo name/author；check `timeoutMs≥180000`。Harness：`diagnose_tips` Search tip |
+| **JSON API 详情空字段 (cooks)** (json_api_bookinfo_fields) | search/toc/content OK；bookInfo 无 name/author；`@js` 模板字符串导致 js失效；init stringify 后 coverUrl 读不到 `.articleid` | 补 `$.articlename`/`$.author`；coverUrl `JSON.parse(result)`；`@js` 用字符串拼接。Harness：`diagnose_tips` Search tip |
 
 ## Worked examples
 
@@ -204,6 +205,7 @@ source-cli progress next   # 先跑 closeout pending
 | 淘小说 tybook | COS 403 → `/tf/chapter_list` signed tocUrl |
 | 第一版主 xinbanzhu | migrate `m→i`；toc `/html/{dir}/{id}_1/`；content `#nr1`+`pb_next`；校验 keyword=斗破 |
 | PO18脸红心跳 mpo18 | POST+GBK `s.php`；`class.sone`；bookInfo `cataloginfo@h3`；校验 ~130s 成功（timeout 180s） |
+| 小说阅读网 cooks.tw | JSON API search/detail/chapter；补 bookInfo `$` 字段；coverUrl 禁模板字符串；校验 ~4s |
 
 ## Scripts / CLI
 

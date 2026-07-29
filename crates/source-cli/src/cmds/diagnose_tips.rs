@@ -34,6 +34,12 @@ pub fn layer_tips(diag: &DiagnoseResult) -> Vec<String> {
                  bookList=class.searchresult@p.sone||class.sone; CF hosts may need check timeout≥180s"
                     .into(),
             );
+            tips.push(
+                "TRAP json_api_bookinfo_fields: JSON detail init returns data but name/author empty — \
+                 add $.articlename/$.author after init; coverUrl must JSON.parse if init stringifies; \
+                 avoid template-literal backticks in @js (Rhino SyntaxError)"
+                    .into(),
+            );
         }
         Layer::Toc => {
             tips.push("Search OK — do NOT rewrite search. Fix tocUrl + ruleToc.".into());

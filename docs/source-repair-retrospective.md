@@ -743,6 +743,13 @@ PO-family UTF-8 twin: POST `s=` alone → empty; need `type=articlename&s={{key}
 Also concurrentRate + verify timeout≥180s (debug ~124s). Device **校验成功** (~137s).
 Trap `known:17mb_post_gbk_search`; skill_fix=0.
 
+## 81. novel.cooks.tw#🎃 小说阅读网 — fixed (2026-07-29)
+
+JSON API already worked for search/toc/content; bookInfo lacked name/author; old
+`js失效` from template-literal `@js`; coverUrl after init stringify must `JSON.parse`.
+Device **校验成功** (~4s). Novel trap `json_api_bookinfo_fields` → SKILL + diagnose_tips.
+skill_fix=1.
+
 ## Close-out 标准（每轮）
 
 
