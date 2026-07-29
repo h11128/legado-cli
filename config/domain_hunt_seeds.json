@@ -42,6 +42,21 @@
         "https://aiqu225.com/",
         "https://www.627txt.com/"
       ]
+    },
+    "tongrenquan.org": {
+      "note": "Apex has Cloudflare NS but no A; mobile subdomain live. Old IP 199.33.126.51 is empty hosting shell.",
+      "migrated_to": "https://m.tongrenquan.org/",
+      "candidates": [
+        "https://m.tongrenquan.org/",
+        "http://m.tongrenquan.org/"
+      ]
+    },
+    "199.33.126.51": {
+      "note": "Was tongrenquan.org shared-host IP; now 没有找到站点. Successor m.tongrenquan.org.",
+      "migrated_to": "https://m.tongrenquan.org/",
+      "candidates": [
+        "https://m.tongrenquan.org/"
+      ]
     }
   }
 }

@@ -22,6 +22,12 @@ pub fn layer_tips(diag: &DiagnoseResult) -> Vec<String> {
                 "TRAP vue_ssr_search: HTML 200 but no result nodes — check __NUXT__/CSR; api search may differ from page URL"
                     .into(),
             );
+            tips.push(
+                "TRAP apex_no_a_try_m: bookSourceUrl is bare IP / 没有找到站点 but header.Host \
+                 names a domain — try https://m.{host}/ (apex may have NS but no A). \
+                 Seeds: domain_hunt_seeds.json"
+                    .into(),
+            );
         }
         Layer::Toc => {
             tips.push("Search OK — do NOT rewrite search. Fix tocUrl + ruleToc.".into());

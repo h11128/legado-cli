@@ -555,6 +555,14 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 |-------|--------|
 | search 18 本 OK；详情 webView 文案「遇到故障,在修复中」 | TocEmpty → **skip/disable** |
 
+## 56. 同人圈 199.33.126.51 → m.tongrenquan.org (2026-07-29)
+
+| Issue | Fix |
+|-------|-----|
+| 裸 IP title=`没有找到站点` 被 skip | `header.Host=tongrenquan.org`；apex 无 A，`m.` CF 有 A |
+| 迁域 | `https://m.tongrenquan.org`；去掉 sticky Host；**校验成功** 755ms |
+| harness | trap `apex_no_a_try_m` + seeds + diagnose_tips |
+
 ## Close-out 标准（每轮）
 
 1. **诊断证据**：`diagnose` + phone `debug_source` / fetch → ledger + retro.msg  
