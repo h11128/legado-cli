@@ -718,6 +718,13 @@ result nodes `class.searchresult@p.sone`. Also filled bookInfo name/author (`cat
 
 Novel trap `17mb_post_gbk_search` → SKILL + `diagnose_tips` Search/GBK tip. skill_fix=1.
 
+## 77. m.po18.xyz 荏染柔木 — fixed (2026-07-29)
+
+Rules already had POST `articlename` + `common-bookele`; site is UTF-8 (not GBK).
+Failure mode was **CF-slow**: debug ~125s / old check 45s → 校验超时. Prep: `concurrentRate=1000`,
+fix broken coverUrl quote, verify `timeoutMs=180000` → **校验成功** (~130s).
+Trap `known:cf_slow_check_needs_180s` (same 180s note as §76); skill_fix=0.
+
 ## Close-out 标准（每轮）
 
 
