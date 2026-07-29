@@ -737,6 +737,12 @@ GBK POST `/search.php` + `.sort_box_list` already correct. Slow host (~30s/req) 
 TOC (4 pages) + old check timeout 15s → 校验超时. Prep concurrentRate=1000; verify keyword
 韩娱GD `timeoutMs=300000` → **校验成功** (~91s). Trap `known:cf_slow_check_needs_180s`; skill_fix=0.
 
+## 80. m.xyuzhaiwu7.com 新御宅屋 — fixed (2026-07-29)
+
+PO-family UTF-8 twin: POST `s=` alone → empty; need `type=articlename&s={{key}}`.
+Also concurrentRate + verify timeout≥180s (debug ~124s). Device **校验成功** (~137s).
+Trap `known:17mb_post_gbk_search`; skill_fix=0.
+
 ## Close-out 标准（每轮）
 
 
