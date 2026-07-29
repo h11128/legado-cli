@@ -897,8 +897,14 @@ Trap `vue_ssr_search`；skill_fix=0（已知 tip 已扩）。
 
 ## 112. wap2.xinbiquge.org 新笔趣阁2 — fixed (2026-07-29)
 
-先前 §39 skip（`inte_base64`）。`bookList` `@js` base64Decode → `div.hot_sale`。
+先前 §39 skip（`inte_base64`）。`bookList` `@js` strip 前缀 + base64Decode → `div.hot_sale`。
 Device **校验成功** (~0.8s). skill_fix=1 + diagnose_tips.
+
+## 113. www.po18yq.com PO18脸红心跳② — fixed (2026-07-29)
+
+searchUrl 双 JSON 碎片 + `class.lists@li` 空。合并 `charset/method/body`；
+`bookList=ul.searchresult@li`；校验关键词用「剑来」（「我的」<4 字节拒搜）。
+Device **校验成功** (~0.9s). skill_fix=0.
 
 ## Close-out 标准（每轮）
 
