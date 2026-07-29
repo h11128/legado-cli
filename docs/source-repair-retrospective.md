@@ -878,6 +878,12 @@ Device **校验成功** (~3.5s). skill_fix=0.
 96biquge admin shell / xiaoshuo1-sm empty / miui signed / pyzht SPA /
 qiufeng 403 / xguolu 404 / noveltri CF / 88xiaoshuo search 500. skill_fix=0.
 
+## 109. m.fuxsb.com 腐小说网 — fixed (2026-07-29)
+
+`www.fuxsb.com` gate→migrate `m.fuxsb.com`（fuxs1 孪生 Empire）。
+复用 `.conbd` + 分页 TOC；删旧 www/#Toshiko。Device **校验成功** (~1.2s).
+Trap `known:empire_cms_host_redirect`; skill_fix=0.
+
 ## Close-out 标准（每轮）
 
 
