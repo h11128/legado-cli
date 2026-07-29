@@ -906,6 +906,17 @@ searchUrl 双 JSON 碎片 + `class.lists@li` 空。合并 `charset/method/body`�
 `bookList=ul.searchresult@li`；校验关键词用「剑来」（「我的」<4 字节拒搜）。
 Device **校验成功** (~0.9s). skill_fix=0.
 
+## 114. RT/目录失效 triage — skip (2026-07-29)
+
+qiufeng CF 空搜；xguolu search.php 404（§16）；zei8 `Can't connect to DB`；
+目录失效里 maoyan dead_api / CF / nginx。skill_fix=0.
+
+## 115. tybook.taoyuewenhua.net 淘小说网 — fixed (2026-07-29)
+
+复发：`tocUrl` 又回到 COS `chapters/{bid}.json` → 403/空目录。
+改 signed `/tf/chapter_list?` + `$.data.chapterList[*]`（无 sticky Host）。
+Device **校验成功** (~4.0s). Trap `known:cos_toc_403`; skill_fix=0.
+
 ## Close-out 标准（每轮）
 
 
