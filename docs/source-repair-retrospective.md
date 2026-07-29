@@ -835,6 +835,14 @@ Empire CMS 模板换皮：`.atts`/`.co-by`→`.tbtls`/`.conbd`；搜索 POST 仍
 旧 `m.jjjjxs.com` 搜索规则失效；同域 POST `#searchList@.searchTopic`；详情/目录换皮（`.kv` + `.chapter-list`）；清 `nextContentUrl`（页=章）。
 Device **校验成功** (~3.2s). skill_fix=0.
 
+## 100. www.verint.com — skip (2026-07-29)
+
+`bookSourceUrl` 是企业 Contact Center 站；搜索指向 8kana。**disable**. skill_fix=0.
+
+## 101. www.kunnu8.com — skip (2026-07-29)
+
+`?s=` **302→luoxiadushu.com**；分类可浏览。**disable** §16. skill_fix=0.
+
 ## Close-out 标准（每轮）
 
 
