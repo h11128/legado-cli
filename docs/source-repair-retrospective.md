@@ -819,6 +819,12 @@ Search API `uid=0` → list=0 (auth). **disable**. skill_fix=0.
 
 `178yhr` search 404/empty → 178xs. **disable** §16. skill_fix=0.
 
+## 97. www.1redbook.com 挺好的 — fixed (2026-07-29)
+
+Schemeless URL + TOC href 伪装（`data-c9e6f9f` base64，tantan/gaysay 孪生）。
+`chapterList=.BCsectionTwo-top-chapter@tag.a` + base64Decode；cover `@_src`。
+Device **校验成功** (~3.2s). Trap `known:toc_href_obfuscation`; skill_fix=0.
+
 ## Close-out 标准（每轮）
 
 
