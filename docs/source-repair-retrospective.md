@@ -632,6 +632,19 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 |-------|--------|
 | diagnose skip；`unexpected end of stream` | **disable** |
 
+## 68. Agent turn stall (2026-07-29)
+
+| Issue | Fix |
+|-------|-----|
+| deep diagnose 卡在 `3322t`：`diagnose` MCP 10060 后台后**回合结束**；login/AES/广告源抠太久 | Discipline **§21** + SKILL trap `agent_turn_stall`：回合必须 close-out 或写下步；auth/广告 ≤2min seal；diagnose 失败改 PC+直连 MCP |
+| 续跑 | 从 `deep_verify_pending` 的 `m.3322t.com#🎃` 继续（PC 搜索已通） |
+
+## 69. m.88xiaoshuo.net seal (2026-07-29)
+
+| Issue | Action |
+|-------|--------|
+| POST `/search.html` 500（§36） | 已 disable；本轮补 ledger/retro |
+
 ## Close-out 标准（每轮）
 
 1. **诊断证据**：`diagnose` + phone `debug_source` / fetch → ledger + retro.msg  

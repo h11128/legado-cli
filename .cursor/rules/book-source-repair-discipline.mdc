@@ -29,6 +29,10 @@ Standing rules for any 书源 fix / validate / bulk-check work in this workspace
    - Soft warn **4 min**; hard stop **5 min** → skip + ledger.
 11. **Never end a source attempt without** `source-cli ledger append`.
 12. **After domain migrate**: fetch new search form HTML before verify.
+12b. **Hunt before disable on dead/timeout** — if gate is `l1_unreachable` / `l2_http_dead`
+    / L0 hunt cluster: run `source-cli hunt --probe` (oneshot does this). Migrate only when
+    a seed candidate passes L2. Do **not** hard-disable first. Exceptions: L0
+    `dead_site_shutdown_confirmed`, parked/ad-hijack/nginx deadish (disable/skip, no hunt).
 13. **If debug OK but check fails** (下载链接为空 / ~100ms): run `source-cli diagnose --debug-file …` first
  (bookUrl → infoHtml trap).
 14. **After every source attempt (fixed / skip / fail), mandatory close-out loop** — do not
@@ -55,6 +59,20 @@ Standing rules for any 书源 fix / validate / bulk-check work in this workspace
 18. **Auto-commit before next URL** — after close-out, if SKILL / scripts / Rust /
  retrospective docs changed this URL, `git commit` those files **before**
  `progress next`. Do not leave skill/script fixes uncommitted across sources.
+19. **Never long-Await a full serial/batch job.** Poll `temp/full_fix/serial_heartbeat.json`
+    and/or `serial_last.json` mtime every ≤90s. If heartbeat stalls past
+    `--url-timeout-s` (+30s slack): kill the serial PID, run
+    `source-cli check channel --force-clear`, resume remaining URLs.
+    Prefer `source-cli serial …` (default `--url-timeout-s 120`, subprocess kill).
+20. **Stale MCP locks:** `source-cli check channel` clears dead/aged locks (repair ≤15m).
+    Hung-but-alive holders: `--force-clear` only after confirming the repair PID is stuck.
+21. **Never end a turn mid-URL.** Deep-diagnose stall modes (banned):
+    - Background a `diagnose`/debug and **stop the turn** without close-out or a written next step.
+    - Keep probing login/AES/JWT/广告劫持 after evidence is enough → **seal ≤2 min**, move on.
+    - Block the whole loop on `source-cli diagnose` MCP `10060` / transport fail — fall back to
+      **PC probe + MCP `debug_source`/`start_check_sources`**, or `skip:mcp_transient` + next URL.
+    - Soft warn still **4 min**; hard stop **5 min** per URL. Prefer finishing N closes over
+      polishing one hard auth source.
 
 ## Types (do not confuse)
 

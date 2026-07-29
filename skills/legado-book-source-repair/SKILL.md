@@ -122,6 +122,7 @@ source-cli progress next   # 先跑 closeout pending
 | 域名停车/过期 | L2 GET 正文含 for sale/出售/域名到期 / Redirecting shell | **disable/skip**（勿当搜索规则坏；**不** hunt） |
 | **dead_skip_without_hunt** | batch/agent 对 `l1_unreachable`/`l2_http_dead` 直接 disable | **禁止** — 先 `hunt --probe` / oneshot 自动 hunt；无后继再 disable。Harness：`classify.rs`→`Hunt`；`oneshot_live` resolve；wave 不把 hunt ledger 成 final skip |
 | **serial_await_idle** | Agent 对整批 `serial`/`batch` 长 AwaitShell（数小时） | **禁止** — 最多短轮询 60–90s；看 `serial_heartbeat.json` / `serial_last.json` mtime；心跳停滞 > `url-timeout-s+30` → kill 父进程、`check channel --force-clear`、续跑。Harness：`serial_cmd`/`serial_spawn` |
+| **agent_turn_stall** | 后台 diagnose 后收工；或 login/AES/广告源反复抠 >2min；或 MCP `10060` 堵死整环 | **禁止** — 回合结束前必须 close-out 当前 URL 或写明下一动作；auth/广告证据够就 seal；diagnose 传输失败 → PC probe + 直连 MCP debug/check，或 `skip:mcp_transient` 下一源。Discipline §21 |
 | **serial_url_timeout** | 单源 MCP/debug 卡住超墙钟 | serial 杀子进程 → `skip:url_timeout` + ledger；继续下一 URL。Harness：`--url-timeout-s`（默认 120） |
 | **mcp_lock_zombie** | Windows 死 PID 仍占 `mcp_channel.lock`（旧实现永远 alive） | `check channel` 自动清；repair stale **15m**；Win32 `OpenProcess`。Harness：`channel.rs`/`channel_pid.rs`；卡死活进程用 `--force-clear` |
 | **mcp_timeout_sot** | 超时写死在代码 / 找不到配置 | 改 `config/mcp_defaults.json`：`http_timeout_s`（默认90）、`debug_timeout_s`（默认45，仅 `debug_source`）、`verify_timeout_ms` / `verify_max_wait_s`。Harness：`timeouts.rs`；discover 重写 URL 会保留这些字段 |
