@@ -581,6 +581,13 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 |-------|-----|
 | layer=ok / 校验超时 | http→https；**校验成功** |
 
+## 60. m.1qxs.com 一七小说 re-apply (2026-07-29)
+
+| Issue | Fix |
+|-------|-----|
+| schemeless migrate 后仍用 `search.html?kw=` → fake_detail | 重套 §34：`/search?kw={{key}}&p={{page}}`；`bookList=.show ul a`；空 tocUrl；`.catalog .show li a` |
+| 设备校验 | **校验成功** 1051ms（keyword=斗破） |
+
 ## Close-out 标准（每轮）
 
 1. **诊断证据**：`diagnose` + phone `debug_source` / fetch → ledger + retro.msg  
