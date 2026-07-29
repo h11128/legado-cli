@@ -843,6 +843,10 @@ Device **校验成功** (~3.2s). skill_fix=0.
 
 `?s=` **302→luoxiadushu.com**；分类可浏览。**disable** §16. skill_fix=0.
 
+## 102. www.wwxsc.com 万相书城 — fixed (2026-07-29)
+
+无 scheme 导致抓取失败；补 `https://` + `checkKeyWord=万相`。Device **校验成功** (~2.2s). skill_fix=0.
+
 ## Close-out 标准（每轮）
 
 
