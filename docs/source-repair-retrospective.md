@@ -513,6 +513,13 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 | diagnose | `layer=toc`；CDN chapters/chapter 仍 200 |
 | 校验 | **校验成功** 4447ms；`skill_fix=0`（已知 trap） |
 
+## 50. so.ihuaben.com# fragment twin (2026-07-29)
+
+| Issue | Fix |
+|-------|-----|
+| 同站 `#` 副本，旧 HTML TOC | 同 §49 CDN 克隆 |
+| 校验 | **校验成功** 13974ms |
+
 ## Close-out 标准（每轮）
 
 1. **诊断证据**：`diagnose` + phone `debug_source` / fetch → ledger + retro.msg  
