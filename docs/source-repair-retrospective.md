@@ -725,6 +725,12 @@ Failure mode was **CF-slow**: debug ~125s / old check 45s → 校验超时. Prep
 fix broken coverUrl quote, verify `timeoutMs=180000` → **校验成功** (~130s).
 Trap `known:cf_slow_check_needs_180s` (same 180s note as §76); skill_fix=0.
 
+## 78. m.popofree.com#🎃 佩蒲斐榕 — fixed (2026-07-29)
+
+Same PO-family POST `articlename` + `.common-bookele`; rules OK. Old fail = 45s check timeout.
+Prep concurrentRate=1000, drop empty charset; verify → **校验成功** (~14s).
+Trap `known:cf_slow_check_needs_180s`; skill_fix=0.
+
 ## Close-out 标准（每轮）
 
 
