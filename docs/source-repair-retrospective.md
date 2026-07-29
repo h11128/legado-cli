@@ -847,6 +847,10 @@ Device **校验成功** (~3.2s). skill_fix=0.
 
 无 scheme 导致抓取失败；补 `https://` + `checkKeyWord=万相`。Device **校验成功** (~2.2s). skill_fix=0.
 
+## 103. www.yybsw.com 夜伴书屋 — fixed (2026-07-29)
+
+同 wwxsc：补 `https://`；清可能串章的 `nextContentUrl`。Device **校验成功** (~2.9s). skill_fix=0.
+
 ## Close-out 标准（每轮）
 
 
