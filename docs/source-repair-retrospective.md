@@ -528,6 +528,13 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 | 修法 | 克隆 `#` 规则并去掉 sticky Host；校验成功 4454ms |
 | harness | SKILL trap `sticky_host_header_cdn` + `diagnose_tips` |
 
+## 52. topwork.cc search 301 dead DNS (2026-07-29)
+
+| Issue | Action |
+|-------|--------|
+| L2 首页 OK；`/search/` 301→`s-topwork-cc.188111.xyz` NXDOMAIN | **disable** §16；hunt empty |
+| diagnose | `layer=skip` |
+
 ## Close-out 标准（每轮）
 
 1. **诊断证据**：`diagnose` + phone `debug_source` / fetch → ledger + retro.msg  
