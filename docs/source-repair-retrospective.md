@@ -731,6 +731,12 @@ Same PO-family POST `articlename` + `.common-bookele`; rules OK. Old fail = 45s 
 Prep concurrentRate=1000, drop empty charset; verify → **校验成功** (~14s).
 Trap `known:cf_slow_check_needs_180s`; skill_fix=0.
 
+## 79. m.roushuwu.com 肉书屋 — fixed (2026-07-29)
+
+GBK POST `/search.php` + `.sort_box_list` already correct. Slow host (~30s/req) + multi-page
+TOC (4 pages) + old check timeout 15s → 校验超时. Prep concurrentRate=1000; verify keyword
+韩娱GD `timeoutMs=300000` → **校验成功** (~91s). Trap `known:cf_slow_check_needs_180s`; skill_fix=0.
+
 ## Close-out 标准（每轮）
 
 
