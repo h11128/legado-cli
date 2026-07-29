@@ -30,6 +30,9 @@ pub const DEADISH_HINTS: &[&str] = &[
     "专业生产厂家",
     "工业通风",
     "请输入您要查询的产品",
+    // Empty hosting / panel shells (skill: 没有找到站点 / nginx).
+    "没有找到站点",
+    "welcome to nginx",
 ];
 
 /// Soft walls: alive but not repairable without human.
@@ -41,6 +44,8 @@ pub const WALL_HINTS: &[&str] = &[
     "连接数据库失败",
     "数据库连接失败",
     "urldance.com",
+    "safebrowse.io",
+    "safebrowsing",
 ];
 
 /// Bot / JS challenge shells (matched against lowered blob; hints already lower).
@@ -141,6 +146,13 @@ mod tests {
             "章节内容".repeat(500)
         );
         assert!(sniff_dead_html(&html, "https://novel.example/book/1", "三体").is_none());
+    }
+
+    #[test]
+    fn sniff_no_site_shell() {
+        let html = "<html><title>没有找到站点</title><body>站点不存在</body></html>";
+        let r = sniff_dead_html(html, "http://199.33.126.51/", "没有找到站点").unwrap();
+        assert_eq!(r, "deadish:没有找到站点");
     }
 
     #[test]

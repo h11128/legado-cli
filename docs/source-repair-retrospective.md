@@ -535,6 +535,13 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 | L2 首页 OK；`/search/` 301→`s-topwork-cc.188111.xyz` NXDOMAIN | **disable** §16；hunt empty |
 | diagnose | `layer=skip` |
 
+## 53. 199.33.126.51 没有找到站点 gate miss (2026-07-29)
+
+| Issue | Fix |
+|-------|-----|
+| title=`没有找到站点` 但 L2 `action=verify` | `DEADISH_HINTS` 缺该串；已补 + 单测 |
+| 源 | 已 `enabled=false`；ledger skip |
+
 ## Close-out 标准（每轮）
 
 1. **诊断证据**：`diagnose` + phone `debug_source` / fetch → ledger + retro.msg  
