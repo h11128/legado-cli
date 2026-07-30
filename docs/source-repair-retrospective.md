@@ -954,6 +954,11 @@ nshkedu：JWT Loading 墙 → skip。
 verify 已修：roushuwu / linovel。nshkedu JWT 墙 skip。
 其余 remain：hunt empty / L1 unreachable / L2 dead / jishuge CF punycode。skill_fix=0。
 
+## 122. douhuawenxue verify-only + remain cleanup (2026-07-29)
+
+`https://m.douhuawenxue.com` diagnose/debug OK → Device **校验成功** (~14s). skill_fix=0.
+另 seal xuanyge/zwduxs/bequgew twin/ibiquxs/zei8 等死站 twin。
+
 ## Close-out 标准（每轮）
 
 
