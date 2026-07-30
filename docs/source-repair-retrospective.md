@@ -949,6 +949,11 @@ http→https；`bookList=a.search-book`（旧 rank-book 空）；searchUrl 去�
 Device **校验成功** (~28s). Trap `linovel_search_book`；skill_fix=1.
 nshkedu：JWT Loading 墙 → skip。
 
+## 121. deep remain dead/hunt batch — skip (2026-07-29)
+
+verify 已修：roushuwu / linovel。nshkedu JWT 墙 skip。
+其余 remain：hunt empty / L1 unreachable / L2 dead / jishuge CF punycode。skill_fix=0。
+
 ## Close-out 标准（每轮）
 
 
