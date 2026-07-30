@@ -985,6 +985,16 @@ verify 已修：roushuwu / linovel。nshkedu JWT 墙 skip。
 
 trap 均为 known（搜索口挂了 / §16 / needs_vpn）；skill_fix=0。
 
+## 126. reorder enabled sources by RT/quality (2026-07-29)
+
+对 **1241** 启用源重写 `customOrder`（2 个 QQ `bookshelf.html5` get 截断跳过）：
+组偏移 小说0 / 漫画1万 / 听书2万 / 下载3万 / API4万 / 特别5万；
+组内 score=`respondTime` + 超时/失效惩罚 − weight/名称加分。
+MCP `save_source` 默认 `preserveOrderWeight` 会锁死 `customOrder` → 本次用 **delete→save**；
+App 已补 `preserveOrderWeight=false`（需装新包后才生效）。
+抽查 dict.cn=0、bimoks=1、漫画/下载/特别顶栏 OK；启用仍 **1243**。
+产物：`temp/full_fix/queues/reorder_plan.json`、`reorder_apply_report.json`。
+
 ## Close-out 标准（每轮）
 
 
