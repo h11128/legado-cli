@@ -937,6 +937,12 @@ phone `bookSourceUrl` 尾带 `\r`（`https://m.ruochu.com\r`）→ 索引/get_so
 清 URL + `tocUrl=text.查看章节目录@href` + `.chapter-list a`；删 `\r` 旧源。
 Device **校验成功** (~2.4s). skill_fix=1.
 
+## 119. m.roushuwu.com 肉书屋 — fixed (2026-07-29)
+
+规则本可用；「我的」搜索 ~2MB/~1900 条 + 分页 TOC 每页 ~30s → 校验超时。
+`bookList=.sort_box_list.0:20`；`checkKeyWord=剑来`；去掉 `nextTocUrl`；timeout 180s。
+Device **校验成功** (~90s). Trap `huge_search_page_timeout`；skill_fix=1.
+
 ## Close-out 标准（每轮）
 
 

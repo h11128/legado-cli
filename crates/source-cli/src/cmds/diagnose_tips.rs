@@ -48,6 +48,12 @@ pub fn layer_tips(diag: &DiagnoseResult) -> Vec<String> {
                     .into(),
             );
             tips.push(
+                "TRAP huge_search_page_timeout: POST search returns megabytes / 1000+ rows \
+                 for 我的 — bookList cap .0:20; use rarer checkKeyWord; drop nextTocUrl on \
+                 slow hosts; check timeoutMs≥180000 (roushuwu)"
+                    .into(),
+            );
+            tips.push(
                 "TRAP json_api_bookinfo_fields: JSON detail init returns data but name/author empty — \
                  add $.articlename/$.author after init; coverUrl must JSON.parse if init stringifies; \
                  avoid template-literal backticks in @js (Rhino SyntaxError)"
