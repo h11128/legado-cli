@@ -917,6 +917,19 @@ qiufeng CF 空搜；xguolu search.php 404（§16）；zei8 `Can't connect to DB`
 改 signed `/tf/chapter_list?` + `$.data.chapterList[*]`（无 sticky Host）。
 Device **校验成功** (~4.0s). Trap `known:cos_toc_403`; skill_fix=0.
 
+## 116. 网站失效 batch — skip + m.1qxs fixed (2026-07-29)
+
+搜索/目录失效队列已扫空。网站失效 49：多数 TLS corrupt/cert expired + hunt empty；
+jijia 非书站；jjwxc api_signature；zei8 DB dead。
+`https://m.1qxs.com` diagnose=ok → Device **校验成功** (~0.9s). skill_fix=0.
+
+## 117. aaread.club 疯情阅读 — fixed (2026-07-29)
+
+`m.aaread.club` 搜索/详情 HTTP 500；桌面 `aaread.club/search?kw=` + 详情内嵌目录可用。
+正文章页壳「内容读取中」→ `/_getcontent.php?id={cid}`（read/index.js ajaxGetContent）。
+迁 `https://aaread.club`；删旧 m；Device **校验成功** (~2.3s).
+Trap `m_host_500_try_desktop` + `qidian_clone_getcontent`；skill_fix=1 + diagnose_tips.
+
 ## Close-out 标准（每轮）
 
 

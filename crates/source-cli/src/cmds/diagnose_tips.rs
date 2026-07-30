@@ -36,6 +36,13 @@ pub fn layer_tips(diag: &DiagnoseResult) -> Vec<String> {
                     .into(),
             );
             tips.push(
+                "TRAP m_host_500_try_desktop: if bookSourceUrl is m.{host} and search/book \
+                 returns 5xx — BEFORE search_endpoint_dead SKIP, probe https://{host}/ \
+                 (desktop search form may differ: kw/q/keyword). If desktop works, migrate \
+                 bookSourceUrl + rewrite searchUrl/selectors (aaread)"
+                    .into(),
+            );
+            tips.push(
                 "TRAP 17mb_post_gbk_search: GET s.php?s= often empty — POST \
                  body s={{key}}&type=articlename + {\"charset\":\"GBK\"}; \
                  bookList=class.searchresult@p.sone||class.sone; CF hosts may need check timeout≥180s"
@@ -70,6 +77,13 @@ pub fn layer_tips(diag: &DiagnoseResult) -> Vec<String> {
             tips.push("TOC OK — fix ruleContent.content against chapter HTML".into());
             tips.push(
                 "TRAP toc_href_obfuscation: debug loads book detail for content — decode base64 attrs on <a> (e.g. data-c8dcb4a)"
+                    .into(),
+            );
+            tips.push(
+                "TRAP qidian_clone_getcontent: chapter HTML shows 「内容读取中」+ \
+                 read/index.js ajaxGetContent → /_getcontent.php?id={cid} — content @js: \
+                 match /chapter/\\d+/(\\d+)/ + java.ajax + java.setContent + java.getString('p@text'); \
+                 no bare return (Rhino). Do not rely on .j_readContent alone (aaread)"
                     .into(),
             );
         }
