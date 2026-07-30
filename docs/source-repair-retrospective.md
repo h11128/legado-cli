@@ -962,8 +962,17 @@ verify 已修：roushuwu / linovel。nshkedu JWT 墙 skip。
 ## 123. refresh-index + disable sealed dead (2026-07-29)
 
 `queue refresh-index` → 4713。从 ledger seal 死源生成 216 URL，
-`check disable-dead --disable --tag` → **215 ok / 1 fail**（`m.elkoparts.net` 已不存在）。
+`check disable-dead --disable --tag` → **215 ok / 1 fail**（`m.elkoparts.net
+` 已不存在）。
 另 mop 4 条尾 CR/换行 URL。启用数 2440→2225；启用失败标签 ~18（多漫画/音乐/twin）。
+
+## 124. phone source cleanup: twins + groups (2026-07-29)
+
+`refresh-index` 后：
+1. twin/hygiene disable **977+8**（fragment/`#🎃`/http 重复、CR、schemeless）；2 条 URL 已不存在。
+2. 粗分组 save **1157/1158**（失败 1：`bookshelf.html5.qq.com/` get 空）。
+主分组：小说 / 漫画 / API / 听书 / 特别 / 下载。
+启用约 1250 级。脚本：`.local-scripts/phone_source_cleanup.py`（用后删）。
 
 ## Close-out 标准（每轮）
 
