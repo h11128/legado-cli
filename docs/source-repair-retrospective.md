@@ -1003,6 +1003,14 @@ App 已补 `preserveOrderWeight=false`（需装新包后才生效）。
 - **不能合并（保留）**：晋江 web/app/分类、SF 发现/目录、起点标签、有度分卷、快看发现版
 启用 1243→**1238**。报告：`temp/full_fix/queues/twin_merge_report.json`。
 
+## 128. delete disabled duplicates (2026-07-30)
+
+禁用源去重删除：
+- A：同 base 已有启用源 → 删全部禁用孪生（1232）
+- B：仅禁用组内留 1 条 → 删多余（673）
+- mop：前后空格/`\r`/`\n` 脏 URL 精确删（15）
+合计约 **1917** 删；禁用多 base 组清零。现 **启用 1232 / 禁用 1562 / 合计 2794**。
+
 ## Close-out 标准（每轮）
 
 
