@@ -959,6 +959,12 @@ verify 已修：roushuwu / linovel。nshkedu JWT 墙 skip。
 `https://m.douhuawenxue.com` diagnose/debug OK → Device **校验成功** (~14s). skill_fix=0.
 另 seal xuanyge/zwduxs/bequgew twin/ibiquxs/zei8 等死站 twin。
 
+## 123. refresh-index + disable sealed dead (2026-07-29)
+
+`queue refresh-index` → 4713。从 ledger seal 死源生成 216 URL，
+`check disable-dead --disable --tag` → **215 ok / 1 fail**（`m.elkoparts.net` 已不存在）。
+另 mop 4 条尾 CR/换行 URL。启用数 2440→2225；启用失败标签 ~18（多漫画/音乐/twin）。
+
 ## Close-out 标准（每轮）
 
 
