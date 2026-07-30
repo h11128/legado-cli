@@ -995,6 +995,14 @@ App 已补 `preserveOrderWeight=false`（需装新包后才生效）。
 抽查 dict.cn=0、bimoks=1、漫画/下载/特别顶栏 OK；启用仍 **1243**。
 产物：`temp/full_fix/queues/reorder_plan.json`、`reorder_apply_report.json`。
 
+## 127. merge base-URL twins (2026-07-30)
+
+启用同 base 变体对比后：
+- **合并禁用**：飞卢 `##男生标签`（规则≈同）、有度 `#出版`（仅空 formatJs）、vik 无尾斜杠（留更快的 `/`）
+- **删除**：QQ `bookshelf.html5` 两条（未分类、JSON 截断脏孪生）
+- **不能合并（保留）**：晋江 web/app/分类、SF 发现/目录、起点标签、有度分卷、快看发现版
+启用 1243→**1238**。报告：`temp/full_fix/queues/twin_merge_report.json`。
+
 ## Close-out 标准（每轮）
 
 
