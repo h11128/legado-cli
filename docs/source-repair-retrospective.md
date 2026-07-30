@@ -974,6 +974,17 @@ verify 已修：roushuwu / linovel。nshkedu JWT 墙 skip。
 主分组：小说 / 漫画 / API / 听书 / 特别 / 下载。
 启用约 1250 级。脚本：`.local-scripts/phone_source_cleanup.py`（用后删）。
 
+## 125. 久久 / 书荒 / 贼吧 / 安娜 deep diagnose (2026-07-29)
+
+| URL | 结论 | 证据 |
+|-----|------|------|
+| `http://m.9191net.com` 久久 | **fixed**（verify-only） | PC `search.html?keywords=` → `class.block`×10；detail `downButton`；设备 **校验成功** (~2s) |
+| `https://noveless.com/` 书荒 | **skip** §16 | `/search/KEY` 恒「找到 0 条」+ `no_search_result`；浏览仍活 |
+| `https://www.zei8.vip#` + `https://m.zei8.vip` 贼吧 | **skip** DB | GET/POST 搜索均 `Cann't connect to DB!`；已禁用手机源 |
+| `https://zh.annas-archive.org` 安娜 | **skip** | L1 DNS 失败；`hunt --probe` empty；镜像连不通（需魔法） |
+
+trap 均为 known（搜索口挂了 / §16 / needs_vpn）；skill_fix=0。
+
 ## Close-out 标准（每轮）
 
 
