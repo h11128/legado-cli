@@ -943,6 +943,12 @@ Device **校验成功** (~2.4s). skill_fix=1.
 `bookList=.sort_box_list.0:20`；`checkKeyWord=剑来`；去掉 `nextTocUrl`；timeout 180s。
 Device **校验成功** (~90s). Trap `huge_search_page_timeout`；skill_fix=1.
 
+## 120. linovel.net 轻之文库 — fixed (2026-07-29)
+
+http→https；`bookList=a.search-book`（旧 rank-book 空）；searchUrl 去掉 `:443`。
+Device **校验成功** (~28s). Trap `linovel_search_book`；skill_fix=1.
+nshkedu：JWT Loading 墙 → skip。
+
 ## Close-out 标准（每轮）
 
 

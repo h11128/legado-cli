@@ -175,6 +175,7 @@ source-cli progress next   # 先跑 closeout pending
 | **URL 尾 CR (ruochu)** (url_trailing_cr) | `bookSourceUrl` 含 `\r` → list/get 怪异、校验挂搜索目录 | 删旧源，保存无 CR 的干净 URL；索引里 `repr(url)` 先查 |
 | **若初/黑岩目录 (ruochu)** | 详情「查看章节目录」→`w2.heiyan.com/chapter/{id}`；旧 `.float-list` 空 | `tocUrl=text.查看章节目录@href`；`chapterList=.chapter-list a` |
 | **搜索页过大超时 (roushuwu)** (huge_search_page_timeout) | 「我的」POST 回 ~2MB/~1900 条；分页 TOC 每页 ~30s → 校验超时 | `bookList=.….0:20`；`checkKeyWord` 用更稀词（剑来）；慢站可去掉 `nextTocUrl`；check `timeoutMs≥180000`。Harness：`diagnose_tips` |
+| **轻之文库搜索 (linovel)** (linovel_search_book) | 旧 `rank-book`/`rank-book-list@a` 空；真结果是 `a.search-book`；`:443` searchUrl 易慢 | `searchUrl=https://www.linovel.net/search?kw=`；`bookList=a.search-book`；https 迁域。Harness：`diagnose_tips` |
 | **tocUrl 阅读链 (powanjuan)** | `tocUrl span.read a`→首章；误走 `index/1.html` 目录空 | **清空 tocUrl**；详情页 `div.catalog` + 已有 `ruleToc` |
 | **COS toc 403 (tybook)** | `chapters/{bid}.json` 403 | 改 signed `/tf/chapter_list?` @js |
 | **sticky_host_header_cdn (tybook)** | `header.Host` 钉死 API 域；`/tf/chapter_list` 302→`scdn…/chapters/{bid}.json` 后列表空 | **去掉 Host**（或克隆无 Host 的 sibling UA）；不要只改 tocUrl。Harness：`diagnose_tips` |
