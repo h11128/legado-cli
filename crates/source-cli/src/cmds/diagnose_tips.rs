@@ -36,10 +36,9 @@ pub fn layer_tips(diag: &DiagnoseResult) -> Vec<String> {
                     .into(),
             );
             tips.push(
-                "TRAP m_host_500_try_desktop: if bookSourceUrl is m.{host} and search/book \
-                 returns 5xx — BEFORE search_endpoint_dead SKIP, probe https://{host}/ \
-                 (desktop search form may differ: kw/q/keyword). If desktop works, migrate \
-                 bookSourceUrl + rewrite searchUrl/selectors (aaread)"
+                "TRAP url_trailing_cr: bookSourceUrl may contain trailing \\r from phone \
+                 export — get_source/list looks broken; strip CR and re-save clean URL \
+                 (ruochu m.ruochu.com\\r)"
                     .into(),
             );
             tips.push(
@@ -68,8 +67,8 @@ pub fn layer_tips(diag: &DiagnoseResult) -> Vec<String> {
                     .into(),
             );
             tips.push(
-                "TRAP sticky_host_header_cdn: header Host=api-host + chapter_list 302→CDN \
-                 → TocEmpty; drop Host / clone sibling UA. Harness: diagnose_tips"
+                "TRAP heiyan_chapter_list: ruochu/heiyan detail 「查看章节目录」→ \
+                 w2.heiyan.com/chapter/{id}; use .chapter-list a (old .float-list empty)"
                     .into(),
             );
         }

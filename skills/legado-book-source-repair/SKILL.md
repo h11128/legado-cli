@@ -172,6 +172,8 @@ source-cli progress next   # 先跑 closeout pending
 | **inte_base64 搜索壳 (xinbiquge)** (inte_base64_search) | `search.aspx` 体为 `inte_base64:{"c":base64}`，选择器打空 | `bookList` `@js`: 先 strip `inte_base64:` → `JSON.parse` + `java.base64Decode(o.c)` + `java.setContent` → `div.hot_sale`；规则本身常仍可用。Harness：`diagnose_tips` |
 | **m 站 500→桌面 (aaread)** (m_host_500_try_desktop) | `m.*/search`/`/book` 5xx；桌面搜索+详情目录 OK | **优先于** `search_endpoint_dead` skip：先探 apex/`www` 再决定；迁 `bookSourceUrl` + 重写 searchUrl/selectors（query 可能是 kw/q/keyword） |
 | **起点壳正文 (aaread)** (qidian_clone_getcontent) | `.j_readContent` 只有「内容读取中」；`ajaxGetContent`→`/_getcontent.php?id=` | content `@js`: 从 `/chapter/{bid}/{cid}` 取 cid → `java.ajax` + `setContent` + `getString('p@text')`；勿 `return`（Rhino）。Harness：`diagnose_tips` |
+| **URL 尾 CR (ruochu)** (url_trailing_cr) | `bookSourceUrl` 含 `\r` → list/get 怪异、校验挂搜索目录 | 删旧源，保存无 CR 的干净 URL；索引里 `repr(url)` 先查 |
+| **若初/黑岩目录 (ruochu)** | 详情「查看章节目录」→`w2.heiyan.com/chapter/{id}`；旧 `.float-list` 空 | `tocUrl=text.查看章节目录@href`；`chapterList=.chapter-list a` |
 | **tocUrl 阅读链 (powanjuan)** | `tocUrl span.read a`→首章；误走 `index/1.html` 目录空 | **清空 tocUrl**；详情页 `div.catalog` + 已有 `ruleToc` |
 | **COS toc 403 (tybook)** | `chapters/{bid}.json` 403 | 改 signed `/tf/chapter_list?` @js |
 | **sticky_host_header_cdn (tybook)** | `header.Host` 钉死 API 域；`/tf/chapter_list` 302→`scdn…/chapters/{bid}.json` 后列表空 | **去掉 Host**（或克隆无 Host 的 sibling UA）；不要只改 tocUrl。Harness：`diagnose_tips` |

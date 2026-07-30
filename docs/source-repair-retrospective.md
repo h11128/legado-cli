@@ -930,6 +930,13 @@ jijia 非书站；jjwxc api_signature；zei8 DB dead。
 迁 `https://aaread.club`；删旧 m；Device **校验成功** (~2.3s).
 Trap `m_host_500_try_desktop` + `qidian_clone_getcontent`；skill_fix=1 + diagnose_tips.
 
+## 118. m.ruochu.com 若初文学 — fixed (2026-07-29)
+
+phone `bookSourceUrl` 尾带 `\r`（`https://m.ruochu.com\r`）→ 索引/get_source 异常。
+搜索 API 仍可用；目录已迁黑岩 `w2.heiyan.com/chapter/{id}`（非 `.float-list`）。
+清 URL + `tocUrl=text.查看章节目录@href` + `.chapter-list a`；删 `\r` 旧源。
+Device **校验成功** (~2.4s). skill_fix=1.
+
 ## Close-out 标准（每轮）
 
 
