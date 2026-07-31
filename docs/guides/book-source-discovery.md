@@ -71,8 +71,11 @@ Preset file: [`config/site_candidates_publish.json`](../../config/site_candidate
 | Site has no search | kanunu | Explore-only; don't fake searchUrl to a writer page |
 | CF / Just a moment | 99csw | `skip_waf` — never rewrite selectors on challenge HTML |
 | 需魔法 | annas-archive | `skip_vpn` |
+| Catalog has no search | xuges / tianyabooks | `searchUrl` `@js: source.put('sk', key)` then `bookList` `@js` filter with `source.get('sk')` — `key` is **not** bound in AnalyzeRule |
+| GBK sites | xuges / tianyabooks | URL option `,{"charset":"GBK"}` |
+| TY empty chapters | newer /world/ shells | Prefer older books with `#neirong`; skip stub first chapters |
 
-## Efficiency rules
+## Related
 
 1. **Batch reachability first** (`site-probe`), never serially curl 20 sites in the agent loop.
 2. **Reuse phone sources**: `list_sources --search 出版|公版|名著|古登堡` before drafting twins.

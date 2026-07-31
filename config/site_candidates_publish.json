@@ -107,6 +107,51 @@
       "kind": "catalog",
       "note": "书目元数据，非正文.",
       "status": "skip_catalog"
+    },
+    {
+      "id": "xuges",
+      "url": "https://www.xuges.com",
+      "kind": "translated_world_lit",
+      "note": "中译世界名著 HTML；GBK；device 校验成功 2026-07-30.",
+      "status": "sourced",
+      "bookSourceUrl": "https://www.xuges.com"
+    },
+    {
+      "id": "standardebooks",
+      "url": "https://standardebooks.org",
+      "kind": "public_domain_en",
+      "note": "精校英文公版；device 校验成功 2026-07-30.",
+      "status": "sourced",
+      "bookSourceUrl": "https://standardebooks.org"
+    },
+    {
+      "id": "tianyabooks",
+      "url": "https://www.tianyabooks.com",
+      "kind": "translated_world_lit",
+      "note": "天涯书库世界文学中译；部分新书正文壳空，旧书#neirong可用；校验成功 2026-07-30.",
+      "status": "sourced",
+      "bookSourceUrl": "https://www.tianyabooks.com"
+    },
+    {
+      "id": "fadedpage",
+      "url": "https://www.fadedpage.com",
+      "kind": "public_domain_en",
+      "note": "加拿大公版；site-probe make_candidate，待做源.",
+      "status": "candidate"
+    },
+    {
+      "id": "wikisource_zh",
+      "url": "https://zh.wikisource.org",
+      "kind": "wikisource",
+      "note": "中文维基文库含译著；site-probe ok，待 MediaWiki API 源.",
+      "status": "candidate"
+    },
+    {
+      "id": "purepen",
+      "url": "http://www.purepen.com",
+      "kind": "classics_zh",
+      "note": "纯文学站；site-probe ok，待做源.",
+      "status": "candidate"
     }
   ]
 }

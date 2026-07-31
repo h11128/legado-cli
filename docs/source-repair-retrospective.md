@@ -1029,6 +1029,18 @@ App 已补 `preserveOrderWeight=false`（需装新包后才生效）。
 - Skill：`legado-book-source` 增 Phase 0；多端已从 `E:/shared-skills` 同步
 - 验证：publish preset `probed=1`（qishuta→`skip_waf`），其余静态桶，约 0.6s
 
+## 131. 译著/外文找站：虚阁 + SE + 天涯 (2026-07-30)
+
+用户要「幸福的婚姻」类外文中译 / TXT 向可读源。site-probe 一批后新建并**设备校验成功**：
+
+| 书源 | URL | 校验关键词 | 备注 |
+|------|-----|------------|------|
+| 虚阁网·外国文学 | https://www.xuges.com | 简 | GBK；目录 `###.htm`；中译名著 |
+| Standard Ebooks | https://standardebooks.org | pride | 英文公版精校 |
+| 天涯书库·世界文学 | https://www.tianyabooks.com | 茨威格 | 目录过滤 `source.put('sk')`；部分新书正文空壳 |
+
+未做：fadedpage / zh.wikisource / purepen（candidate）。《幸福的婚姻》无精确同名站内书，可用「婚姻/爱/简」等在虚阁/天涯搜相近译著。
+
 ## Close-out 标准（每轮）
 
 
