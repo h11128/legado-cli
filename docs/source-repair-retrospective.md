@@ -1041,6 +1041,21 @@ App 已补 `preserveOrderWeight=false`（需装新包后才生效）。
 
 未做：fadedpage / zh.wikisource / purepen（candidate）。《幸福的婚姻》无精确同名站内书，可用「婚姻/爱/简」等在虚阁/天涯搜相近译著。
 
+## 132. 译著/公版再补 6 源 → 合计约 12 (2026-07-31)
+
+用户要「最好再加 10 个」同类源。在已有 6 个（Gutenberg / ctext / 虚阁 / SE / 天涯 / 有度）上再新建并**设备校验成功** 6 个：
+
+| 书源 | URL | 校验关键词 | 备注 |
+|------|-----|------------|------|
+| 维基文库 中文 | https://zh.wikisource.org | 红楼梦 | MediaWiki API；子页目录 |
+| Wikisource EN | https://en.wikisource.org | pride | 跳过 Versions of；优先 `(year)` |
+| 纯笔斋·古典名著 | http://www.purepen.com | 红楼 | GBK；首页过滤 |
+| Authorama 公版 | https://www.authorama.com | Pride | `*-1.html` 目录过滤 |
+| Faded Page 公版 | https://www.fadedpage.com | pride | POST `csearc2.php`；单章 HTML |
+| Loyal Books TXT | https://www.loyalbooks.com | austen | TXT 下载作全文 |
+
+Trap：`bookList`/`chapterList` 的 `@js` 里 **`key` 未绑定** → 用 `source.put('sk')`；维基目录勿抓 sister projects；EN 搜「pride」会先命中 Versions 页，snippet 过滤 + 年份排序。
+
 ## Close-out 标准（每轮）
 
 

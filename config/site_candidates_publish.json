@@ -136,22 +136,49 @@
       "id": "fadedpage",
       "url": "https://www.fadedpage.com",
       "kind": "public_domain_en",
-      "note": "加拿大公版；site-probe make_candidate，待做源.",
-      "status": "candidate"
+      "note": "加拿大公版；POST csearc2.php title=；全文 HTML；校验成功 2026-07-31.",
+      "status": "sourced",
+      "bookSourceUrl": "https://www.fadedpage.com"
     },
     {
       "id": "wikisource_zh",
       "url": "https://zh.wikisource.org",
       "kind": "wikisource",
-      "note": "中文维基文库含译著；site-probe ok，待 MediaWiki API 源.",
-      "status": "candidate"
+      "note": "MediaWiki API 搜索；子页面目录；校验成功 2026-07-31.",
+      "status": "sourced",
+      "bookSourceUrl": "https://zh.wikisource.org"
+    },
+    {
+      "id": "wikisource_en",
+      "url": "https://en.wikisource.org",
+      "kind": "wikisource",
+      "note": "跳过 Versions of；优先 (year) 版本页；校验成功 2026-07-31.",
+      "status": "sourced",
+      "bookSourceUrl": "https://en.wikisource.org"
     },
     {
       "id": "purepen",
       "url": "http://www.purepen.com",
       "kind": "classics_zh",
-      "note": "纯文学站；site-probe ok，待做源.",
-      "status": "candidate"
+      "note": "四大名著 GBK；首页目录过滤；校验成功 2026-07-31.",
+      "status": "sourced",
+      "bookSourceUrl": "http://www.purepen.com"
+    },
+    {
+      "id": "authorama",
+      "url": "https://www.authorama.com",
+      "kind": "public_domain_en",
+      "note": "首页 *-1.html 目录过滤；校验成功 2026-07-31.",
+      "status": "sourced",
+      "bookSourceUrl": "https://www.authorama.com"
+    },
+    {
+      "id": "loyalbooks",
+      "url": "https://www.loyalbooks.com",
+      "kind": "public_domain_en",
+      "note": "有声站兼 TXT 下载作单章正文；校验成功 2026-07-31.",
+      "status": "sourced",
+      "bookSourceUrl": "https://www.loyalbooks.com"
     }
   ]
 }
