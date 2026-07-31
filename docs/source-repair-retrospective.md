@@ -1019,6 +1019,16 @@ App 已补 `preserveOrderWeight=false`（需装新包后才生效）。
 已有可用并加「出版」标签：有度、努努书坊、鸠摩搜书、名著阅读 API。
 未做：安娜/Z-Lib（需魔法）、高教/科学文库（偏 PDF/登录）。
 
+## 130. discovery workflow + site-probe (2026-07-30)
+
+把「找出版/公版站 → 做源」收成固定流程，避免 agent 串行 curl：
+
+- 指南：`docs/guides/book-source-discovery.md`
+- 种子：`config/site_candidates_publish.json`
+- CLI：`source-cli site-probe --preset publish`（已知 skip/sourced 短路；只 L1/L2 探 `candidate`）
+- Skill：`legado-book-source` 增 Phase 0；多端已从 `E:/shared-skills` 同步
+- 验证：publish preset `probed=1`（qishuta→`skip_waf`），其余静态桶，约 0.6s
+
 ## Close-out 标准（每轮）
 
 

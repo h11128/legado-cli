@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "preset": "publish",
+  "note": "Curated discovery seeds for 出版/公版/古籍/找书. Agents: run `source-cli site-probe --preset publish` before drafting sources.",
+  "updated": "2026-07-30",
+  "candidates": [
+    {
+      "id": "gutenberg",
+      "url": "https://www.gutenberg.org",
+      "kind": "public_domain_en",
+      "note": "English public-domain; HTML full-text. Device-verified 2026-07-30.",
+      "status": "sourced",
+      "bookSourceUrl": "https://www.gutenberg.org"
+    },
+    {
+      "id": "ctext",
+      "url": "https://ctext.org",
+      "kind": "classics_zh",
+      "note": "先秦经典文言; chapter under span.subcontents. Device-verified 2026-07-30.",
+      "status": "sourced",
+      "bookSourceUrl": "https://ctext.org"
+    },
+    {
+      "id": "yodu",
+      "url": "https://www.yodu.org",
+      "kind": "mixed_publish",
+      "note": "经典文学/出版向发现 + 网文混合. Existing phone source.",
+      "status": "sourced",
+      "bookSourceUrl": "https://www.yodu.org"
+    },
+    {
+      "id": "kanunu8",
+      "url": "http://www.kanunu8.com",
+      "kind": "classics_zh",
+      "note": "出版/经典向; site search weak — rely on explore.",
+      "status": "sourced",
+      "bookSourceUrl": "http://www.kanunu8.com"
+    },
+    {
+      "id": "jiumodiary",
+      "url": "https://www.jiumodiary.com",
+      "kind": "download_finder",
+      "note": "网盘找书，非正文流. Existing.",
+      "status": "sourced",
+      "bookSourceUrl": "https://www.jiumodiary.com"
+    },
+    {
+      "id": "mingzhu_api",
+      "url": "https://api.520diandu.com",
+      "kind": "illustrated_classics",
+      "note": "名著阅读 API（偏图文）.",
+      "status": "sourced",
+      "bookSourceUrl": "https://api.520diandu.com"
+    },
+    {
+      "id": "cnoabook",
+      "url": "https://cnoabook.com",
+      "kind": "oa_academic",
+      "note": "科学出版社 OA；偏 PDF，不优先做正文源.",
+      "status": "skip_pdf"
+    },
+    {
+      "id": "qishuta",
+      "url": "http://www.xqishuta.org",
+      "kind": "ebook_download",
+      "note": "奇书网；2026-07-30 site-probe → 403 Just a moment (bot shell).",
+      "status": "skip_waf"
+    },
+    {
+      "id": "99csw",
+      "url": "https://www.99csw.com",
+      "kind": "classics_zh",
+      "note": "CF challenge (2026-07-30 probe).",
+      "status": "skip_waf"
+    },
+    {
+      "id": "shuge",
+      "url": "https://www.shuge.org",
+      "kind": "scan_archive",
+      "note": "古籍扫描；403/不稳.",
+      "status": "skip_dead"
+    },
+    {
+      "id": "annas",
+      "url": "https://zh.annas-archive.org",
+      "kind": "download_finder",
+      "note": "需魔法/DNS 不通；不做默认源.",
+      "status": "skip_vpn"
+    },
+    {
+      "id": "weread",
+      "url": "https://weread.qq.com",
+      "kind": "app_store",
+      "note": "微信读书；登录/App，不做正文书源.",
+      "status": "skip_app"
+    },
+    {
+      "id": "zhangyue",
+      "url": "https://www.zhangyue.com",
+      "kind": "app_store",
+      "note": "掌阅；App 向.",
+      "status": "skip_app"
+    },
+    {
+      "id": "douban_book",
+      "url": "https://book.douban.com",
+      "kind": "catalog",
+      "note": "书目元数据，非正文.",
+      "status": "skip_catalog"
+    }
+  ]
+}

@@ -1,6 +1,8 @@
 //! Clap CLI definition (kept out of main.rs for the 300-line limit).
 
-use crate::cli_subs::{ClaimSub, CloseoutSub, LedgerSub, ParseSub, PatternSub, ProgressSub, RetroSub, SourceSub};
+use crate::cli_subs::{
+    ClaimSub, CloseoutSub, LedgerSub, ParseSub, PatternSub, ProgressSub, RetroSub, SourceSub,
+};
 use crate::ops_subs::{CacheSub, CheckSub, DbSub, KnowledgeSub, QueueSub};
 use clap::{Parser, Subcommand};
 use std::path::PathBuf;
@@ -144,6 +146,27 @@ pub enum Cmd {
         #[arg(long)]
         out: Option<PathBuf>,
     },
+    /// Batch L0–L2 reachability for discovery seeds (`--preset publish`).
+    SiteProbe {
+        #[arg(long)]
+        preset: Option<String>,
+        #[arg(long)]
+        urls_file: Option<PathBuf>,
+        #[arg(long)]
+        url: Vec<String>,
+        #[arg(long)]
+        rules: Option<PathBuf>,
+        #[arg(long, default_value_t = 8)]
+        concurrency: usize,
+        #[arg(long, default_value_t = 1.5)]
+        tcp_timeout: f64,
+        #[arg(long, default_value_t = 4.0)]
+        l2_timeout: f64,
+        #[arg(long)]
+        out: Option<PathBuf>,
+        #[arg(long, default_value_t = false)]
+        include_sourced: bool,
+    },
     Progress {
         #[command(subcommand)]
         cmd: ProgressSub,
@@ -280,6 +303,12 @@ pub enum Cmd {
         auto_retro: bool,
         #[arg(long)]
         out: Option<PathBuf>,
+        /// Kill hung oneshot child and continue (seconds). 0 = no kill (in-process).
+        #[arg(long, default_value_t = 120.0)]
+        url_timeout_s: f64,
+        /// Run oneshot in-process (no subprocess kill). Prefer default subprocess.
+        #[arg(long, default_value_t = false)]
+        in_process: bool,
     },
     Bench {
         #[arg(long)]

@@ -147,6 +147,27 @@ fn main() -> ExitCode {
             rules,
             out,
         }),
+        Cmd::SiteProbe {
+            preset,
+            urls_file,
+            url,
+            rules,
+            concurrency,
+            tcp_timeout,
+            l2_timeout,
+            out,
+            include_sourced,
+        } => run_site_probe(SiteProbeArgs {
+            preset,
+            urls_file,
+            url,
+            rules,
+            concurrency,
+            tcp_timeout,
+            l2_timeout,
+            out,
+            include_sourced,
+        }),
         Cmd::Progress { cmd } => match cmd {
             ProgressSub::Status {
                 index,
@@ -453,15 +474,9 @@ fn main() -> ExitCode {
             out,
         }),
         Cmd::Source { cmd } => match cmd {
-            SourceSub::Triage {
-                url,
-                fail_msg,
-                out,
-            } => run_source(SourceCmd::Triage {
-                url,
-                fail_msg,
-                out,
-            }),
+            SourceSub::Triage { url, fail_msg, out } => {
+                run_source(SourceCmd::Triage { url, fail_msg, out })
+            }
             SourceSub::Fetch {
                 url,
                 page,
@@ -509,7 +524,9 @@ fn main() -> ExitCode {
                 index,
                 agent,
             }),
-            SourceSub::Index { from_log, index } => run_source(SourceCmd::Index { from_log, index }),
+            SourceSub::Index { from_log, index } => {
+                run_source(SourceCmd::Index { from_log, index })
+            }
             SourceSub::Channel {
                 clear_stale,
                 force_clear,

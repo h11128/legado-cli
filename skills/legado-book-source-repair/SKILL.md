@@ -218,6 +218,7 @@ source-cli progress next   # 先跑 closeout pending
 
 | Entry | Role |
 |--------|------|
+| **`source-cli site-probe`** | 找站 reachability（`--url` / `--preset publish`）；见 `docs/guides/book-source-discovery.md` |
 | **`source-cli diagnose`** | L2 fail-fast + debug layer / fake_detail |
 | **`source-cli repair`** | Live oneshot/batch |
 | **`source-cli closeout`** | pending / gate / sync-skill / status |
