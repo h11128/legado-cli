@@ -66,6 +66,9 @@ Standing rules for any 书源 fix / validate / bulk-check work in this workspace
     Prefer `source-cli serial …` (default `--url-timeout-s 120`, subprocess kill).
 20. **Stale MCP locks:** `source-cli check channel` clears dead/aged locks (repair ≤15m).
     Hung-but-alive holders: `--force-clear` only after confirming the repair PID is stuck.
+20b. **Alias `bookSourceUrl`** (`QQ浏览器` / `DragonQuest*` / app labels): never tag 「网站失效」
+    from probing the label alone when `searchUrl` has absolute `https://…`. Gate skips L1/L2;
+    `disable-dead` skips aliases. Trap: `alias_booksourceurl_false_dead`.
 21. **Never end a turn mid-URL.** Deep-diagnose stall modes (banned):
     - Background a `diagnose`/debug and **stop the turn** without close-out or a written next step.
     - Keep probing login/AES/JWT/广告劫持 after evidence is enough → **seal ≤2 min**, move on.

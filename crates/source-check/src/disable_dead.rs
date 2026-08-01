@@ -5,6 +5,7 @@ use std::path::Path;
 
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
+use source_gate::is_alias_book_source_url;
 use source_ports::SourceRepository;
 use source_types::{BookSource, PortError, SourceKey};
 use thiserror::Error;
@@ -57,6 +58,20 @@ pub fn load_dead_urls(path: &Path) -> DisableResult<Vec<String>> {
     Ok(urls)
 }
 
+/// Drop alias `bookSourceUrl` labels — L1/precheck on them is a false dead signal.
+pub fn filter_alias_dead_urls(urls: Vec<String>) -> (Vec<String>, Vec<String>) {
+    let mut keep = Vec::new();
+    let mut skipped = Vec::new();
+    for u in urls {
+        if is_alias_book_source_url(&u) {
+            skipped.push(u);
+        } else {
+            keep.push(u);
+        }
+    }
+    (keep, skipped)
+}
+
 pub fn ensure_tag(group: Option<&str>, tag: &str) -> String {
     let mut parts: Vec<String> = group
         .unwrap_or("")
@@ -71,6 +86,17 @@ pub fn ensure_tag(group: Option<&str>, tag: &str) -> String {
     parts.join(",")
 }
 
+/// Remove `tag` from a comma group (revive false 「网站失效」).
+pub fn strip_tag(group: Option<&str>, tag: &str) -> String {
+    group
+        .unwrap_or("")
+        .split(',')
+        .map(str::trim)
+        .filter(|p| !p.is_empty() && *p != tag)
+        .collect::<Vec<_>>()
+        .join(",")
+}
+
 pub fn apply_limit(mut urls: Vec<String>, limit: usize) -> Vec<String> {
     if limit > 0 && urls.len() > limit {
         urls.truncate(limit);
@@ -78,10 +104,11 @@ pub fn apply_limit(mut urls: Vec<String>, limit: usize) -> Vec<String> {
     urls
 }
 
-/// Dry-run plan: no MCP I/O.
+/// Dry-run plan: no MCP I/O. Alias URLs are listed under `skipped_alias`, not applied.
 pub fn plan_disable_dead(precheck_json: &Path, opts: &DisableDeadOpts) -> DisableResult<Value> {
     opts.validate()?;
-    let dead = apply_limit(load_dead_urls(precheck_json)?, opts.limit);
+    let (filtered, skipped_alias) = filter_alias_dead_urls(load_dead_urls(precheck_json)?);
+    let dead = apply_limit(filtered, opts.limit);
     Ok(json!({
         "dry_run": true,
         "total": dead.len(),
@@ -89,6 +116,8 @@ pub fn plan_disable_dead(precheck_json: &Path, opts: &DisableDeadOpts) -> Disabl
         "tag": opts.tag,
         "dead_tag": DEAD_TAG,
         "urls": dead,
+        "skipped_alias": skipped_alias,
+        "skip_reason": "alias_bookSourceUrl_false_dead",
     }))
 }
 
@@ -119,9 +148,10 @@ pub fn apply_disable_dead<R: SourceRepository + ?Sized>(
     opts: &DisableDeadOpts,
 ) -> DisableResult<Value> {
     opts.validate()?;
+    let (dead, skipped_alias) = filter_alias_dead_urls(urls.to_vec());
     let mut ok = Vec::new();
     let mut failed = Vec::new();
-    for url in urls {
+    for url in &dead {
         match apply_one(repo, url, opts) {
             Ok(()) => ok.push(json!({"url": url})),
             Err(e) => failed.push(json!({"url": url, "error": e.to_string()})),
@@ -129,9 +159,11 @@ pub fn apply_disable_dead<R: SourceRepository + ?Sized>(
     }
     Ok(json!({
         "dry_run": false,
-        "total": urls.len(),
+        "total": dead.len(),
         "ok": ok,
         "failed": failed,
+        "skipped_alias": skipped_alias,
+        "skip_reason": "alias_bookSourceUrl_false_dead",
     }))
 }
 
@@ -233,6 +265,57 @@ mod tests {
     }
 
     #[test]
+    fn dry_run_skips_alias_urls() {
+        let dir = TempDir::new().unwrap();
+        let p = dir.path().join("pre.json");
+        std::fs::write(
+            &p,
+            r#"{"dead_urls":["QQ浏览器","https://dead.example/"]}"#,
+        )
+        .unwrap();
+        let plan = plan_disable_dead(
+            &p,
+            &DisableDeadOpts {
+                disable: true,
+                tag: true,
+                limit: 0,
+            },
+        )
+        .unwrap();
+        assert_eq!(plan["total"], 1);
+        assert_eq!(plan["urls"][0], "https://dead.example/");
+        assert_eq!(plan["skipped_alias"][0], "QQ浏览器");
+    }
+
+    #[test]
+    fn apply_skips_alias_without_touching_repo() {
+        let repo = FakeRepo {
+            store: RefCell::new(HashMap::from([(
+                "QQ浏览器".into(),
+                json!({
+                    "bookSourceUrl": "QQ浏览器",
+                    "enabled": true,
+                    "bookSourceGroup": "小说"
+                }),
+            )])),
+        };
+        let report = apply_disable_dead(
+            &repo,
+            &["QQ浏览器".into()],
+            &DisableDeadOpts {
+                disable: true,
+                tag: true,
+                limit: 0,
+            },
+        )
+        .unwrap();
+        assert_eq!(report["total"], 0);
+        assert_eq!(report["skipped_alias"][0], "QQ浏览器");
+        assert_eq!(repo.store.borrow()["QQ浏览器"]["enabled"], true);
+        assert_eq!(repo.store.borrow()["QQ浏览器"]["bookSourceGroup"], "小说");
+    }
+
+    #[test]
     fn apply_tag_only() {
         let repo = FakeRepo {
             store: RefCell::new(HashMap::from([(
@@ -261,5 +344,34 @@ mod tests {
             .to_string();
         assert!(g.contains(DEAD_TAG));
         assert_eq!(repo.store.borrow()["https://a/"]["enabled"], true);
+    }
+
+    #[test]
+    fn strip_tag_removes_dead() {
+        assert_eq!(strip_tag(Some("小说,网站失效"), DEAD_TAG), "小说");
+        assert_eq!(strip_tag(Some("网站失效"), DEAD_TAG), "");
+    }
+
+    #[test]
+    fn dry_run_limit_after_alias_filter() {
+        let dir = TempDir::new().unwrap();
+        let p = dir.path().join("pre.json");
+        std::fs::write(
+            &p,
+            r#"{"dead_urls":["QQ浏览器","DragonQuestQBall","https://dead1.example/","https://dead2.example/"]}"#,
+        )
+        .unwrap();
+        let plan = plan_disable_dead(
+            &p,
+            &DisableDeadOpts {
+                disable: true,
+                tag: true,
+                limit: 1,
+            },
+        )
+        .unwrap();
+        assert_eq!(plan["total"], 1);
+        assert_eq!(plan["urls"][0], "https://dead1.example/");
+        assert_eq!(plan["skipped_alias"].as_array().unwrap().len(), 2);
     }
 }

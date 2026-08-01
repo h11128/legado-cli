@@ -6,9 +6,9 @@ use std::sync::Arc;
 
 use serde_json::json;
 use source_check::{
-    apply_disable_dead, apply_limit, default_rules_path, filter_urls, load_dead_urls,
-    load_shard_urls_file, load_urls_file, plan_disable_dead, shard_urls, write_report,
-    write_shards, DisableDeadOpts,
+    apply_disable_dead, apply_limit, default_rules_path, filter_alias_dead_urls, filter_urls,
+    load_dead_urls, load_shard_urls_file, load_urls_file, plan_disable_dead, shard_urls,
+    write_report, write_shards, DisableDeadOpts,
 };
 use source_mcp::{McpClient, McpEndpoint, McpSourceRepository};
 
@@ -96,10 +96,11 @@ fn run_inner(cmd: CheckOpsCmd) -> Result<serde_json::Value, String> {
             let report = if dry_run {
                 plan_disable_dead(&precheck_json, &opts).map_err(|e| e.to_string())?
             } else {
-                let dead = apply_limit(
+                let (filtered, _skipped) = filter_alias_dead_urls(
                     load_dead_urls(&precheck_json).map_err(|e| e.to_string())?,
-                    limit,
                 );
+                let dead = apply_limit(filtered, limit);
+                // Alias bookSourceUrl labels are filtered before apply_limit.
                 let ep = McpEndpoint::load_defaults().map_err(|e| e.to_string())?;
                 let client = Arc::new(McpClient::new(ep).with_client_name("disable_dead"));
                 client.ensure_session().map_err(|e| e.to_string())?;

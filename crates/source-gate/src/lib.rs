@@ -1,5 +1,6 @@
 //! PC gate: L0 denylist + L1 DNS/TCP + L2 HTTP sniff (Phase B/C).
 
+mod alias_url;
 #[cfg(feature = "l2")]
 mod classify;
 mod error;
@@ -13,6 +14,10 @@ mod sniff;
 #[cfg(any(feature = "l1", feature = "l2"))]
 mod url_util;
 
+pub use alias_url::{
+    book_url_base, classify_alias_row, effective_probe_hint, first_absolute_http,
+    is_alias_book_source_url, refuse_dead_tag_reason, ALIAS_GATE_REASON,
+};
 pub use error::GateError;
 pub use l0::{classify_l0, load_rules, match_l0, SkipRule};
 

@@ -24,12 +24,18 @@ pub use bench::{run_bench10, BenchOpts, DEFAULT_BENCH_URLS};
 pub use channel::channel_status_json as channel_status;
 pub use deep_wave::{run_deep_wave, DeepWaveOpts};
 pub use disable_dead::{
-    apply_disable_dead, apply_limit, ensure_tag, load_dead_urls, plan_disable_dead, write_report,
-    DisableDeadError, DisableDeadOpts, DEAD_TAG,
+    apply_disable_dead, apply_limit, ensure_tag, filter_alias_dead_urls, load_dead_urls,
+    plan_disable_dead, strip_tag, write_report, DisableDeadError, DisableDeadOpts, DEAD_TAG,
+};
+// Re-export alias helpers used by disable-dead / ops scans.
+pub use source_gate::{
+    classify_alias_row, is_alias_book_source_url, refuse_dead_tag_reason, ALIAS_GATE_REASON,
 };
 pub use harvest::{default_fails_path, run_harvest, HarvestOpts};
 pub use materials::{classify_results, dump_fail_materials, FAIL_TAGS};
-pub use precheck::{parse_host, precheck_json, precheck_report, precheck_urls, probe_one, PrecheckRow};
+pub use precheck::{
+    parse_host, precheck_json, precheck_report, precheck_urls, probe_one, PrecheckRow,
+};
 pub use prefilter::{filter_urls, PrefilterSummary};
 pub use search_wave::{run_search_wave, SearchWaveOpts};
 pub use shard::{

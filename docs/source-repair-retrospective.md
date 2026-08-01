@@ -1069,6 +1069,24 @@ Trap：`bookList`/`chapterList` 的 `@js` 里 **`key` 未绑定** → 用 `sourc
 
 Trap：Legado 里 `td.0` 是 **class**，索引要用 `tag.td.0@…`；目录勿用过宽 `a[href*=_]`（会点到榜单页空正文）。
 
+## 134. 假「网站失效」：别名 bookSourceUrl (2026-08-01)
+
+用户指出「松鹤阅读」仍可用，却被标失效。根因：`bookSourceUrl=QQ浏览器`（及 DragonQuest* 等）是**别名**，真 API 在 `searchUrl`/`rule*` 的绝对 `https://…`。对别名做 L1/precheck/MCP GET → DNS 失败 → 误打「网站失效」。
+
+同类误判（扫描 ~164 个「网站失效」里约 25 个别名/无 scheme）：
+
+| 模式 | 例子 | 正确动作 |
+|------|------|----------|
+| 别名 URL + 绝对 searchUrl | QQ浏览器、DragonQuestQBkd1、飛龍在天、西瓜 App | debug/check；勿因别名不可达封站 |
+| 别名但规则已坏 | DragonQuestQBall / QBqq2（搜索 OK、详情 JSONPath 挂） | 可清「网站失效」；**勿**当死站；按层修或保持禁用 |
+| 别名 + loginUrl/@js 拼主机 | sjsw:youke | 先 debug；失败≠域名死 |
+| URL 尾 `\r`（已有 trap） | m.ruochu.com\\r | trim 再 get/migrate |
+| 规则失效误标死站 | 校验「搜索失效」却进「网站失效」组 | 分组按失败层，勿一律死站 |
+
+已恢复：`QQ浏览器` 松鹤（先前）、`DragonQuestQBkd1` → **校验成功**；QBall/QBqq2 仅去「网站失效」标签仍禁用。
+
+Harness：`source-gate/alias_url.rs`（gate `alias_bookSourceUrl_skip_host_probe`）；`disable_dead` → `skipped_alias`；`diagnose_tips` + skill trap `alias_booksourceurl_false_dead`。
+
 ## Close-out 标准（每轮）
 
 

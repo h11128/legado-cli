@@ -1,5 +1,6 @@
 //! Build diagnose tips from layer + live probe (Python `repair_diagnose.suggest`).
 
+use source_gate::is_alias_book_source_url;
 use source_probe::LiveProbeResult;
 use source_types::{DiagnoseResult, Layer};
 
@@ -9,6 +10,15 @@ pub fn layer_tips(diag: &DiagnoseResult) -> Vec<String> {
     if diag.fake_detail == Some(true) {
         tips.push(
             "TRAP fake_detail: detail_url is search page / list-empty fallback — fix SEARCH first"
+                .into(),
+        );
+    }
+    if is_alias_book_source_url(diag.url.as_str()) {
+        tips.push(
+            "TRAP alias_booksourceurl_false_dead: bookSourceUrl is an app/alias label \
+             (QQ浏览器 / DragonQuest* / 黑岩阅读), not a host — do NOT tag 「网站失效」 from \
+             L1/precheck/MCP GET on that label. debug_source / check; if searchUrl has absolute \
+             https://… probe that. Gate reason: alias_bookSourceUrl_skip_host_probe"
                 .into(),
         );
     }
@@ -176,5 +186,14 @@ mod tests {
         let d = DiagnoseResult::new(Url::new("https://m.mpo18.com/").unwrap(), Layer::Search);
         let tips = layer_tips(&d);
         assert!(tips.iter().any(|t| t.contains("17mb_post_gbk_search")));
+    }
+
+    #[test]
+    fn alias_false_dead_tip() {
+        let d = DiagnoseResult::new(Url::new("http://QQ浏览器/").unwrap(), Layer::Search);
+        let tips = layer_tips(&d);
+        assert!(tips
+            .iter()
+            .any(|t| t.contains("alias_booksourceurl_false_dead")));
     }
 }
