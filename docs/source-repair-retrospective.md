@@ -1056,6 +1056,19 @@ App 已补 `preserveOrderWeight=false`（需装新包后才生效）。
 
 Trap：`bookList`/`chapterList` 的 `@js` 里 **`key` 未绑定** → 用 `source.put('sk')`；维基目录勿抓 sister projects；EN 搜「pride」会先命中 Versions 页，snippet 过滤 + 年份排序。
 
+## 133. 努努同类站：中华典藏 + 52书库 (2026-08-01)
+
+用户要「类似努努书坊」的站并做源。`site-probe` 一批后：
+
+| 结果 | 站点 | 说明 |
+|------|------|------|
+| 已有 | `http://www.kanunu8.com` 努努书坊 | 手机上已启用（探索向，搜索钉死作者页） |
+| **新建校验成功** | `https://www.diancang.xyz` 中华典藏 | 古籍 HTML；POST `e/search`；目录过滤同路径 `.html` |
+| **新建校验成功** | `https://www.52shuku.net` 52书库 | 全本 HTML；`/so/search.php?q=`；`li.mulu a` |
+| 跳过 | millionbook / 99csw / sbkk / 经典书库 / 旧天涯域 | 死站、WAF 或目录链断 |
+
+Trap：Legado 里 `td.0` 是 **class**，索引要用 `tag.td.0@…`；目录勿用过宽 `a[href*=_]`（会点到榜单页空正文）。
+
 ## Close-out 标准（每轮）
 
 
