@@ -120,7 +120,6 @@ source-cli progress next   # 先跑 closeout pending
 | API 目录要登录 | 认证失败 / device 必填 | **skip** |
 | 验证码搜索 | getcode / yzm / actyzm | **skip** |
 | 域名停车/过期 | L2 GET 正文含 for sale/出售/域名到期 / Redirecting shell | **disable/skip**（勿当搜索规则坏；**不** hunt） |
-| **alias_booksourceurl_false_dead** | `bookSourceUrl`=`QQ浏览器`/`DragonQuest*`/`黑岩阅读` 等别名；`searchUrl` 才是真 `https://…`；对别名做 L1/precheck/MCP GET→假「网站失效」 | **禁止** 因别名不可达就打「网站失效」。`debug_source`/校验；有绝对 searchUrl 就探那个。Gate：`alias_bookSourceUrl_skip_host_probe`；`disable-dead` 跳过 alias。Harness：`source-gate/alias_url.rs` + `disable_dead` `skipped_alias` |
 | **dead_skip_without_hunt** | batch/agent 对 `l1_unreachable`/`l2_http_dead` 直接 disable | **禁止** — 先 `hunt --probe` / oneshot 自动 hunt；无后继再 disable。Harness：`classify.rs`→`Hunt`；`oneshot_live` resolve；wave 不把 hunt ledger 成 final skip |
 | **serial_await_idle** | Agent 对整批 `serial`/`batch` 长 AwaitShell（数小时） | **禁止** — 最多短轮询 60–90s；看 `serial_heartbeat.json` / `serial_last.json` mtime；心跳停滞 > `url-timeout-s+30` → kill 父进程、`check channel --force-clear`、续跑。Harness：`serial_cmd`/`serial_spawn` |
 | **agent_turn_stall** | 后台 diagnose 后收工；或 login/AES/广告源反复抠 >2min；或 MCP `10060` 堵死整环 | **禁止** — 回合结束前必须 close-out 当前 URL 或写明下一动作；auth/广告证据够就 seal；diagnose 传输失败 → PC probe + 直连 MCP debug/check，或 `skip:mcp_transient` 下一源。**Harness：** `deep_active.json` claim；`closeout pending`/`progress next` 未 seal 则拒；`closeout release`；Discipline §21–23 |
@@ -186,6 +185,8 @@ source-cli progress next   # 先跑 closeout pending
 | **17mb 空 index + 未审书 (xinbanzhu)** (17mb_empty_index_unapproved) | 「查看目录」→`…/index.html`/`zx.js` 空壳；新书「未经审核」首条 TocEmpty | toc=`/html/{dir}/{id}_1/` 静态；校验勿用易撞空书的「我的」。Harness：`apply_safe_rule_fixes`→`17mb_empty_index_tocUrl`；diagnose TOC tip |
 | **17mb POST+GBK 搜索 (mpo18)** (17mb_post_gbk_search) | GET `s.php?s=` 空；真搜索是 POST `s`+`type=articlename`+GBK；结果在 `p.sone`；CF 单源校验易 90s 超时 | `searchUrl=…/s.php,{"charset":"GBK","method":"POST","body":"s={{key}}&type=articlename"}`；`bookList=class.searchresult@p.sone`；补 bookInfo name/author；check `timeoutMs≥180000`。Harness：`diagnose_tips` Search tip |
 | **JSON API 详情空字段 (cooks)** (json_api_bookinfo_fields) | search/toc/content OK；bookInfo 无 name/author；`@js` 模板字符串导致 js失效；init stringify 后 coverUrl 读不到 `.articleid` | 补 `$.articlename`/`$.author`；coverUrl `JSON.parse(result)`；`@js` 用字符串拼接。Harness：`diagnose_tips` Search tip |
+| **ss_search_delay_cookie (15u)** | debug「获取成功」list=0；HTTP 体 `alert(搜索间隔)` / Cookie `ss_search_delay` | **勿改 bookList** — `source-cli check clear-cookies --url …`；`enabledCookieJar=false`；可选 searchUrl `@js` removeCookie。Harness：`sniff_search_rate_limit` + `diagnose_tips` |
+| **multi_list_charts_toc (15u)** | 多个 `ul.list-group.list-charts`；固定 `.1` 只有最新几章 | `@js` 取 `li>a` 最多的 ul。Harness：`diagnose_tips` Toc tip |
 
 ## Worked examples
 
@@ -219,14 +220,14 @@ source-cli progress next   # 先跑 closeout pending
 
 | Entry | Role |
 |--------|------|
-| **`source-cli site-probe`** | 找站 reachability（`--url` / `--preset publish`）；见 `docs/guides/book-source-discovery.md` |
 | **`source-cli diagnose`** | L2 fail-fast + debug layer / fake_detail |
 | **`source-cli repair`** | Live oneshot/batch |
 | **`source-cli closeout`** | pending / gate / sync-skill / status |
 | **`source-cli retro`** | Per-source reflection + optional ledger seal |
 | **`source-cli progress` / `ledger`** | Queue next + session log |
 | **`source-cli discover`** | MCP LAN probe + write mcp_defaults.json |
-| **`source-cli check`** | channel / precheck / batch / full |
+| **`source-cli check`** | channel / precheck / batch / full / **clear-cookies** |
+| **`source-cli source`** | triage / fetch / verify / log / **push --file** |
 | **`source-cli queue`** | refresh-index / rt queue |
 | **`source-cli wave` / `harvest` / `serial`** | Batch orchestration |
 | **`source-cli parse`** | Offline rule/url analysis |

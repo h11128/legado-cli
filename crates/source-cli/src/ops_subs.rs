@@ -167,7 +167,14 @@ pub enum QueueSub {
 
 #[derive(Subcommand)]
 pub enum CheckSub {
-    Channel,
+    Channel {
+        /// Remove dead/aged locks (also runs on plain status).
+        #[arg(long, default_value_t = false)]
+        clear_stale: bool,
+        /// Force-remove repair+bulk locks even if PID still looks alive (hung agent).
+        #[arg(long, default_value_t = false)]
+        force_clear: bool,
+    },
     Precheck {
         #[arg(long)]
         urls_file: PathBuf,
@@ -250,6 +257,12 @@ pub enum CheckSub {
         l2_timeout: f64,
         #[arg(long)]
         rules: Option<PathBuf>,
+    },
+    /// Clear App CookieStore for a host (MCP `clear_cookies`). Use before retesting
+    /// search after `ss_search_delay` / 搜索间隔 throttle.
+    ClearCookies {
+        #[arg(long)]
+        url: String,
     },
 }
 

@@ -202,6 +202,15 @@ pub enum SourceSub {
         #[arg(long, default_value_t = false)]
         force_clear: bool,
     },
+    /// Push BookSource JSON file to phone via MCP `save_source` (avoids IDE escaping hell).
+    Push {
+        #[arg(long)]
+        file: PathBuf,
+        /// Overwrite enabled/group from JSON (default true for new drafts).
+        #[arg(long, default_value_t = true)]
+        #[arg(long = "no-overwrite", action = clap::ArgAction::SetFalse)]
+        overwrite: bool,
+    },
 }
 
 #[derive(Subcommand)]

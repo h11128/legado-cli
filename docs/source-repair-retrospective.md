@@ -1087,6 +1087,21 @@ Trap：Legado 里 `td.0` 是 **class**，索引要用 `tag.td.0@…`；目录勿
 
 Harness：`source-gate/alias_url.rs`（gate `alias_bookSourceUrl_skip_host_probe`）；`disable_dead` → `skipped_alias`；`diagnose_tips` + skill trap `alias_booksourceurl_false_dead`。
 
+## 131. 新建书源流程优化（15u 会话，2026-08-04）
+
+本批建源（ttks / xsw / sto55 / twkan / uukanshu / 15u）里最烧时间的点：
+
+1. **搜索 list=0 先改选择器** — 实际是 `ss_search_delay` + `alert(搜索间隔)`；PC curl 正常、手机 Cookie 粘滞。
+2. **IDE `save_source` 嵌套 JSON 转义** — 容易失败，改走文件推源。
+3. **笔趣阁多块 `list-charts`** — 固定 `.1` 只拿到「最新章节」。
+
+已落地：
+
+- `source-cli check clear-cookies --url …`
+- `source-cli source push --file …`
+- `sniff_search_rate_limit` + diagnose tips `ss_search_delay_cookie` / `multi_list_charts_toc`
+- create/repair skill + discovery guide 流程与 trap 表
+
 ## Close-out 标准（每轮）
 
 

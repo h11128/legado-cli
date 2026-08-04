@@ -29,7 +29,7 @@ pub use classify::{classify_one, ClassifyOpts};
 #[cfg(feature = "l2")]
 pub use l2::probe_l2;
 #[cfg(feature = "l2")]
-pub use sniff::sniff_dead_html;
+pub use sniff::{sniff_dead_html, sniff_search_rate_limit, SEARCH_RATE_LIMIT_HINTS};
 
 use source_types::GateResult;
 

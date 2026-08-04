@@ -17,6 +17,7 @@ mod hunt;
 mod knowledge_cmd;
 mod ledger_cmd;
 mod migrate;
+mod mcp_tools;
 mod oneshot_finish;
 mod oneshot_hunt;
 mod oneshot_live;
@@ -58,6 +59,7 @@ pub use gate::{run_gate, GateArgs};
 pub use hunt::{run_hunt, HuntArgs};
 pub use ledger_cmd::{run_ledger, LedgerCmd};
 pub use migrate::{run_migrate, MigrateArgs};
+pub use mcp_tools::{run_mcp_tools, McpToolsCmd};
 pub use ops_bridge::{
     run_cache_sub, run_check_sub, run_db_sub, run_knowledge_sub, run_pattern_sub, run_queue_sub,
 };

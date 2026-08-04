@@ -23,12 +23,14 @@ Repair of *existing* failing sources stays in `legado-book-source-repair` + `sou
 3) Pick rows with discovery=make_candidate (ignore already_sourced unless improving)
 4) source-cli fetch --url … --dump-dir temp/full_fix/cache/html
 5) source-cli probe --base-url … --html-file … --key <keyword>   # optional form/rank hint
-6) Draft BookSource JSON from raw HTML (see skill Phase 2)
-7) MCP save_source → debug_source → start_check_sources (checkDiscovery=false)
-8) Tag bookSourceGroup with 出版 (or 特别,出版); append seed to preset JSON; ledger/retro if needed
+6) Draft BookSource JSON from raw HTML → `temp/full_fix/cache/new_sources/<host>.json`
+7) `source-cli source push --file …` → debug_source → start_check_sources (checkDiscovery=false)
+   If search list=0: HTTP log first; `搜索间隔`/`ss_search_delay` → `check clear-cookies` + jar off
+8) Tag bookSourceGroup; append seed to preset JSON; ledger/retro if needed
 ```
 
 Wall budget: probe batch ≤1–2 min; one new source draft+verify ≤5–8 min. Skip VPN/App/PDF early.
+If search empty burns >2 min on throttle cookies — clear cookies once, then one verify; do not rewrite selectors on alert HTML.
 
 **Note:** `config/site_candidates_publish.json` is a curated ledger (`sourced` / `skip_*`).
 Empty `make_candidate` on `--preset publish` alone is expected until you add `status=candidate`
@@ -74,6 +76,10 @@ Preset file: [`config/site_candidates_publish.json`](../../config/site_candidate
 | Catalog has no search | xuges / tianyabooks | `searchUrl` `@js: source.put('sk', key)` then `bookList` `@js` filter with `source.get('sk')` — `key` is **not** bound in AnalyzeRule |
 | GBK sites | xuges / tianyabooks | URL option `,{"charset":"GBK"}` |
 | TY empty chapters | newer /world/ shells | Prefer older books with `#neirong`; skip stub first chapters |
+| `ss_search_delay` / 搜索间隔 | list=0; HTTP body is alert script | `check clear-cookies` + `enabledCookieJar=false`; never rewrite bookList |
+| Multi `list-charts` | TOC only latest N chapters | `@js` pick ul with max `li>a` |
+| IDE save_source escape | Truncated/broken JSON on MCP call | `source-cli source push --file` |
+| CF Turnstile search | uukanshu-style | skip or manual loginUrl; do not fake selectors |
 
 ## Related
 
@@ -84,9 +90,9 @@ Preset file: [`config/site_candidates_publish.json`](../../config/site_candidate
 5. **Do not claim fixed/created** without device `校验成功` / debug content non-empty.
 6. After a useful new site class, append one row to the preset JSON (`status` + `note`).
 
-## Related
+## Links
 
 - Create skill: `legado-book-source` (Phases 1–3 + this doc link)
 - Repair skill: `legado-book-source-repair`
 - MCP SOT: `config/mcp_defaults.json`
-- Session note: `docs/source-repair-retrospective.md` §129
+- Session note: `docs/source-repair-retrospective.md` §129 / §131

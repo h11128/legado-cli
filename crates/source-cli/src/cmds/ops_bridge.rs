@@ -8,6 +8,7 @@ use crate::cmds::check_cmd::{run_check, CheckCmd};
 use crate::cmds::check_ops::{run_check_ops, CheckOpsCmd};
 use crate::cmds::db_cmd::{run_db, DbCmd};
 use crate::cmds::knowledge_cmd::{run_knowledge, KnowledgeCmd};
+use crate::cmds::mcp_tools::{run_mcp_tools, McpToolsCmd};
 use crate::cmds::pattern_cmd::{run_pattern, PatternCmd};
 use crate::cmds::queue_cmd::{run_queue, QueueCmd};
 use crate::cmds::queue_ops::{run_queue_ops, QueueOpsCmd};
@@ -166,7 +167,13 @@ pub fn run_queue_sub(cmd: QueueSub) -> ExitCode {
 
 pub fn run_check_sub(cmd: CheckSub) -> ExitCode {
     match cmd {
-        CheckSub::Channel => run_check(CheckCmd::Channel),
+        CheckSub::Channel {
+            clear_stale,
+            force_clear,
+        } => run_check(CheckCmd::Channel {
+            clear_stale,
+            force_clear,
+        }),
         CheckSub::Precheck {
             urls_file,
             timeout,
@@ -253,6 +260,7 @@ pub fn run_check_sub(cmd: CheckSub) -> ExitCode {
             l2_timeout,
             rules,
         }),
+        CheckSub::ClearCookies { url } => run_mcp_tools(McpToolsCmd::ClearCookies { url }),
     }
 }
 

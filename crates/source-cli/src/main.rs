@@ -534,6 +534,9 @@ fn main() -> ExitCode {
                 clear_stale,
                 force_clear,
             }),
+            SourceSub::Push { file, overwrite } => {
+                run_mcp_tools(McpToolsCmd::Push { file, overwrite })
+            }
         },
         Cmd::Claim { cmd } => match cmd {
             ClaimSub::Validate { check_json } => run_claim(ClaimCmd::Validate { check_json }),

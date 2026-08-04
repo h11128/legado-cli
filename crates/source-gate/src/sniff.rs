@@ -57,10 +57,39 @@ pub const SHELL_HINTS: &[&str] = &[
     "cf-browser-verification",
 ];
 
+/// Search throttle shells (笔趣阁系 `ss_search_delay` / alert 间隔).
+///
+/// Not a dead/wall site — do **not** disable. Agent must clear cookies and/or
+/// set `enabledCookieJar=false` before rewriting search selectors.
+pub const SEARCH_RATE_LIMIT_HINTS: &[&str] = &[
+    "搜索间隔",
+    "ss_search_delay",
+    "search interval",
+    "搜索太频繁",
+    "请稍后再搜索",
+    "请稍后搜索",
+];
+
+/// True when HTML is a search-throttle stub (often tiny `<script>alert("搜索间隔…")`).
+pub fn sniff_search_rate_limit(text: &str) -> Option<&'static str> {
+    let low = text.to_lowercase();
+    for h in SEARCH_RATE_LIMIT_HINTS {
+        if low.contains(&h.to_lowercase()) {
+            return Some(*h);
+        }
+    }
+    None
+}
+
 /// Return reason tag if HTML looks like parking / wall / bot-shell.
 ///
 /// Tags: `wall:…` | `deadish:…` | `shell:…` | `deadish:tiny_sale_or_redirect`.
+/// Search-throttle stubs (`搜索间隔` / `ss_search_delay`) return **None** — not dead.
 pub fn sniff_dead_html(text: &str, final_url: &str, title: &str) -> Option<String> {
+    // Throttle HTML must not fall through to tiny_sale / shell heuristics.
+    if sniff_search_rate_limit(text).is_some() {
+        return None;
+    }
     let low = text.to_lowercase();
     let title_l = title.to_lowercase();
     let final_l = final_url.to_lowercase();
@@ -162,5 +191,21 @@ mod tests {
         let r = sniff_dead_html(html, "https://www.jinyongwang.net/", "安盛风机").unwrap();
         assert!(r.starts_with("deadish:"), "{r}");
         assert!(r.contains("专业生产厂家") || r.contains("工业通风") || r.contains("查询的产品"));
+    }
+
+    #[test]
+    fn sniff_search_interval_alert() {
+        let html = r#"<script>alert("搜索间隔: 30 秒");window.history.go(-1);</script>"#;
+        assert_eq!(sniff_search_rate_limit(html), Some("搜索间隔"));
+        assert!(sniff_dead_html(html, "http://www.15u.cc/searchb0.html", "").is_none());
+    }
+
+    #[test]
+    fn sniff_search_interval_not_deadish_even_with_sale_word() {
+        // Tiny page + 出售 would otherwise hit tiny_sale; throttle must win.
+        let html = r#"<script>alert("搜索间隔: 30 秒");</script>出售"#;
+        assert!(html.len() < 6000);
+        assert_eq!(sniff_search_rate_limit(html), Some("搜索间隔"));
+        assert!(sniff_dead_html(html, "http://www.15u.cc/s", "").is_none());
     }
 }

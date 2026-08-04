@@ -74,11 +74,24 @@ pub fn layer_tips(diag: &DiagnoseResult) -> Vec<String> {
                  avoid template-literal backticks in @js (Rhino SyntaxError)"
                     .into(),
             );
+            tips.push(
+                "TRAP ss_search_delay_cookie: debug 获取成功但 list=0；HTTP 体是 \
+                 alert(搜索间隔) / Cookie ss_search_delay — NOT a selector bug. \
+                 Clear cookies (`source-cli check clear-cookies --url …` or MCP clear_cookies); \
+                 set enabledCookieJar=false; optional searchUrl @js cookie.removeCookie before GET/POST. \
+                 Do not rewrite bookList on throttle HTML (15u.cc)"
+                    .into(),
+            );
         }
         Layer::Toc => {
             tips.push("Search OK — do NOT rewrite search. Fix tocUrl + ruleToc.".into());
             tips.push(
                 "TRAP tocUrl_read_link: span.read/first-chapter href → clear tocUrl; use detail-page catalog"
+                    .into(),
+            );
+            tips.push(
+                "TRAP multi_list_charts_toc: 笔趣阁系多个 ul.list-group.list-charts \
+                 (.0=最新几章, 另一块=全章) — do NOT hardcode .1; @js pick ul with max li>a count"
                     .into(),
             );
             tips.push(
