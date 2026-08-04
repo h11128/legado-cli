@@ -114,6 +114,7 @@ fn host_of(base: &str) -> Option<String> {
     url::Url::parse(base)
         .ok()
         .and_then(|u| u.host_str().map(str::to_lowercase))
+        .map(|h| h.strip_prefix("www.").unwrap_or(&h).to_string())
 }
 
 fn regex_escape_host(host: &str) -> String {
