@@ -137,6 +137,18 @@ pub fn enrich_with_live_probe(diag: &mut DiagnoseResult, live: &LiveProbeResult)
         diag.tips
             .push("TRAP 搜索口挂了: form endpoint HTTP 5xx — SKIP (not a selector bug)".into());
     }
+    if live
+        .ranked
+        .iter()
+        .any(|r| r.signals.iter().any(|s| s == "search_rate_limit"))
+    {
+        diag.tips.push(
+            "TRAP ss_search_delay_cookie: probe HTML has 搜索间隔/ss_search_delay — \
+             NOT a selector bug. source-cli check clear-cookies --url …; \
+             enabledCookieJar=false; do not rewrite bookList"
+                .into(),
+        );
+    }
     if let Some(ref best) = live.best {
         if best.score >= 2 {
             diag.evidence.search_url = Some(best.search_url.clone());
@@ -202,11 +214,9 @@ mod tests {
     }
 
     #[test]
-    fn alias_false_dead_tip() {
-        let d = DiagnoseResult::new(Url::new("http://QQ浏览器/").unwrap(), Layer::Search);
+    fn search_ss_delay_tip_in_layer() {
+        let d = DiagnoseResult::new(Url::new("http://www.15u.cc/").unwrap(), Layer::Search);
         let tips = layer_tips(&d);
-        assert!(tips
-            .iter()
-            .any(|t| t.contains("alias_booksourceurl_false_dead")));
+        assert!(tips.iter().any(|t| t.contains("ss_search_delay_cookie")));
     }
 }

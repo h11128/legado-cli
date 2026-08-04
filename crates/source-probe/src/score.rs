@@ -61,6 +61,23 @@ pub fn score_search_html_with_home(
         out.dead = true;
         return out;
     }
+    // 笔趣阁系 search throttle: alert(搜索间隔) / ss_search_delay — not a dead site.
+    let lower_early = html.to_ascii_lowercase();
+    for needle in [
+        "搜索间隔",
+        "ss_search_delay",
+        "search interval",
+        "搜索太频繁",
+        "请稍后再搜索",
+        "请稍后搜索",
+    ] {
+        if lower_early.contains(&needle.to_ascii_lowercase()) || html.contains(needle) {
+            out.score = -50;
+            out.reasons.push("search_rate_limit".into());
+            out.dead = false;
+            return out;
+        }
+    }
     // Cloudflare / empty error bodies often arrive as 200 with tiny payload
     if html.trim().len() < 80
         && (html.contains("error code")
@@ -74,7 +91,7 @@ pub fn score_search_html_with_home(
         return out;
     }
 
-    let lower = html.to_ascii_lowercase();
+    let lower = lower_early;
     for (needle, w, tag, bl) in [
         ("id=\"sitebox\"", 5, "list_sitebox", Some("#sitebox dl")),
         ("id='sitebox'", 5, "list_sitebox", Some("#sitebox dl")),
@@ -221,5 +238,14 @@ mod tests {
         let html = r#"<a href="/sort/1/1.html">玄幻</a><a href="/top/allvisit/1.html">榜</a>"#;
         let s = score_search_html(html, "x", 200);
         assert!(!s.reasons.iter().any(|r| r.starts_with("bookish_hrefs")));
+    }
+
+    #[test]
+    fn search_interval_alert_not_dead() {
+        let html = r#"<script>alert("搜索间隔: 30 秒");window.history.go(-1);</script>"#;
+        let s = score_search_html(html, "收徒", 200);
+        assert!(!s.dead);
+        assert!(s.reasons.iter().any(|r| r == "search_rate_limit"));
+        assert!(s.score < 0);
     }
 }

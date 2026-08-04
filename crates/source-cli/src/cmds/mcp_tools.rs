@@ -37,6 +37,10 @@ fn clear_cookies(url: &str) -> ExitCode {
             return ExitCode::from(1);
         }
     };
+    if let Err(e) = client.ensure_session() {
+        eprintln!("clear-cookies: session: {e}");
+        return ExitCode::from(1);
+    }
     match client.tools_call("clear_cookies", json!({ "url": url })) {
         Ok(v) => {
             println!("{}", McpClient::extract_text(&v));
@@ -49,6 +53,7 @@ fn clear_cookies(url: &str) -> ExitCode {
                 || msg.contains("not found")
                 || msg.contains("Unknown")
                 || msg.contains("unknown")
+                || msg.contains("Method not found")
             {
                 eprintln!("clear-cookies: tool unavailable ({msg}); trying eval_js fallback");
                 return clear_cookies_via_js(&client, url);
@@ -105,6 +110,10 @@ fn push_source(file: &PathBuf, overwrite: bool) -> ExitCode {
             return ExitCode::from(1);
         }
     };
+    if let Err(e) = client.ensure_session() {
+        eprintln!("push: session: {e}");
+        return ExitCode::from(1);
+    }
     let payload = match serde_json::to_string(&value) {
         Ok(s) => s,
         Err(e) => {

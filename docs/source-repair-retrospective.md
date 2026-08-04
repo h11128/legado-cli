@@ -1097,9 +1097,9 @@ Harness：`source-gate/alias_url.rs`（gate `alias_bookSourceUrl_skip_host_probe
 
 已落地：
 
-- `source-cli check clear-cookies --url …`
+- `source-cli check clear-cookies --url …`（须 MCP initialize；Cursor 目录可能缺工具，手机 App 有）
 - `source-cli source push --file …`
-- `sniff_search_rate_limit` + diagnose tips `ss_search_delay_cookie` / `multi_list_charts_toc`
+- `sniff_search_rate_limit` 接入 `sniff_dead_html` 早退；probe score `search_rate_limit`；diagnose tips
 - create/repair skill + discovery guide 流程与 trap 表
 
 ## Close-out 标准（每轮）
