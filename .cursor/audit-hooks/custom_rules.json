@@ -108,7 +108,7 @@
     "intercept": {
       "events": ["beforeShellExecution"],
       "action": "ask",
-      "agent_message": "ASK: long sleep (>=120s) detected. Book-source repair must poll serial_heartbeat.json <=90s (discipline §19) and never end a turn with an unsealed deep_active (§21-22).",
+      "agent_message": "ASK: long sleep (>=120s) detected. Book-source repair/create must poll serial_heartbeat.json <=90s (discipline §19) and never end a turn with an unsealed deep_active (§21-22 / create §14b).",
       "user_message": null,
       "plugin": null
     },

@@ -7,7 +7,7 @@ auth/ad walls, or writes hedged ledger lines like `校验成功或见上` after 
 
 | Layer | What | Enforcement |
 |-------|------|-------------|
-| **CliCommand / Rust** | `deep_active.json` claim on `diagnose` / `repair oneshot` | Soft claim always |
+| **CliCommand / Rust** | `deep_active.json` claim on `diagnose` / `repair oneshot` / **`source push` (create)** | Soft claim always |
 | **CliCommand / Rust** | `closeout pending` + `progress next` | **DENY** if unsealed claim |
 | **CliCommand / Rust** | `retro append` fixed/skip/fail | Seals `deep_active` |
 | **CliCommand / Rust** | `closeout claim\|heartbeat\|release\|clear-active` | Manual escape + heartbeat |
@@ -16,10 +16,10 @@ auth/ad walls, or writes hedged ledger lines like `校验成功或见上` after 
 | **HookRule** | `legado_hedged_ledger_success` | beforeShell **deny** |
 | **HookRule** | `legado_l0_only_live_repair` | beforeShell **deny** (§15) |
 | **HookRule** | `legado_serial_long_await` | beforeShell **ask** on long sleep |
-| **hooks.json prompt** | `stop`: unsealed `deep_active` reminder | ask at turn end |
-| **MdcRule** | discipline §21–23 | Always-loaded agent guidance |
-| **Skill** | traps `agent_turn_stall`, `hedged_ledger_success` | Repair playbook |
-| **Work context** | deep anti-stall one-liner | Session SOT |
+| **hooks.json command** | `stop`: `.cursor/hooks/check-deep-active-stop.py` | **followup** if unsealed (`loop_limit` 2) |
+| **MdcRule** | discipline §14b / §21–23 | Always-loaded agent guidance (repair **and** create) |
+| **Skill** | traps `agent_turn_stall`, create Phase 4 | Repair + create playbooks |
+| **Work context** | deep anti-stall + create close-out | Session SOT |
 
 ## HookRule wiring (verified 2026-07-29)
 
@@ -69,8 +69,10 @@ source-cli closeout claim --url 'https://…' --note 'mcp-debug'
 - `crates/source-closeout/src/active.rs`
 - `crates/source-closeout/src/ledger_gate.rs`
 - `crates/source-closeout/src/pending.rs`
-- `.cursor/rules/book-source-repair-discipline.mdc` §21–23
-- `skills/legado-book-source-repair/SKILL.md`
+- `.cursor/rules/book-source-repair-discipline.mdc` §14b / §21–23 (repair **and** create)
+- `skills/legado-book-source-repair/SKILL.md` + `skills/legado-book-source/SKILL.md` Phase 4
+- `.cursor/hooks/check-deep-active-stop.py` (tracked) + wire in local `.cursor/hooks.json`
+- `.cursor/hooks.json.example` (copy stop entry into gitignored `hooks.json`)
 - `.cursor/audit-hooks/custom_rules.json` (`legado_*` HookRules, tracked)
 - `.cursor/hooks.json` (machine-local wiring only; gitignored)
 

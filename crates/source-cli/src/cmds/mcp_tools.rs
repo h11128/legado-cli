@@ -134,7 +134,31 @@ fn push_source(file: &PathBuf, overwrite: bool) -> ExitCode {
         Ok(v) => {
             println!("{}", McpClient::extract_text(&v));
             eprintln!("push: ok url={url} overwrite={overwrite}");
-            ExitCode::SUCCESS
+            // Same anti-stall gate as diagnose/repair: must close-out before next site.
+            // Claim failure is hard for create — otherwise stop/progress gates never arm.
+            let claim = source_closeout::CloseoutPaths::from_repo().and_then(|paths| {
+                source_closeout::claim_active(&paths, url, "create push").map(|_| ())
+            });
+            match claim {
+                Ok(()) => {
+                    eprintln!(
+                        "push: claimed deep_active — REQUIRED before next site:\n\
+                           source-cli ledger append --url {url} --step check --result '…'\n\
+                           source-cli retro append --url {url} --status fixed|skip|fail \\\n\
+                             --trap '…' --skill-fix 0|1 --script-fix '…'\n\
+                         novel trap → update skill + diagnose_tips/harness, then git commit"
+                    );
+                    ExitCode::SUCCESS
+                }
+                Err(e) => {
+                    eprintln!(
+                        "push: FAIL claim deep_active: {e}\n\
+                         source saved on device but create close-out gate is not armed.\n\
+                         Fix paths/repo root, then: source-cli closeout claim --url {url} --note 'create push'"
+                    );
+                    ExitCode::from(2)
+                }
+            }
         }
         Err(e) => {
             eprintln!("push: {e}");

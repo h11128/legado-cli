@@ -1,0 +1,30 @@
+# Example only — do NOT replace your whole `.cursor/hooks.json` with this file.
+# `.cursor/hooks.json` is gitignored / machine-local. Merge the `stop` entry below
+# into the existing `hooks.stop` array (keep `audit-hooks hook` and other entries).
+#
+# Tracked script: `.cursor/hooks/check-deep-active-stop.py`
+#
+# Minimal stop entry to add:
+#
+# {
+#   "command": "python .cursor/hooks/check-deep-active-stop.py",
+#   "timeout": 10,
+#   "loop_limit": 2,
+#   "_note": "Unsealed deep_active (create push / diagnose / oneshot) → followup close-out"
+# }
+#
+# Full fragment if `stop` is empty:
+
+{
+  "stop": [
+    {
+      "command": "audit-hooks hook"
+    },
+    {
+      "command": "python .cursor/hooks/check-deep-active-stop.py",
+      "timeout": 10,
+      "loop_limit": 2,
+      "_note": "Unsealed deep_active (create push / diagnose / oneshot) → followup close-out"
+    }
+  ]
+}

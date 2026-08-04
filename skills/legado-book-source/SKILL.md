@@ -214,6 +214,7 @@ Use when the user asks to **find sites** or make **出版/公版/古籍** source
 1. Write JSON under `temp/full_fix/cache/new_sources/<host>.json`.
 2. `source-cli check channel` (idle) → `source-cli source push --file …`
    (binary often `crates/target/debug/source-cli.exe` — see create guide).
+   Prefer `source push` over IDE MCP `save_source` so `deep_active` is claimed.
 3. `debug_source` with a real search keyword. If **list=0**:
    - `set_http_log_recording(true)`, re-debug once, read `get_http_log`.
    - Throttle (`搜索间隔` / `ss_search_delay`): clear-cookies + `enabledCookieJar=false`.
@@ -225,6 +226,15 @@ Use when the user asks to **find sites** or make **出版/公版/古籍** source
    `timeoutMs` ≥ `verify_timeout_ms` in mcp_defaults (slow hosts ≥180000).
    `debug_source` `timeoutSec` ≥ `debug_timeout_s` (raise if mid-content truncated).
 6. Only claim success on device `校验成功`.
+7. **Phase 4 close-out (mandatory, same as repair — do not wait for reminder):**
+   ```
+   source-cli ledger append --url … --step check --result '校验成功'|fail:…|skip:…
+   source-cli retro append --url … --status fixed|skip|fail \
+     --trap '…' --skill-fix 0|1 --script-fix '…'
+   ```
+   Novel trap → update create/repair skill **and** harness (`diagnose_tips` / patch / sniff)
+   or `no_auto:<理由>` → `git commit` before next site.
+   `source push` already claims `deep_active`; unsealed blocks `progress next`.
 
 ## Hard rules
 

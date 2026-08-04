@@ -1,16 +1,17 @@
 ---
-description: Hard discipline for Legado book-source repair (anti fake-fixed / channel / infra)
+description: Hard discipline for Legado book-source repair AND create (anti fake-fixed / missing close-out)
 alwaysApply: true
 ---
 
-# Book-source repair discipline
+# Book-source repair & create discipline
 
-Standing rules for any 书源 fix / validate / bulk-check work in this workspace.
+Standing rules for any 书源 **fix / validate / bulk-check / 新建** work in this workspace.
+Create and repair share the same close-out / improve gate — do not wait for the user to remind.
 
 ## Hard bans
 
-1. **Never claim `fixed` without device verify** (`source-cli repair` → 校验成功).
-2. **Never run fix while bulk owns MCP** — `source-cli check channel` must be idle.
+1. **Never claim `fixed` / `created` without device verify** (`校验成功` from check/repair).
+2. **Never run fix/create-verify while bulk owns MCP** — `source-cli check channel` must be idle.
 3. **One phone = one check/debug job** (MCP single-flight). Do **parallel PC** work
    (fetch HTML / triage / prepare patches) and **one batch** `start_check_sources` for many URLs.
    Do not run two `debug_source` / check jobs on the same device.
@@ -20,13 +21,15 @@ Standing rules for any 书源 fix / validate / bulk-check work in this workspace
    Trust diagnose `layer`. If `fake_detail` (search page as 1 book, wmp8) → fix **search**, not toc.
    「搜索目录失效」is ambiguous — 画本=TOC, 御书屋=dead search; never guess from Chinese alone.
 6. **Wave is triage, not fix**: `repair_wave` may only apply *meaningful* smells; rate-only ≠ fixed.
-7. **Never rewrite search rules** on rate-limit HTML — rely on EWMA cooldown cache.
+7. **Never rewrite search rules** on rate-limit HTML — rely on EWMA cooldown cache / clear-cookies.
 8. **Never create** ad-hoc inspect scripts — use `source-cli diagnose` / `probe`.
-9. **Prefer** `source-cli wave` → `diagnose` → layer patch → verify.
+9. **Prefer** `source-cli wave` → `diagnose` → layer patch → verify (repair);
+   create prefers `docs/guides/book-source-create.md` + `source push --file`.
 10. Wall-time budgets (do not pad):
    - Root cause known, 1–2 field patch + verify: **≤1 min** (aim **30–45s**).
    - Diagnose + HTML + patch: target **2–3 min**.
    - Soft warn **4 min**; hard stop **5 min** → skip + ledger.
+   - Create draft+verify: target **5–8 min**; same hard stop spirit — seal and improve.
 11. **Never end a source attempt without** `source-cli ledger append`.
 12. **After domain migrate**: fetch new search form HTML before verify.
 12b. **Hunt before disable on dead/timeout** — if gate is `l1_unreachable` / `l2_http_dead`
@@ -35,8 +38,8 @@ Standing rules for any 书源 fix / validate / bulk-check work in this workspace
     `dead_site_shutdown_confirmed`, parked/ad-hijack/nginx deadish (disable/skip, no hunt).
 13. **If debug OK but check fails** (下载链接为空 / ~100ms): run `source-cli diagnose --debug-file …` first
  (bookUrl → infoHtml trap).
-14. **After every source attempt (fixed / skip / fail), mandatory close-out loop** — do not
-    pick the next URL until these finish:
+14. **After every source attempt (repair OR create: fixed/created / skip / fail), mandatory close-out**
+    — do not pick the next URL / site until these finish:
     1. **Document**: short note in `docs/source-repair-retrospective.md` (or dated retro)
        + `source-cli ledger append` / `source-cli retro append`.
     2. **Reflect**: `source-cli retro append` with `trap` / `harness` / `script_fix` /
@@ -45,7 +48,11 @@ Standing rules for any 书源 fix / validate / bulk-check work in this workspace
        `script_fix=no_auto:<理由>`。`skill_fix=1` 时 gate **强制**有效 `script_fix`
        （只改 SKILL、script_fix 写 MCP 手工 → retro/pending 拒绝）。
        known trap → `skill_fix=0`，可不改 Rust。
-       `source-cli retro append` 校验 trap + script_fix；`skill_fix` 会 sync Cursor SKILL。
+       Create path SOT: `legado-book-source` + `docs/guides/book-source-create.md`.
+       `source-cli retro append` 校验 trap + script_fix；`skill_fix` 会 sync Cursor SKILL.
+14b. **Create uses the same gate as repair.** `source-cli source push` claims
+    `temp/full_fix/deep_active.json`. Unsealed → `progress next` / `closeout pending` DENY.
+    After verify (or skip/fail), `retro append` seals. Do **not** end a create turn without close-out.
 15. **Never pass `--l0-only` on live progress / diagnose / repair.** L0-only skips L2 dead/wall
     sniff and burns phone/probe time on dead hosts (dcrsu 2026-07-27). Use full gate.
 16. **If site search API is empty but browse still works:** **disable** by default. Do **not**
@@ -77,7 +84,7 @@ Standing rules for any 书源 fix / validate / bulk-check work in this workspace
     - Soft warn still **4 min**; hard stop **5 min** per URL. Prefer finishing N closes over
       polishing one hard auth source.
 22. **Structural anti-stall (enforced, not prose):**
-    - `diagnose` / `repair oneshot` **claim** `temp/full_fix/deep_active.json`.
+    - `diagnose` / `repair oneshot` / **`source push` (create)** **claim** `temp/full_fix/deep_active.json`.
     - `source-cli progress next` / `closeout pending` **DENY** while deep_active is unsealed.
     - `retro append --status fixed|skip|fail` **seals** deep_active.
     - Escape: `source-cli closeout release --url … --status skip` (then still write honest ledger/retro).
@@ -86,7 +93,7 @@ Standing rules for any 书源 fix / validate / bulk-check work in this workspace
     - HookRules `legado_hedged_ledger_success` / `legado_l0_only_live_repair` (deny) and
       `legado_serial_long_await` (ask) live in `.cursor/audit-hooks/custom_rules.json`.
     - Full matrix + how to verify a rule actually fires: `docs/deep-diagnose-anti-stall.md`.
-23. **Honest verify ledger only:** after migrate/verify, write `校验成功` **iff** `verify_ok:true`;
+23. **Honest verify ledger only:** after migrate/verify/create-check, write `校验成功` **iff** `verify_ok:true`;
     else `fail:…` / `skip:…`. Never copy shell `tee` into a fake success line.
 
 ## Types (do not confuse)
@@ -97,7 +104,7 @@ Standing rules for any 书源 fix / validate / bulk-check work in this workspace
 | 3 | **file** (download / m3u8 list via downloadUrls) |
 | 4 | **video** |
 
-## Required path
+## Required path (repair)
 
 ```
 source-cli check channel
@@ -109,6 +116,21 @@ source-cli retro append --url … --status fixed --trap '…' --skill-fix 0
 source-cli closeout pending   # progress next 自动调用
 source-cli progress next
 ```
+
+## Required path (create)
+
+```
+source-cli check channel
+# draft → temp/full_fix/cache/new_sources/<host>.json
+source-cli source push --file …          # claims deep_active
+# debug_source → start_check_sources (checkDiscovery=false)
+source-cli ledger append --url … --step check --result '校验成功'   # or fail:/skip:
+source-cli retro append --url … --status fixed --trap '…' --skill-fix 0|1 --script-fix '…'
+# novel trap → update skill + harness BEFORE next site
+git commit   # if skill/docs/rust changed
+```
+
+Create SOT: `docs/guides/book-source-create.md` + skill `legado-book-source`.
 
 Cache: `temp/full_fix/cache/`. MCP: `config/mcp_defaults.json`. 
 Ledger: `temp/full_fix/repair_session_ledger.jsonl`.  

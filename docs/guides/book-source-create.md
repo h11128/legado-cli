@@ -25,16 +25,36 @@ Never invent a second `--target-dir`. MCP URL/token: `config/mcp_defaults.json`.
 1) source-cli check channel
 2) Fetch raw HTML (PC curl / source-cli fetch) — not DevTools DOM
 3) Draft JSON → temp/full_fix/cache/new_sources/<host>.json
-4) source-cli source push --file …          # not IDE save_source paste
+4) source-cli source push --file …          # claims deep_active (must close-out later; prefer over IDE save_source)
 5) debug_source keyword → if list=0: HTTP log first
 6) debug detail/toc/content (see debug keys below)
 7) start_check_sources checkDiscovery=false, timeoutMs≥90000 (slow≥180000)
 8) Only claim done on 校验成功
+9) MANDATORY close-out (same as repair — do not wait for user reminder):
+     ledger append → retro append (trap/skill_fix/script_fix) → improve → git commit
 ```
+
+**Unsealed `deep_active` after push → `progress next` / `closeout pending` DENY.**
+Turn-end: stop hook `.cursor/hooks/check-deep-active-stop.py` auto-followups close-out
+(wire via `.cursor/hooks.json.example` → local gitignored `hooks.json`).
+Seal with `retro append --status fixed|skip|fail`. Escape: `closeout release`.
+**Do not wait for the user to remind** — improve skill/docs/harness on novel traps before the next host.
 
 Timeouts SOT: `config/mcp_defaults.json` (`debug_timeout_s`, `verify_timeout_ms`, `http_timeout_s`).
 MCP `debug_source` may pass `timeoutSec` to override; check may pass `timeoutMs`.
 
+## Phase 4 — Close-out / improve (mandatory after every create attempt)
+
+Same gate as repair (discipline §14 / §14b). After success **or** skip/fail:
+
+1. `source-cli ledger append --url <bookSourceUrl> --step check --result '校验成功'|fail:…|skip:…`
+2. `source-cli retro append --url … --status fixed|skip|fail --trap '…' --skill-fix 0|1 --script-fix '…'`
+3. If **novel** trap: update `legado-book-source` and/or `legado-book-source-repair` **and**
+   harness (`diagnose_tips` / `source_patch` / sniff…) or `script_fix=no_auto:<理由>`
+4. Append a short note to `docs/source-repair-retrospective.md` when useful
+5. `git commit` skill/docs/rust before the next site
+
+Do **not** start the next host until close-out finishes. User should not have to remind.
 ## CookieJar decision (do not guess)
 
 | Signal | enabledCookieJar | Action |
