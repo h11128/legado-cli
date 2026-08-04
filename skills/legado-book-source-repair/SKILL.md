@@ -185,8 +185,14 @@ source-cli progress next   # 先跑 closeout pending
 | **17mb 空 index + 未审书 (xinbanzhu)** (17mb_empty_index_unapproved) | 「查看目录」→`…/index.html`/`zx.js` 空壳；新书「未经审核」首条 TocEmpty | toc=`/html/{dir}/{id}_1/` 静态；校验勿用易撞空书的「我的」。Harness：`apply_safe_rule_fixes`→`17mb_empty_index_tocUrl`；diagnose TOC tip |
 | **17mb POST+GBK 搜索 (mpo18)** (17mb_post_gbk_search) | GET `s.php?s=` 空；真搜索是 POST `s`+`type=articlename`+GBK；结果在 `p.sone`；CF 单源校验易 90s 超时 | `searchUrl=…/s.php,{"charset":"GBK","method":"POST","body":"s={{key}}&type=articlename"}`；`bookList=class.searchresult@p.sone`；补 bookInfo name/author；check `timeoutMs≥180000`。Harness：`diagnose_tips` Search tip |
 | **JSON API 详情空字段 (cooks)** (json_api_bookinfo_fields) | search/toc/content OK；bookInfo 无 name/author；`@js` 模板字符串导致 js失效；init stringify 后 coverUrl 读不到 `.articleid` | 补 `$.articlename`/`$.author`；coverUrl `JSON.parse(result)`；`@js` 用字符串拼接。Harness：`diagnose_tips` Search tip |
-| **ss_search_delay_cookie (15u)** | debug「获取成功」list=0；HTTP 体 `alert(搜索间隔)` / Cookie `ss_search_delay` | **勿改 bookList** — `source-cli check clear-cookies --url …`；`enabledCookieJar=false`；可选 searchUrl `@js` removeCookie。Harness：`sniff_search_rate_limit` + `diagnose_tips` |
-| **multi_list_charts_toc (15u)** | 多个 `ul.list-group.list-charts`；固定 `.1` 只有最新几章 | `@js` 取 `li>a` 最多的 ul。Harness：`diagnose_tips` Toc tip |
+| **ss_search_delay_cookie (15u)** | debug「获取成功」list=0；HTTP 体 `alert(搜索间隔)` / Cookie `ss_search_delay` | **勿改 bookList** — `source-cli check clear-cookies --url …`；`enabledCookieJar=false`；可选 searchUrl `@js` removeCookie。Harness：`sniff_search_rate_limit` + probe `search_rate_limit` + `diagnose_tips` |
+| **cookiejar_cf_needs_on (twkan)** | CF 搜索需要 cookie/webView；与限流站「关 jar」相反 | jar true + webView；仍挡 → skip。Harness：`diagnose_tips`；指南 `book-source-create.md` |
+| **multi_toc_pick_longest (15u/ttks)** | 多块目录容器；固定 `.1`/frame 只有最新章 | `@js` 取链接数最多的容器。Harness：`diagnose_tips` |
+| **multi_list_charts_toc (15u)** | 多个 `ul.list-group.list-charts`；固定 `.1` 只有最新几章 | 同 multi_toc_pick_longest |
+| **relative_ajax_toc (sto55)** | `ajax_index.html` 相对路径目录空 | `tocUrl=@js: baseUrl + 'ajax_index.html'`。Harness：`diagnose_tips` |
+| **desktop_empty_mobile_content (xsw)** | PC 正文空；m. 可读 | 桌面搜+目录，章节改写 m.。Harness：`diagnose_tips` |
+| **debug_colon_explore** | `::URL` 当详情调试 | 用绝对 URL / `++URL`。Harness：`diagnose_tips` |
+| **check_keyword_too_broad** | 「我的」首条坏书 → 假目录失败 | 稀有书名片段作 checkKeyWord。Harness：`diagnose_tips` |
 
 ## Worked examples
 
@@ -229,6 +235,7 @@ source-cli progress next   # 先跑 closeout pending
 | **`source-cli check`** | channel / precheck / batch / full / **clear-cookies** |
 | **`source-cli source`** | triage / fetch / verify / log / **push --file** |
 | **`source-cli queue`** | refresh-index / rt queue |
+| **Create guide** | `docs/guides/book-source-create.md` (CookieJar / debug keys / CLI path) |
 | **`source-cli wave` / `harvest` / `serial`** | Batch orchestration |
 | **`source-cli parse`** | Offline rule/url analysis |
 | **`source-cli parity`** | `cargo test --workspace` + inventory |

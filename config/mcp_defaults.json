@@ -1,12 +1,12 @@
 {
-  "mcp_url": "http://10.0.0.139:1236/mcp",
-  "token": "1234",
-  "web_api": "http://10.0.0.139:1122",
-  "updated": "2026-07-29",
-  "note": "Single SOT for phone LAN endpoint + MCP timeouts. Prefer source-cli discover over hard-coding DHCP IPs; skills/scripts should read this file.",
+  "debug_timeout_s": 90.0,
   "discovered_via": "adb",
-  "http_timeout_s": 90,
-  "debug_timeout_s": 45,
-  "verify_timeout_ms": 45000,
-  "verify_max_wait_s": 90
+  "http_timeout_s": 90.0,
+  "mcp_url": "http://10.0.0.139:1236/mcp",
+  "note": "Single SOT for phone LAN endpoint + MCP timeouts. debug_timeout_s=90 for slow create/debug; verify_timeout_ms for check. Updated by source-cli discover (preserves these fields).",
+  "token": "1234",
+  "updated": "2026-08-04",
+  "verify_max_wait_s": 120.0,
+  "verify_timeout_ms": 90000,
+  "web_api": "http://10.0.0.139:1122"
 }

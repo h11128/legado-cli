@@ -29,8 +29,12 @@ Repair of *existing* failing sources stays in `legado-book-source-repair` + `sou
 8) Tag bookSourceGroup; append seed to preset JSON; ledger/retro if needed
 ```
 
+**Create deep checklist:** [`book-source-create.md`](./book-source-create.md) (CookieJar table, `::` vs absolute debug, multi-TOC, hybrid m., CLI binary path).
+
 Wall budget: probe batch ≤1–2 min; one new source draft+verify ≤5–8 min. Skip VPN/App/PDF early.
 If search empty burns >2 min on throttle cookies — clear cookies once, then one verify; do not rewrite selectors on alert HTML.
+
+CLI binary (often not on PATH): `crates/target/debug/source-cli.exe` or `cargo install --path crates/source-cli --force`.
 
 **Note:** `config/site_candidates_publish.json` is a curated ledger (`sourced` / `skip_*`).
 Empty `make_candidate` on `--preset publish` alone is expected until you add `status=candidate`
@@ -80,6 +84,12 @@ Preset file: [`config/site_candidates_publish.json`](../../config/site_candidate
 | Multi `list-charts` | TOC only latest N chapters | `@js` pick ul with max `li>a` |
 | IDE save_source escape | Truncated/broken JSON on MCP call | `source-cli source push --file` |
 | CF Turnstile search | uukanshu-style | skip or manual loginUrl; do not fake selectors |
+| CookieJar opposite cases | throttle vs CF | see `book-source-create.md` decision table |
+| Relative ajax toc | sto55-style | `baseUrl + 'ajax_index.html'` |
+| Desktop empty / m. OK | xsw-style | hybrid chapter URL |
+| `::URL` debug | treated as 发现 | use absolute / `++` for detail |
+| Broad checkKeyWord | first hit junk | rare title fragment |
+| source-cli missing | not on PATH | `crates/target/debug/source-cli.exe` |
 
 ## Related
 
@@ -92,6 +102,7 @@ Preset file: [`config/site_candidates_publish.json`](../../config/site_candidate
 
 ## Links
 
+- Create checklist: `docs/guides/book-source-create.md`
 - Create skill: `legado-book-source` (Phases 1–3 + this doc link)
 - Repair skill: `legado-book-source-repair`
 - MCP SOT: `config/mcp_defaults.json`

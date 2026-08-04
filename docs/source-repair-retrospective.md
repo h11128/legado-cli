@@ -1101,6 +1101,7 @@ Harness：`source-gate/alias_url.rs`（gate `alias_bookSourceUrl_skip_host_probe
 - `source-cli source push --file …`
 - `sniff_search_rate_limit` 接入 `sniff_dead_html` 早退；probe score `search_rate_limit`；diagnose tips
 - create/repair skill + discovery guide 流程与 trap 表
+- **§131b（全量补齐）：** `docs/guides/book-source-create.md`（CookieJar 决策、`::` 调试、多 TOC、相对 ajax toc、m. hybrid、checkKeyWord、CLI 二进制路径）；mcp_defaults `debug_timeout_s=90` / `verify_timeout_ms=90000`
 
 ## Close-out 标准（每轮）
 

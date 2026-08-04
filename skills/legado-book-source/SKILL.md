@@ -91,10 +91,12 @@ Prefer device MCP over local Python sim.
 
 **CLI shortcuts (preferred for agents):**
 ```
-source-cli source push --file temp/full_fix/cache/new_sources/foo.json
-source-cli check clear-cookies --url http://www.example.com
-source-cli check channel
+# binary often not on PATH:
+E:/Projects/legadoSkill/crates/target/debug/source-cli.exe check channel
+E:/Projects/legadoSkill/crates/target/debug/source-cli.exe source push --file temp/full_fix/cache/new_sources/foo.json
+E:/Projects/legadoSkill/crates/target/debug/source-cli.exe check clear-cookies --url http://www.example.com
 ```
+Or `cargo install --path crates/source-cli --force`. Create checklist: `docs/guides/book-source-create.md`.
 `source-cli` talks to the phone MCP URL in `config/mcp_defaults.json` directly (works even when Cursor's tool catalog omits `clear_cookies`). If the App build lacks the tool, CLI falls back to `eval_js` / tells you to clear in the UI.
 Avoid pasting huge BookSource JSON through IDE `save_source` args (escaping breaks). Write a file → `source push`.
 
@@ -157,6 +159,9 @@ and `E:/Projects/legado/docs/pc-check-engine-research.md`.
 - [ ] Phase 3: save + device debug + fix loop
 ```
 
+**Full create checklist (traps + CookieJar + debug keys + CLI path):**
+`docs/guides/book-source-create.md`
+
 ### Phase 0 — Discovery (找站 / 出版 / 公版)
 
 Use when the user asks to **find sites** or make **出版/公版/古籍** sources — not when repairing an existing URL.
@@ -194,29 +199,31 @@ Use when the user asks to **find sites** or make **出版/公版/古籍** source
 2. Prefer CSS short form (`.name@text`, `#id@text`, `.a.b@href`).
 3. Handle lazy cover (`data-src` / `@data-src`), merged info fields,
    pagination (`nextTocUrl` / `nextContentUrl`).
-4. **笔趣阁系多目录块:** if page has several `ul.list-group.list-charts`, do **not**
-   hardcode `.0`/`.1` (often 「最新章节」 only). Prefer `@js` that picks the `ul`
-   with the most `li>a`.
-5. For JS rules: Rhino; prefer `var`; use `java.*` helpers. See
+4. **Multi-TOC containers** (笔趣阁 `list-charts`, ttks 最新+全部, etc.): do **not**
+   hardcode `.0`/`.1`. Prefer `@js` that picks the container with the most chapter links.
+5. **Relative ajax toc:** `tocUrl`/`ajax_index.html` → `@js: baseUrl + 'ajax_index.html'`.
+6. **PC body empty / m. OK:** keep desktop search+TOC; rewrite chapter fetch to `m.` sibling.
+7. Set `checkKeyWord` to a **rare title fragment** (not 「我的」) for the book you care about.
+8. For JS rules: Rhino; prefer `var`; use `java.*` helpers. See
    `legadoSkill/assets/方法-JS扩展类.md` when needed.
-6. When unsure, read official Kotlin under
+9. When unsure, read official Kotlin under
    `legado/app/src/main/java/io/legado/app/`.
 
 ### Phase 3 — Save and verify on device
 
 1. Write JSON under `temp/full_fix/cache/new_sources/<host>.json`.
-2. `source-cli check channel` (idle) → `source-cli source push --file …`.
-3. `debug_source` with a real search keyword (or MCP). If **list=0**:
-   - Turn on `set_http_log_recording(true)`, re-debug once, read `get_http_log`.
-   - If body is `搜索间隔` / Cookie `ss_search_delay`:  
-     `source-cli check clear-cookies --url <bookSourceUrl>`  
-     set `enabledCookieJar: false` (Legado still **reads** CookieStore even when
-     jar-save is off — clear is mandatory after a throttled attempt).  
-     Optional: `searchUrl` `@js: cookie.removeCookie('…'); '/search…'+key`.  
-     **Do not** rewrite `bookList` on throttle HTML.
-4. Debug detail/toc/content (absolute book URL or search→first hit).
-5. `start_check_sources` with `checkDiscovery=false`, keyword matching `checkKeyWord`,
-   `timeoutMs` ≥ 90s on slow hosts; poll `get_check_progress` until idle.
+2. `source-cli check channel` (idle) → `source-cli source push --file …`
+   (binary often `crates/target/debug/source-cli.exe` — see create guide).
+3. `debug_source` with a real search keyword. If **list=0**:
+   - `set_http_log_recording(true)`, re-debug once, read `get_http_log`.
+   - Throttle (`搜索间隔` / `ss_search_delay`): clear-cookies + `enabledCookieJar=false`.
+   - CF needing cookies: `enabledCookieJar=true` + `webView:true`; still blocked → skip.
+   - **Do not** rewrite `bookList` on throttle/challenge HTML.
+4. Prove detail/toc/content with an **absolute** book URL (or `++URL`).  
+   **Never** use `::URL` for that — `::` is 发现/explore.
+5. `start_check_sources` with `checkDiscovery=false`, keyword = `checkKeyWord`,
+   `timeoutMs` ≥ `verify_timeout_ms` in mcp_defaults (slow hosts ≥180000).
+   `debug_source` `timeoutSec` ≥ `debug_timeout_s` (raise if mid-content truncated).
 6. Only claim success on device `校验成功`.
 
 ## Hard rules
@@ -235,10 +242,17 @@ Use when the user asks to **find sites** or make **出版/公版/古籍** source
 | Trap | Signal | Fix |
 |------|--------|-----|
 | `ss_search_delay_cookie` | list=0; body `搜索间隔`; Cookie `ss_search_delay` | clear-cookies + `enabledCookieJar=false` |
-| `multi_list_charts_toc` | 目录只有最新 9 章 | JS 取最多 `li>a` 的 list-charts |
-| CF Turnstile | webView 仍搜索失效 | skip / loginUrl 手工过验证；勿瞎改选择器 |
+| `cookiejar_cf_needs_on` | CF search empty without cookies | jar true + webView; else skip/manual |
+| `multi_toc_pick_longest` | TOC only latest N chapters | @js max link-count container |
+| `relative_ajax_toc` | ajax_index relative → toc empty | `baseUrl + 'ajax_index.html'` |
+| `desktop_empty_mobile_content` | PC content empty; m. readable | hybrid chapter URL to m. |
+| `debug_colon_explore` | used `::URL` expecting detail | absolute URL or `++URL` |
+| `check_keyword_too_broad` | first search hit bad/empty book | rarer `checkKeyWord` + matching check keyword |
+| `multi_list_charts_toc` | 笔趣阁 list-charts `.1` only latest | same as multi_toc_pick_longest |
+| CF Turnstile | webView 仍搜索失效 | skip / loginUrl 手工过验证 |
 | IDE `save_source` escape | JSON 解析失败 / 规则被截断 | `source-cli source push --file` |
 | PC curl OK / phone list=0 | 同公网 IP + 手机 Cookie 已限流 | clear phone cookies；少用 PC 连搜同域 |
+| `source-cli` not found | command not found | `crates/target/debug/source-cli.exe` or `cargo install --path crates/source-cli` |
 
 ## When MCP is missing
 
@@ -247,6 +261,7 @@ via Web `:1122` or the app UI.
 
 ## Extra reference
 
+- **Create checklist:** `docs/guides/book-source-create.md`
 - **Discovery guide:** `docs/guides/book-source-discovery.md`
 - Upstream Trae skill (long, custom tools): `skills/SKILLV0.7.md`
 - Architecture: `docs/PROJECT_ARCHITECTURE.md`

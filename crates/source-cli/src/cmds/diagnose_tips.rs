@@ -82,6 +82,17 @@ pub fn layer_tips(diag: &DiagnoseResult) -> Vec<String> {
                  Do not rewrite bookList on throttle HTML (15u.cc)"
                     .into(),
             );
+            tips.push(
+                "TRAP cookiejar_cf_needs_on: Cloudflare/Turnstile search needs cookies — \
+                 enabledCookieJar=true + searchUrl webView:true; still blocked → skip/loginUrl. \
+                 Opposite of ss_search_delay (that case jar OFF + clear). See book-source-create.md"
+                    .into(),
+            );
+            tips.push(
+                "TRAP check_keyword_too_broad: key=我的 hits junk/empty first book → false TOC fail — \
+                 set checkKeyWord + check keyword to rare title fragment (收徒万倍/…)"
+                    .into(),
+            );
         }
         Layer::Toc => {
             tips.push("Search OK — do NOT rewrite search. Fix tocUrl + ruleToc.".into());
@@ -90,8 +101,18 @@ pub fn layer_tips(diag: &DiagnoseResult) -> Vec<String> {
                     .into(),
             );
             tips.push(
+                "TRAP multi_toc_pick_longest: several chapter containers (list-charts / 最新+全部 / frames) — \
+                 do NOT hardcode .0/.1; @js pick container with max chapter links (15u/ttks)"
+                    .into(),
+            );
+            tips.push(
+                "TRAP relative_ajax_toc: tocUrl or catalog is relative ajax_index.html — \
+                 use @js: baseUrl + 'ajax_index.html' (sto55). Relative-only often resolves wrong"
+                    .into(),
+            );
+            tips.push(
                 "TRAP multi_list_charts_toc: 笔趣阁系多个 ul.list-group.list-charts \
-                 (.0=最新几章, 另一块=全章) — do NOT hardcode .1; @js pick ul with max li>a count"
+                 (.0=最新几章, 另一块=全章) — same as multi_toc_pick_longest"
                     .into(),
             );
             tips.push(
@@ -113,10 +134,20 @@ pub fn layer_tips(diag: &DiagnoseResult) -> Vec<String> {
                     .into(),
             );
             tips.push(
+                "TRAP desktop_empty_mobile_content: PC chapter HTML empty/JS-only but m. host has \
+                 #nr1/readable body — keep www search+TOC; rewrite chapterUrl to m. sibling (xsw.tw)"
+                    .into(),
+            );
+            tips.push(
                 "TRAP qidian_clone_getcontent: chapter HTML shows 「内容读取中」+ \
                  read/index.js ajaxGetContent → /_getcontent.php?id={cid} — content @js: \
                  match /chapter/\\d+/(\\d+)/ + java.ajax + java.setContent + java.getString('p@text'); \
                  no bare return (Rhino). Do not rely on .j_readContent alone (aaread)"
+                    .into(),
+            );
+            tips.push(
+                "TRAP debug_colon_explore: debug key ::URL is 发现/explore, not book detail — \
+                 use absolute book URL or ++URL for toc/content prove"
                     .into(),
             );
         }
@@ -214,9 +245,23 @@ mod tests {
     }
 
     #[test]
-    fn search_ss_delay_tip_in_layer() {
-        let d = DiagnoseResult::new(Url::new("http://www.15u.cc/").unwrap(), Layer::Search);
+    fn relative_ajax_toc_tip() {
+        let d = DiagnoseResult::new(Url::new("https://sto55.com/").unwrap(), Layer::Toc);
         let tips = layer_tips(&d);
-        assert!(tips.iter().any(|t| t.contains("ss_search_delay_cookie")));
+        assert!(tips.iter().any(|t| t.contains("relative_ajax_toc")));
+    }
+
+    #[test]
+    fn desktop_mobile_content_tip() {
+        let d = DiagnoseResult::new(Url::new("https://www.xsw.tw/").unwrap(), Layer::Content);
+        let tips = layer_tips(&d);
+        assert!(tips.iter().any(|t| t.contains("desktop_empty_mobile_content")));
+    }
+
+    #[test]
+    fn cookiejar_cf_tip() {
+        let d = DiagnoseResult::new(Url::new("https://twkan.com/").unwrap(), Layer::Search);
+        let tips = layer_tips(&d);
+        assert!(tips.iter().any(|t| t.contains("cookiejar_cf_needs_on")));
     }
 }
