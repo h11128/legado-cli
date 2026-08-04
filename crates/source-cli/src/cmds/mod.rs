@@ -8,7 +8,10 @@ mod closeout;
 mod db_cmd;
 mod debug_vs_check;
 mod diagnose;
+mod diagnose_http_log;
 mod diagnose_tips;
+mod install_cmd;
+mod scaffold;
 mod discover_cmd;
 mod ewma;
 mod fetch_cmd;
@@ -59,7 +62,9 @@ pub use gate::{run_gate, GateArgs};
 pub use hunt::{run_hunt, HuntArgs};
 pub use ledger_cmd::{run_ledger, LedgerCmd};
 pub use migrate::{run_migrate, MigrateArgs};
+pub use install_cmd::run_install;
 pub use mcp_tools::{run_mcp_tools, McpToolsCmd};
+pub use scaffold::{default_out_for as scaffold_default_out, run_scaffold};
 pub use ops_bridge::{
     run_cache_sub, run_check_sub, run_db_sub, run_knowledge_sub, run_pattern_sub, run_queue_sub,
 };

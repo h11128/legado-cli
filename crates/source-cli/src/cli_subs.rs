@@ -211,6 +211,15 @@ pub enum SourceSub {
         #[arg(long = "no-overwrite", action = clap::ArgAction::SetFalse)]
         overwrite: bool,
     },
+    /// Scaffold a 笔趣阁-family draft JSON (MVP — rewrite selectors from live HTML).
+    Scaffold {
+        #[arg(long, help = "site base url or host, e.g. http://www.15u.cc")]
+        url: String,
+        #[arg(long)]
+        name: Option<String>,
+        #[arg(long, help = "default: temp/full_fix/cache/new_sources/<host>_scaffold.json")]
+        out: Option<PathBuf>,
+    },
 }
 
 #[derive(Subcommand)]

@@ -17,6 +17,9 @@ auth/ad walls, or writes hedged ledger lines like `校验成功或见上` after 
 | **HookRule** | `legado_l0_only_live_repair` | beforeShell **deny** (§15) |
 | **HookRule** | `legado_serial_long_await` | beforeShell **ask** on long sleep |
 | **hooks.json command** | `stop`: `.cursor/hooks/check-deep-active-stop.py` | **followup** if unsealed (`loop_limit` 2) |
+| **hooks.json command** | `afterMCPExecution`: `mcp-save-source-closeout.py` | IDE `save_source` → claim + remind |
+| **CliCommand / Rust** | `diagnose` Search layer → HTTP log sniff | Tip `ss_search_delay` + clear-cookies CLI |
+| **CliCommand / Rust** | `source scaffold` / `source-cli install` | 笔趣阁 MVP draft / PATH install |
 | **MdcRule** | discipline §14b / §21–23 | Always-loaded agent guidance (repair **and** create) |
 | **Skill** | traps `agent_turn_stall`, create Phase 4 | Repair + create playbooks |
 | **Work context** | deep anti-stall + create close-out | Session SOT |
@@ -72,7 +75,8 @@ source-cli closeout claim --url 'https://…' --note 'mcp-debug'
 - `.cursor/rules/book-source-repair-discipline.mdc` §14b / §21–23 (repair **and** create)
 - `skills/legado-book-source-repair/SKILL.md` + `skills/legado-book-source/SKILL.md` Phase 4
 - `.cursor/hooks/check-deep-active-stop.py` (tracked) + wire in local `.cursor/hooks.json`
-- `.cursor/hooks.json.example` (copy stop entry into gitignored `hooks.json`)
+- `.cursor/hooks/mcp-save-source-closeout.py` (IDE `save_source` claim)
+- `.cursor/hooks.json.example` (merge stop + afterMCP entries into gitignored `hooks.json`)
 - `.cursor/audit-hooks/custom_rules.json` (`legado_*` HookRules, tracked)
 - `.cursor/hooks.json` (machine-local wiring only; gitignored)
 

@@ -388,5 +388,11 @@ pub enum Cmd {
         #[arg(long, default_value_t = false)]
         no_ledger: bool,
     },
+    /// Install `source-cli` onto `~/.cargo/bin` (PATH) via `cargo install --path`.
+    Install {
+        #[arg(long, default_value_t = true)]
+        #[arg(long = "no-force", action = clap::ArgAction::SetFalse)]
+        force: bool,
+    },
     Version,
 }

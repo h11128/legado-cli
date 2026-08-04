@@ -4,33 +4,41 @@ Agent entry: skill `legado-book-source`. Repair of existing URLs stays in `legad
 
 ## CLI binary (Windows)
 
-`source-cli` is often **not** on PATH. Prefer an absolute path:
+Prefer installing onto PATH once:
 
 ```bash
-# from repo (Cargo writes under crates/target when built from crates/)
-E:/Projects/legadoSkill/crates/target/debug/source-cli.exe --help
-
-# rebuild
 cd E:/Projects/legadoSkill/crates && cargo build -p source_cli
+# from repo root (or crates/):
+source-cli install          # cargo install --path … --force → ~/.cargo/bin
+# new shell:
+source-cli --help
+```
 
-# optional install onto cargo bin (then `source-cli` works in new shells)
-cargo install --path E:/Projects/legadoSkill/crates/source-cli --force
+If `source-cli` is still missing, use the absolute debug binary:
+
+```bash
+E:/Projects/legadoSkill/crates/target/debug/source-cli.exe --help
 ```
 
 Never invent a second `--target-dir`. MCP URL/token: `config/mcp_defaults.json`.
+
+**Clear cookies SOT:** always `source-cli check clear-cookies --url …`.
+Do **not** rely on Cursor MCP tool lists — they often omit App `clear_cookies`
+even though the phone implements it (CLI calls MCP or falls back to `eval_js`).
 
 ## Fast path
 
 ```
 1) source-cli check channel
-2) Fetch raw HTML (PC curl / source-cli fetch) — not DevTools DOM
-3) Draft JSON → temp/full_fix/cache/new_sources/<host>.json
-4) source-cli source push --file …          # claims deep_active (must close-out later; prefer over IDE save_source)
-5) debug_source keyword → if list=0: HTTP log first
-6) debug detail/toc/content (see debug keys below)
-7) start_check_sources checkDiscovery=false, timeoutMs≥90000 (slow≥180000)
-8) Only claim done on 校验成功
-9) MANDATORY close-out (same as repair — do not wait for user reminder):
+2) Optional scaffold: source-cli source scaffold --url http://host [--name …]
+3) Fetch raw HTML (PC curl / source-cli fetch) — not DevTools DOM; rewrite selectors
+4) Draft JSON → temp/full_fix/cache/new_sources/<host>.json
+5) source-cli source push --file …          # claims deep_active (prefer over IDE save_source)
+6) debug_source keyword → if list=0: HTTP log / diagnose (auto tip on 搜索间隔)
+7) debug detail/toc/content (see debug keys below)
+8) start_check_sources checkDiscovery=false, timeoutMs≥90000 (slow≥180000)
+9) Only claim done on 校验成功
+10) MANDATORY close-out (same as repair — do not wait for user reminder):
      ledger append → retro append (trap/skill_fix/script_fix) → improve → git commit
 ```
 
@@ -59,7 +67,7 @@ Do **not** start the next host until close-out finishes. User should not have to
 
 | Signal | enabledCookieJar | Action |
 |--------|------------------|--------|
-| HTTP body `搜索间隔` / Cookie `ss_search_delay` | **false** | `check clear-cookies --url …` then retest; optional searchUrl `@js` `cookie.removeCookie` |
+| HTTP body `搜索间隔` / Cookie `ss_search_delay` | **false** | **`source-cli check clear-cookies --url …`** then retest; optional searchUrl `@js` `cookie.removeCookie` |
 | CF / Turnstile needs browser cookie to search | **true** + often `webView:true` | If still blocked → skip / `loginUrl` manual; do not rewrite selectors on challenge HTML |
 | Site needs login session | **true** | loginUrl / loginUi; do not clear cookies mid-debug |
 
@@ -112,7 +120,7 @@ Pattern:
 
 | Trap | Signal | Fix |
 |------|--------|-----|
-| `ss_search_delay_cookie` | list=0; alert 搜索间隔 | clear-cookies + jar false |
+| `ss_search_delay_cookie` | list=0; alert 搜索间隔 | **`source-cli check clear-cookies`** + jar false |
 | `cookiejar_cf_needs_on` | CF search empty without jar/webView | jar true + webView; else skip |
 | `multi_toc_pick_longest` | TOC only latest N | @js max link-count container |
 | `relative_ajax_toc` | toc empty; ajax_index relative | baseUrl + path |
@@ -121,7 +129,17 @@ Pattern:
 | `check_keyword_too_broad` | first hit bad book | rarer checkKeyWord |
 | `ide_save_escape` | save JSON broken | `source push --file` |
 | CF Turnstile | webView still fail | skip / manual loginUrl |
-| CLI not found | `source-cli: command not found` | use `crates/target/debug/source-cli.exe` |
+| CLI not found | `source-cli: command not found` | `source-cli install` or `crates/target/debug/source-cli.exe` |
+
+## Scaffold (笔趣阁系 MVP)
+
+```bash
+source-cli source scaffold --url http://www.example.com --name '例站'
+# → temp/full_fix/cache/new_sources/www_example_com_scaffold.json
+```
+
+Draft only: CookieJar off, GET-ish search with `removeCookie`, longest-list TOC JS,
+common content selectors. **Must** fetch live HTML and rewrite before verify.
 
 ## Related
 

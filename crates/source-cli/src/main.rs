@@ -537,6 +537,10 @@ fn main() -> ExitCode {
             SourceSub::Push { file, overwrite } => {
                 run_mcp_tools(McpToolsCmd::Push { file, overwrite })
             }
+            SourceSub::Scaffold { url, name, out } => {
+                let out = out.unwrap_or_else(|| scaffold_default_out(&url));
+                run_scaffold(&url, name.as_deref(), &out)
+            }
         },
         Cmd::Claim { cmd } => match cmd {
             ClaimSub::Validate { check_json } => run_claim(ClaimCmd::Validate { check_json }),
@@ -569,6 +573,7 @@ fn main() -> ExitCode {
             out,
             no_ledger,
         }),
+        Cmd::Install { force } => run_install(force),
         Cmd::Version => run_version(),
     }
 }

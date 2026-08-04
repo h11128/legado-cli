@@ -13,6 +13,7 @@ use source_ports::SourceRepository;
 use source_probe::probe_search_live;
 use source_types::{Layer, SourceKey, Url};
 
+use super::diagnose_http_log::enrich_http_log_on_empty_search;
 use super::diagnose_tips::{enrich_with_live_probe, layer_tips};
 
 #[cfg(feature = "gate_full")]
@@ -131,9 +132,9 @@ pub fn run_diagnose(args: DiagnoseArgs) -> ExitCode {
         return ExitCode::from(3);
     }
 
-    let debug_text = if let Some(p) = &args.debug_file {
+    let (debug_text, mcp_client) = if let Some(p) = &args.debug_file {
         match std::fs::read_to_string(p) {
-            Ok(t) => t,
+            Ok(t) => (t, None),
             Err(e) => {
                 eprintln!("diagnose: read debug file: {e}");
                 return ExitCode::from(4);
@@ -164,11 +165,14 @@ pub fn run_diagnose(args: DiagnoseArgs) -> ExitCode {
                 return ExitCode::from(2);
             }
         };
-        raw
+        (raw, Some(client))
     };
 
     let mut d = diagnose_from_debug(url, &debug_text, Some(gate), None);
     attach_probe_tips(&mut d, &args.key);
+    if let Some(ref client) = mcp_client {
+        enrich_http_log_on_empty_search(client, &mut d, args.url.trim(), &args.key, &debug_text);
+    }
     let v = serde_json::to_value(&d).unwrap_or_default();
     if let Err(e) = validate_diagnose(&v) {
         eprintln!("diagnose: contract: {e}");

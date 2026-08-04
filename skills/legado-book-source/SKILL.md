@@ -91,14 +91,19 @@ Prefer device MCP over local Python sim.
 
 **CLI shortcuts (preferred for agents):**
 ```
-# binary often not on PATH:
+# once per machine (puts source-cli on ~/.cargo/bin):
+source-cli install   # or: cargo run -p source_cli -- install
+# fallback absolute binary:
 E:/Projects/legadoSkill/crates/target/debug/source-cli.exe check channel
+E:/Projects/legadoSkill/crates/target/debug/source-cli.exe source scaffold --url http://www.example.com
 E:/Projects/legadoSkill/crates/target/debug/source-cli.exe source push --file temp/full_fix/cache/new_sources/foo.json
 E:/Projects/legadoSkill/crates/target/debug/source-cli.exe check clear-cookies --url http://www.example.com
 ```
-Or `cargo install --path crates/source-cli --force`. Create checklist: `docs/guides/book-source-create.md`.
-`source-cli` talks to the phone MCP URL in `config/mcp_defaults.json` directly (works even when Cursor's tool catalog omits `clear_cookies`). If the App build lacks the tool, CLI falls back to `eval_js` / tells you to clear in the UI.
-Avoid pasting huge BookSource JSON through IDE `save_source` args (escaping breaks). Write a file → `source push`.
+Create checklist: `docs/guides/book-source-create.md`.
+**Clear cookies:** always CLI (`check clear-cookies`). Do not wait for Cursor MCP to list `clear_cookies`.
+`source-cli` talks to phone MCP in `config/mcp_defaults.json` (eval_js fallback if App lacks tool).
+Avoid pasting huge BookSource JSON through IDE `save_source` (escaping breaks). Write a file → `source push`.
+IDE `save_source` still arms `deep_active` via hook `mcp-save-source-closeout.py` — finish ledger+retro.
 
 ### Anti-block (rate / headers)
 
@@ -211,13 +216,16 @@ Use when the user asks to **find sites** or make **出版/公版/古籍** source
 
 ### Phase 3 — Save and verify on device
 
-1. Write JSON under `temp/full_fix/cache/new_sources/<host>.json`.
+1. Write JSON under `temp/full_fix/cache/new_sources/<host>.json`
+   (optional start: `source-cli source scaffold --url …` then rewrite from HTML).
 2. `source-cli check channel` (idle) → `source-cli source push --file …`
-   (binary often `crates/target/debug/source-cli.exe` — see create guide).
-   Prefer `source push` over IDE MCP `save_source` so `deep_active` is claimed.
+   (binary: `source-cli install` or `crates/target/debug/source-cli.exe` — see create guide).
+   Prefer `source push` over IDE MCP `save_source` so `deep_active` is claimed
+   (IDE save still claims via afterMCP hook — still must close-out).
 3. `debug_source` with a real search keyword. If **list=0**:
-   - `set_http_log_recording(true)`, re-debug once, read `get_http_log`.
-   - Throttle (`搜索间隔` / `ss_search_delay`): clear-cookies + `enabledCookieJar=false`.
+   - Prefer `source-cli diagnose` (auto HTTP-log sniff for 搜索间隔).
+   - Or `set_http_log_recording(true)`, re-debug once, read `get_http_log`.
+   - Throttle (`搜索间隔` / `ss_search_delay`): **`source-cli check clear-cookies`** + `enabledCookieJar=false`.
    - CF needing cookies: `enabledCookieJar=true` + `webView:true`; still blocked → skip.
    - **Do not** rewrite `bookList` on throttle/challenge HTML.
 4. Prove detail/toc/content with an **absolute** book URL (or `++URL`).  
@@ -251,7 +259,7 @@ Use when the user asks to **find sites** or make **出版/公版/古籍** source
 
 | Trap | Signal | Fix |
 |------|--------|-----|
-| `ss_search_delay_cookie` | list=0; body `搜索间隔`; Cookie `ss_search_delay` | clear-cookies + `enabledCookieJar=false` |
+| `ss_search_delay_cookie` | list=0; body `搜索间隔`; Cookie `ss_search_delay` | **`source-cli check clear-cookies`** + `enabledCookieJar=false` |
 | `cookiejar_cf_needs_on` | CF search empty without cookies | jar true + webView; else skip/manual |
 | `multi_toc_pick_longest` | TOC only latest N chapters | @js max link-count container |
 | `relative_ajax_toc` | ajax_index relative → toc empty | `baseUrl + 'ajax_index.html'` |

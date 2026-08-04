@@ -30,6 +30,8 @@ fn client() -> Result<Arc<McpClient>, String> {
 }
 
 fn clear_cookies(url: &str) -> ExitCode {
+    // Cursor IDE MCP catalogs often omit `clear_cookies` even when the App exposes it —
+    // this CLI entry is the SOT path (with eval_js fallback).
     let client = match client() {
         Ok(c) => c,
         Err(e) => {
