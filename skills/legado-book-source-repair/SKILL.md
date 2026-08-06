@@ -195,6 +195,8 @@ source-cli progress next   # 先跑 closeout pending
 | **check_keyword_too_broad** | 「我的」首条坏书 → 假目录失败 | 稀有书名片段作 checkKeyWord。Harness：`diagnose_tips` |
 | **search_author_concat_sibling_div** (rouwen/xn--7dv) | 搜索 `class.author@text` 拼出 `新乙\n阅读量：882`；同级第二个 `div.author` 是阅读量；详情无 author | search `class.author.0@text##作者：`；bookInfo `class.booktag@tag.a.0@text`。Harness：`no_auto:站点 DOM 特例` |
 | **dict_url_decode_fake_name** (haici/dict.cn) | `name=@js:decodeURI(baseUrl…)` + `bookList=body` → 任意换源关键词都「书名命中」；详情「该词条未找到」 | bookList `@js` 遇未找到返回 `[]`；name 用页面 `tag.h1`/`.word`；换源侧 `isAcceptableChangeSourceHit`（空/假最新章、本地有作者却空作者、词典 intro）。Harness：`ChangeBookSourceQuality` |
+| **url_decode_fake_booklist_non_novel** (百度图片/知道) | `bookList=@js:[{title:decodeURIComponent(word…)}]` 把搜索词伪造成一书；非小说站 | `bookList=@js:[]`；换源 `isNonNovelSearchHost` 黑名单。Harness：`ChangeBookSourceQuality` |
+| **qq_search_state_not_items** (白浏览器/松鹤) | `bookList=$.data.state[*]` + 搜索 JSON 无 lastChapter → 换源空最新章被丢 | flatten `novel_search_list.items`；bookInfo 补 `lastSerialname`；App 侧作者+长简介可放行空最新章 |
 
 ## Worked examples
 
