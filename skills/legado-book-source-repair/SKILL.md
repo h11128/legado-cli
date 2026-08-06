@@ -194,6 +194,7 @@ source-cli progress next   # 先跑 closeout pending
 | **debug_colon_explore** | `::URL` 当详情调试 | 用绝对 URL / `++URL`。Harness：`diagnose_tips` |
 | **check_keyword_too_broad** | 「我的」首条坏书 → 假目录失败 | 稀有书名片段作 checkKeyWord。Harness：`diagnose_tips` |
 | **search_author_concat_sibling_div** (rouwen/xn--7dv) | 搜索 `class.author@text` 拼出 `新乙\n阅读量：882`；同级第二个 `div.author` 是阅读量；详情无 author | search `class.author.0@text##作者：`；bookInfo `class.booktag@tag.a.0@text`。Harness：`no_auto:站点 DOM 特例` |
+| **dict_url_decode_fake_name** (haici/dict.cn) | `name=@js:decodeURI(baseUrl…)` + `bookList=body` → 任意换源关键词都「书名命中」；详情「该词条未找到」 | bookList `@js` 遇未找到返回 `[]`；name 用页面 `tag.h1`/`.word`；换源侧 `isAcceptableChangeSourceHit`（空/假最新章、本地有作者却空作者、词典 intro）。Harness：`ChangeBookSourceQuality` |
 
 ## Worked examples
 
