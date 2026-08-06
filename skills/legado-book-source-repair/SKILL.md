@@ -193,6 +193,7 @@ source-cli progress next   # 先跑 closeout pending
 | **desktop_empty_mobile_content (xsw)** | PC 正文空；m. 可读 | 桌面搜+目录，章节改写 m.。Harness：`diagnose_tips` |
 | **debug_colon_explore** | `::URL` 当详情调试 | 用绝对 URL / `++URL`。Harness：`diagnose_tips` |
 | **check_keyword_too_broad** | 「我的」首条坏书 → 假目录失败 | 稀有书名片段作 checkKeyWord。Harness：`diagnose_tips` |
+| **search_author_concat_sibling_div** (rouwen/xn--7dv) | 搜索 `class.author@text` 拼出 `新乙\n阅读量：882`；同级第二个 `div.author` 是阅读量；详情无 author | search `class.author.0@text##作者：`；bookInfo `class.booktag@tag.a.0@text`。Harness：`no_auto:站点 DOM 特例` |
 
 ## Worked examples
 
