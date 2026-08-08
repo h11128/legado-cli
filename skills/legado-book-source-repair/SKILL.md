@@ -119,6 +119,8 @@ source-cli progress next   # 先跑 closeout pending
 | **author_zhu_suffix** | 作者=`xxx著`（著作后缀） | **勿**写成 `…##前缀规则##著$`（第二条会被当成替换值）。用单条捕获：`##.*作者：\\s*(.*?)著?\\s*$##$1` 或仅 `##著$`（若前缀已干净）。Harness：`no_auto:去著后缀` |
 | **name_format_noise** | 书名带 `《》` / `[其他]` / `最新章节` 后缀 | 单条删除：`##^《\|》$` / `##^\\[其他\\]` / `##最新章节$`；勿多段 `##a##b` 误当替换。Harness：`no_auto:书名格式清洗` |
 | **lofter_tuiwen_as_book** | Lofter 搜索命中标题以 `推文` 开头（推文当书） | `ruleSearch.name` 的 `<js>` 里：`if(/^推文/.test(result)) result=""`（或从 bookList 过滤）。Harness：`no_auto:丢弃推文标题` |
+| **audiobook_announcer_in_author** | 听书源作者=`{{$.author}} 演播：{{$.announcer}}`（演播拼进作者） | `ruleSearch/ruleBookInfo.author` 改为 `$.author`（演播可另放 `kind`/`intro`）。Harness：`no_auto:去掉演播拼接` |
+| **ximalaya_author_is_anchor** | 喜马拉雅搜索/详情 API 只有 `nickname`/`anchorName`（主播），无原著作者字段 | **无法**修成小说作者；作者=主播是平台数据。勿把 nickname 当解析错误反复抠。Harness：`no_auto:平台无原著作者字段` |
 | 真 TOC (画本) | search≥2 + 目录空 + real detail | tocUrl/ruleToc |
 | 假「假详情」 | search≥2 but log shows search URL first | still toc/content |
 | 空 tocUrl + JSON (长佩) | `$.data.list` + empty tocUrl | chapter API tocUrl |
