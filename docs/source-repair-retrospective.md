@@ -1118,3 +1118,12 @@ Harness：`source-gate/alias_url.rs`（gate `alias_bookSourceUrl_skip_host_probe
 3. **文档**：本节或 dated retro
 4. **改进**：新 trap → patch SKILL + Rust/Python **再** next URL（2026-07-28 补：thread trap + `diagnose_tips.rs`）
 
+
+### 2026-08-08 采墨阁 https://www.caimoge.net (shelf source-first)
+- scaffold `search.php?q=`→404；真搜 `/search38.html?searchkey=`；列表 `.item`；目录 `/indexlist/{id}/` 分页；正文 `#booktxt`+`text.下一页`
+- `source verify` → **校验成功** (~9s)
+
+### 2026-08-08 Biu话 empty_search_detail_fallback_h1
+- URL: https://lbxjtjs.com/bh
+- Fix: ruleBookInfo.name -> class.article-title@text; author article-meta
+- Verify: key=同时穿越了99 -> 书籍总数:0; key=丝袜 -> 12
