@@ -113,6 +113,7 @@ source-cli progress next   # 先跑 closeout pending
 |------|--------|--------|
 | 假详情 (wmp8) | list-empty + books≤1 + `/s.php` | **search** |
 | **empty_search_detail_fallback_h1** | debug：`列表为空,按详情页解析` → 书名=`…搜索结果` / `Books: {{key}}`；bookUrl=搜索 URL | `ruleBookInfo.name` 勿用裸 `h1@text`；改成详情页专属（如 `h1.article-title` / `class.book-title`）。空搜应 `书籍总数:0`。Harness：`no_auto:按站改详情选择器` |
+| **search_author_highlight_span** | 搜索作者=`{{key}}`；HTML 标题内 `<span style=color>` 高亮关键词，`span.0` 误当作者 | `ruleSearch.author` 改 `span[itemprop=author]` / 真作者节点，勿用标题内第一个 span。Harness：`no_auto:按DOM改author` |
 | 真 TOC (画本) | search≥2 + 目录空 + real detail | tocUrl/ruleToc |
 | 假「假详情」 | search≥2 but log shows search URL first | still toc/content |
 | 空 tocUrl + JSON (长佩) | `$.data.list` + empty tocUrl | chapter API tocUrl |
