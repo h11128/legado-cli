@@ -1127,3 +1127,9 @@ Harness：`source-gate/alias_url.rs`（gate `alias_bookSourceUrl_skip_host_probe
 - URL: https://lbxjtjs.com/bh
 - Fix: ruleBookInfo.name -> class.article-title@text; author article-meta
 - Verify: key=同时穿越了99 -> 书籍总数:0; key=丝袜 -> 12
+
+### 2026-08-08 shelf source-first 头部清扫
+- **fixed**: `https://www.caimoge.net`（search38 / `.item` / indexlist / `#booktxt`）校验成功
+- **skip 簇**: xcfcch/99wenku/banzhuer antibot·停车；shufudai/zsngf/8zwdu 等 hunt empty；ttshu8 migrate 后 search 500；ranwen/121ds/feibzw/bqg123 死或 API 不可达；shubao1 搜得到但目录验证墙；xinrcy 搜索外链
+- 状态文件：`legado/temp/shelf_restore/queue/source_first_status.json`
+- 下一阶段：书籍验读换源（结构缺源≠可读）
