@@ -12,6 +12,17 @@ Create and repair share the same close-out / improve gate — do not wait for th
 
 1. **Never claim `fixed` / `created` without device verify** (`校验成功` from check/repair).
 2. **Never run fix/create-verify while bulk owns MCP** — `source-cli check channel` must be idle.
+2-shelf-origin. **Never `delete_sources` / 去重删禁用源 without a bookshelf-origin check.**
+    `books.origin` is an **exact** `bookSourceUrl` match (`BookSourceDao.getBookSource`).
+    Deleting a “twin” (`https://host` vs `https://host/` / `#frag`) while an enabled
+    base remains still orphans shelf books. If any `books.origin` equals the URL:
+    **do not delete** (keep disabled) or remap origins first.
+    **How to check (MCP has no bookshelf list tool):**
+    `adb exec-out run-as <pkg> cat databases/legado.db` (+ `-wal`/`-shm`) then
+    `SELECT origin, COUNT(*) FROM books WHERE origin IN (…) GROUP BY origin`
+    — or parse phone backup `bookshelf.json` / `Download/legado/backup*.zip`.
+    Prefer disable over delete for shelf-referenced URLs. Postmortem:
+    `docs/postmortem/2026-08-07-shelf-origin-source-deleted.md` (legado repo).
 3. **One phone = one check/debug job** (MCP single-flight). Do **parallel PC** work
    (fetch HTML / triage / prepare patches) and **one batch** `start_check_sources` for many URLs.
    Do not run two `debug_source` / check jobs on the same device.

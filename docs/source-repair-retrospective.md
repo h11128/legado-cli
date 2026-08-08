@@ -1011,6 +1011,13 @@ App 已补 `preserveOrderWeight=false`（需装新包后才生效）。
 - mop：前后空格/`\r`/`\n` 脏 URL 精确删（15）
 合计约 **1917** 删；禁用多 base 组清零。现 **启用 1232 / 禁用 1562 / 合计 2794**。
 
+**2026-08-07 事后更正：** 该清理**未检查书架 `books.origin`**。阅读按精确
+`bookSourceUrl` 绑定，删禁用孪生（如留下 `https://www.69shuba.com/`、删掉无尾斜杠）
+导致养肥/书架大量书丢源。已从 `backup-2026-07-26` 恢复书架引用源
+（restore 151 + reenable-via-delete/save 107 + norm/clone 补洞）；纪律见
+`legado` `docs/postmortem/2026-08-07-shelf-origin-source-deleted.md` 与
+`book-source-repair-discipline` §2-shelf-origin。此后去重删源必须先查 origin。
+
 ## 129. 出版书源：Gutenberg + ctext (2026-07-30)
 
 新建并设备校验成功：
