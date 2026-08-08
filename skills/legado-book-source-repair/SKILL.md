@@ -114,6 +114,11 @@ source-cli progress next   # 先跑 closeout pending
 | 假详情 (wmp8) | list-empty + books≤1 + `/s.php` | **search** |
 | **empty_search_detail_fallback_h1** | debug：`列表为空,按详情页解析` → 书名=`…搜索结果` / `Books: {{key}}`；bookUrl=搜索 URL | `ruleBookInfo.name` 勿用裸 `h1@text`；改成详情页专属（如 `h1.article-title` / `class.book-title`）。空搜应 `书籍总数:0`。Harness：`no_auto:按站改详情选择器` |
 | **search_author_highlight_span** | 搜索作者=`{{key}}`；HTML 标题内 `<span style=color>` 高亮关键词，`span.0` 误当作者 | `ruleSearch.author` 改 `span[itemprop=author]` / 真作者节点，勿用标题内第一个 span。Harness：`no_auto:按DOM改author` |
+| **txt_header_author_no_html_field** | 搜索/详情 HTML **无作者字段**（仅上传者）；但 `down.php?bid=` TXT 全本文件头有 `作者：xxx`（需 Referer=详情页，`name=NULL` 亦可） | `ruleBookInfo.author`=`@js`：`java.cacheFile(downUrl+Referer)` 解析文件头；**勿**对搜索列表每条拉 TXT（数 MB）。搜索列表仍可能空作者。Harness：`no_auto:按站拼down.php+Referer` |
+| **meta_author_content** | 详情可见区无作者/作者选择器空，但 `<meta name="author" content="…">`（或 og:novel:author）有值 | `ruleBookInfo.author`=`meta[name=author]@content`（可 `\|\|` 备选）。书名带《》时加 `##^《\|》$`。Harness：`no_auto:按站读meta` |
+| **author_zhu_suffix** | 作者=`xxx著`（著作后缀） | **勿**写成 `…##前缀规则##著$`（第二条会被当成替换值）。用单条捕获：`##.*作者：\\s*(.*?)著?\\s*$##$1` 或仅 `##著$`（若前缀已干净）。Harness：`no_auto:去著后缀` |
+| **name_format_noise** | 书名带 `《》` / `[其他]` / `最新章节` 后缀 | 单条删除：`##^《\|》$` / `##^\\[其他\\]` / `##最新章节$`；勿多段 `##a##b` 误当替换。Harness：`no_auto:书名格式清洗` |
+| **lofter_tuiwen_as_book** | Lofter 搜索命中标题以 `推文` 开头（推文当书） | `ruleSearch.name` 的 `<js>` 里：`if(/^推文/.test(result)) result=""`（或从 bookList 过滤）。Harness：`no_auto:丢弃推文标题` |
 | 真 TOC (画本) | search≥2 + 目录空 + real detail | tocUrl/ruleToc |
 | 假「假详情」 | search≥2 but log shows search URL first | still toc/content |
 | 空 tocUrl + JSON (长佩) | `$.data.list` + empty tocUrl | chapter API tocUrl |
