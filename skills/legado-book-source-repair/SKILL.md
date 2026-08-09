@@ -167,6 +167,7 @@ source-cli progress next   # 先跑 closeout pending
 | **mcp_timeout_sot** | 超时写死在代码 / 找不到配置 | 改 `config/mcp_defaults.json`：`http_timeout_s`（默认90）、`debug_timeout_s`（默认45，仅 `debug_source`）、`verify_timeout_ms` / `verify_max_wait_s`。Harness：`timeouts.rs`；discover 重写 URL 会保留这些字段 |
 | 主机跳转 | bookSourceUrl host ≠ final host（如 .org→.com） | **migrate** 再修搜索 |
 | **migrate_false_friend_cms** | gate `l2_host_redirect`/301 新域通，但是**无关 CMS**（如 Z-Blog `zb_users`/`San_Media`）；旧 `/novel_*`、`modules/article/search.php` **404**；OSINT 真后继（如 `.net`）手机/PC **CF 522** | **勿**按「主机跳转」盲目 migrate。先嗅新域模板/旧路径；假友 → disable；真后继不可达 → skip+换源。Harness：`no_auto:sniff_cms_before_migrate` |
+| **meta_search_third_party_toc_dead** | 书源是夸克/神马等 **SERP 聚合**；新 DOM（`qk-title-text`）可搜出书，但 `bookUrl` 落在随机第三方（403/`TocEmpty`）；书架常是搜索 URL/起点搜书页 | **勿**只修选择器当 fixed。无稳定本站详情/目录 → **skip/disable**+换源。Harness：`no_auto:aggregator_disable` |
 | **没有找到站点 (521danmei)** | title=`没有找到站点` / 空壳 | L2 `deadish:没有找到站点` → **skip**。Harness：`sniff.rs` DEADISH_HINTS |
 | **apex_no_a_try_m (tongrenquan)** | 裸 IP/`没有找到站点`；`header.Host=tongrenquan.org`；apex/`www` 无 A，但 `m.` 有 CF A；备注 `Unable to resolve host` | **勿**对 IP 空壳/死 www **缓修当 skip**。读 Host/旧域 → **立刻** `hunt --probe`（种子常已有 `m.`）→ migrate+verify+书架 remap。见 `gate_hunt_deferred_unprobed`。Seeds：`domain_hunt_seeds.json` |
 | **nginx 空站 (cstxt)** | title=`Welcome to nginx!` | L2 `deadish:welcome to nginx` → **skip** |
