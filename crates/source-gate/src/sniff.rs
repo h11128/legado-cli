@@ -7,7 +7,8 @@ pub const DEADISH_HINTS: &[&str] = &[
     "域名已过期",
     "域名过期",
     "sitename suspended",
-    "404 Not Found",
+    // Bare nginx/title "404 Not Found" is NOT parked — site may still serve
+    // /book/… + search (trap home_404_paths_alive). Leave as L2 http fail → Hunt.
     "this domain",
     "domain expired",
     "domain has expired",
@@ -207,5 +208,15 @@ mod tests {
         assert!(html.len() < 6000);
         assert_eq!(sniff_search_rate_limit(html), Some("搜索间隔"));
         assert!(sniff_dead_html(html, "http://www.15u.cc/s", "").is_none());
+    }
+
+    #[test]
+    fn sniff_bare_404_title_not_deadish() {
+        // home_404_paths_alive: nginx 404 home must not map to parked/Disable.
+        let html = "<html><title>404 Not Found</title><body>404 Not Found</body></html>";
+        assert!(
+            sniff_dead_html(html, "https://www.dbxsn.com/", "404 Not Found").is_none(),
+            "bare 404 must not be deadish"
+        );
     }
 }
