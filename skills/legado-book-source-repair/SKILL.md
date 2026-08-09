@@ -66,9 +66,18 @@ Budget clock starts at **pick**. Diagnose+patch **2–3 min**; hard stop **5 min
 [ ] 0  channel idle
 [ ] 1  progress next  (script L2-gates walls/parked; ≤~20s)
 [ ] 2  if next.l2_gate.action=migrate → migrate first
-[ ] 2b if action=hunt (l1_unreachable / l2_http_dead / L0 timeout_cluster) →
-       `source-cli hunt --url … --probe`（repair oneshot 已自动跑）→
-       migrate | disable(no_mirror/none_alive/empty) | skip(weak)
+[ ] 2b if action=hunt (l1_unreachable / l2_http_dead / L0 timeout_cluster)
+       OR brand may have migrated (parked/广告壳但仍可能换域) →
+       A) `source-cli hunt --url … --probe`（repair oneshot 已自动跑）
+       B) **OSINT successor pass（强制）**：
+          `python scripts/domain-successor-hunt.py --url … --title …`
+          （限流 Wayback CDX + crt.sh；打印 Google 查询；有
+          `SECURITYTRAILS_API_KEY` 再打付费档案）
+          Agent 必须浏览器跑脚本给出的 Google 查询（书名+站名）。
+          Wayback：**禁止**对 archive.org 并行/连发 curl — 只走
+          `scripts/lib/wayback_cdx.py`（默认间隔 12s，429 指数退避）。
+       C) migrate | disable(no_mirror/none_alive/empty) | skip(weak)
+          未做 B 不得宣称 hunt-empty / 修不了（trap `hunt_osint_skipped`）
 [ ] 3  diagnose --url URL   # also L2-failfast BEFORE phone debug
 [ ] 4  if layer=skip → ledger already done → close-out (§ below) → **立刻汇报**
 [ ] 5  else patch ONLY layer → ONE verify → ledger
@@ -146,6 +155,7 @@ source-cli progress next   # 先跑 closeout pending
 | 验证码搜索 | getcode / yzm / actyzm | **skip** |
 | 域名停车/过期 | L2 GET 正文含 for sale/出售/域名到期 / Redirecting shell | **disable/skip**（勿当搜索规则坏；**不** hunt） |
 | **dead_skip_without_hunt** | batch/agent 对 `l1_unreachable`/`l2_http_dead` 直接 disable | **禁止** — 先 `hunt --probe` / oneshot 自动 hunt；无后继再 disable。Harness：`classify.rs`→`Hunt`；`oneshot_live` resolve；wave 不把 hunt ledger 成 final skip |
+| **hunt_osint_skipped** | 只跑 `hunt --probe` empty 就结案；不做 Google / crt.sh / 限流 Wayback /（有 key 时）付费 DNS 档案；或对 archive.org 连发触发 429 | **禁止** — deep dig 迁域嫌疑必须跑 `scripts/domain-successor-hunt.py` + 浏览器 Google（书名+站名）。Wayback 只走 `scripts/lib/wayback_cdx.py`。Harness：`no_auto:osint_then_disable` |
 | **serial_await_idle** | Agent 对整批 `serial`/`batch` 长 AwaitShell（数小时） | **禁止** — 最多短轮询 60–90s；看 `serial_heartbeat.json` / `serial_last.json` mtime；心跳停滞 > `url-timeout-s+30` → kill 父进程、`check channel --force-clear`、续跑。Harness：`serial_cmd`/`serial_spawn` |
 | **agent_turn_stall** | 后台 diagnose 后收工；或 login/AES/广告源反复抠 >2min；或 MCP `10060` 堵死整环 | **禁止** — 回合结束前必须 close-out 当前 URL 或写明下一动作；auth/广告证据够就 seal；diagnose 传输失败 → PC probe + 直连 MCP debug/check，或 `skip:mcp_transient` 下一源。**Harness：** `deep_active.json` claim；`closeout pending`/`progress next` 未 seal 则拒；`closeout release`；Discipline §21–23 |
 | **hedged_ledger_success** | ledger `校验成功或见上` / `见上` / 假成功（migrate verify_ok=false 仍记成功） | **禁止** — `ledger append` 硬拒；pending 拒；goal 不计。只写精确 `校验成功` / `skip:…` / `fail:…`。Harness：`ledger_gate.rs` |
