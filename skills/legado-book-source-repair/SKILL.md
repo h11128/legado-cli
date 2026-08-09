@@ -112,6 +112,7 @@ source-cli progress next   # 先跑 closeout pending
 
 | Trap | Signal | Action |
 |------|--------|--------|
+| **search_empty_shell_open_ok** | `search.html` 200 但无结果节点（`#sitembox`/`dl` 空）；混淆字段（如 `369koolearn`）POST 仍空壳；详情 `#list`+`#content` 可读 | **勿**浅判整源死。修/保留打开路径；`checkSearch=false`+`checkDiscovery=false` 验证；有活 `m.` 孪生则优先；假搜索勿用热门按钮当 bookList。Harness：`no_auto:open_path_verify` |
 | **shallow_unfixable_claim** | Agent 仅凭 `gate`/`serial`/`hunt empty`/「搜索失效」标签口头判「修不了」；用户再深挖又能迁域/修打开路径 | **禁止**浅层终局。收工前至少：PC 首页+搜索+一本 TOC/正文，或手机 `debug_source`+`get_http_logs`。搜索死仍要看打开路径；批次结束写 `docs/source-repair-retrospective.md` 总教训。Harness：`no_auto:agent_must_html_or_phone_debug` |
 | **content_qsbs_bb_base64** | 正文章节 HTML 含 `qsbs.bb('…base64…')`；`##…##@js:base64Decode` 易截断触发 Hutool AIOOBE | `ruleContent.content` 用 `@js`：`indexOf("qsbs.bb('")`→`substring`→`java.base64Decode`；搜索若 meta refresh 回首页则 `checkSearch=false` 或 disable §16。Harness：`no_auto:按正文脚本改` |
 | **toc_href_slash_twin_unreachable** | 详情 TOC 几乎全是 `href="/"`（仅最新章真链）；PC 孪生（如 `biquge5200.cc`/`b5200.org`）目录/搜索 OK，但手机 Cronet 对 `23.224.*` 60s timeout | **勿**浅判「站点活着就能修」；手机不可达孪生 → `skip`+留证据；可达再 migrate。Harness：`no_auto:PC探针+手机HTTP日志` |
