@@ -213,7 +213,7 @@ source-cli progress next   # 先跑 closeout pending
 | **ss_search_delay_cookie (15u)** | debug「获取成功」list=0；HTTP 体 `alert(搜索间隔)` / Cookie `ss_search_delay` | **勿改 bookList** — `source-cli check clear-cookies --url …`；`enabledCookieJar=false`；可选 searchUrl `@js` removeCookie。Harness：`sniff_search_rate_limit` + probe `search_rate_limit` + `diagnose_tips` |
 | **cookiejar_cf_needs_on (twkan)** | CF 搜索需要 cookie/webView；与限流站「关 jar」相反 | jar true + webView；仍挡 → skip。Harness：`diagnose_tips`；指南 `book-source-create.md` |
 | **multi_toc_pick_longest (15u/ttks)** | 多块目录容器；固定 `.1`/frame 只有最新章 | `@js` 取链接数最多的容器。Harness：`diagnose_tips` |
-| **multi_list_charts_toc (15u)** | 多个 `ul.list-group.list-charts`；固定 `.1` 只有最新几章 | 同 multi_toc_pick_longest |
+| **multi_list_charts_toc (15u/jile1)** | 多个 `ul.list-group.list-charts`；固定 `.1` 只有最新几章，**或**第二块是相关推荐黄链 | 正文在首块用 `.0`；块序不定用 multi_toc_pick_longest |
 | **relative_ajax_toc (sto55)** | `ajax_index.html` 相对路径目录空 | `tocUrl=@js: baseUrl + 'ajax_index.html'`。Harness：`diagnose_tips` |
 | **desktop_empty_mobile_content (xsw)** | PC 正文空；m. 可读 | 桌面搜+目录，章节改写 m.。Harness：`diagnose_tips` |
 | **debug_colon_explore** | `::URL` 当详情调试 | 用绝对 URL / `++URL`。Harness：`diagnose_tips` |

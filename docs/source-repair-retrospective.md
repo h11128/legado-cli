@@ -1119,6 +1119,13 @@ Harness：`source-gate/alias_url.rs`（gate `alias_bookSourceUrl_skip_host_probe
 4. **改进**：新 trap → patch SKILL + Rust/Python **再** next URL（2026-07-28 补：thread trap + `diagnose_tips.rs`）
 
 
+### 2026-08-09 PO18文学 https://www.jile1.com (toc related-list)
+- Trap: `multi_list_charts_toc` — 双 `ul.list-group.list-charts`；第二块是相关推荐黄链（非「最新几章」）
+- Fix: `ruleToc.chapterList` → `class.list-charts.0@li@a`（只取第一块正文目录）
+- Debug: 目录总数 **48**，最新/末章「第四十八章 显露真身」（不再吞推荐位）
+- Verify: `start_check_sources` → **校验成功** (~2.3s, keyword=我的)
+- Note: 换源 tocIdentity 降权仍保留作产品护栏；本修只清这家脏目录
+
 ### 2026-08-08 采墨阁 https://www.caimoge.net (shelf source-first)
 - scaffold `search.php?q=`→404；真搜 `/search38.html?searchkey=`；列表 `.item`；目录 `/indexlist/{id}/` 分页；正文 `#booktxt`+`text.下一页`
 - `source verify` → **校验成功** (~9s)
