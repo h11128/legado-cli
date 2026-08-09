@@ -130,6 +130,7 @@ source-cli progress next   # 先跑 closeout pending
 | **manual_mcp_bypass_closeout** | Agent 用 `LegadoMcp.debug/save/check` 或 IDE MCP 深挖，却不跑 `diagnose`/`push`，导致不 claim `deep_active`，收工跳过 retro/skill | **已修 harness**：LegadoMcp 自动 claim；`mcp-deep-dig-claim.py`；stop 找 sibling legadoSkill；未 seal 则 followup。Agent 仍须 ledger+retro+（新陷阱）SKILL。Harness：`legado_mcp.py`+hooks |
 | **host_phone_timeout_no_mirror** | PC 与手机均连不上（Cronet/URL 超时）；`hunt --probe` empty | 已 hunt 仍无后继 → disable/skip；勿反复 debug。Harness：`no_auto:hunt_then_disable` |
 | **dns_nxdomain_hunt_empty** | PC `NXDOMAIN` / 手机 `UnknownHostException`；`hunt --probe` empty；假镜像为 XDNS 威胁页或影视壳 | **disable/skip**；勿当超时反复 debug；有真小说孪生且路径可开再 migrate+remap。Harness：`no_auto:hunt_then_disable` |
+| **adb_db_push_stale_snapshot_wipes_source** | MCP `save_source(新URL)` 已成功，但随后 `push_legado_db` 用**更早 pull**（或缺 WAL checkpoint）的整库覆盖 → 新源从 `book_sources` 消失；或 `get_source` 仍像活着但 SQL 无行 | **禁止** MCP-save 后推旧快照。同一份 pull 内 `upsert`/`INSERT` 新 URL，再 `require_source_urls` 后 push；或用 `python scripts/legado-db-mutate.py`。`pull_legado_db` 默认 WAL-aware。校验用 `LegadoMcp.wait_check_done`，勿 `sleep×N`。Postmortem：`docs/postmortem/2026-08-09-adb-db-push-wipes-mcp-source.md`。Harness：`legado_db_mutate.py` + hook `legado_adb_push_stale_mcp_race_ask` |
 | **home_404_paths_alive** | 首页 GET 404（或仅数百字节）；但 `/book/…`、`/plus/search.php` 等同站路径 200 且 HTML 含 `og:novel`/`cont-body` | **勿**只凭首页判死。PC 再探针搜索+一本详情/目录/正文；可迁 `bookSourceUrl` 到活孪生并 remap。Harness：`source-gate/sniff.rs` 不再把裸 `404 Not Found` 当 parked（→ L2 Hunt）；`no_auto:probe_book_and_search_paths` |
 | **placeholder_web_accesible_google** | 首页 title=`Web accesible`（或西语「La web está accesible」）+ `meta refresh`→Google；书/搜索路径 404 | **disable/skip** — 占位壳非小说站。同名孪生若 CF 522/超时勿当可迁。Harness：`no_auto:placeholder_disable` |
 | **name_similar_video_not_novel_twin** | 原站超时；同名 `.com` 等可开但是影视/视频壳（标题含影院/电影）；hunt 无小说候选 | **勿**迁到影视站。`skip`+disable；靠自动换源。Harness：`no_auto:title_sniff_video` |
@@ -171,6 +172,7 @@ source-cli progress next   # 先跑 closeout pending
 | **waf_401_meta_refresh_cluster** | 首页/详情/搜索均 **HTTP 401**，体为 `<meta http-equiv=refresh content=0>` 或 `loading host` 旋转壳；`_wa_`/`p2d` cookie 后仍 401；同库孪生（mozhua/2wxh/juqisw/dizhuwu）一锅端；偶发手机 **TLS packet header** | **skip/disable** — WAF/需登录，非选择器。webView 仍 401 勿死磕。Harness：`no_auto:waf401_disable` |
 | **desktop_ua_blocked_mobile_ok** | HTTP 日志 `403` + 正文 `The User-Agent has been blocked`；PC/默认桌面 Chrome UA 失败，Android Mobile UA 同路径 200 | header 改移动 UA；再验打开/发现。勿当整站死。Harness：`no_auto:set_mobile_ua` |
 | **js_loading_jwt_ad_hijack** | 首页/书 URL 仅 `Loading...` + `location.replace(...?ch=1&js=JWT)`；`webView` 后跳 `ovret.com` 等广告联盟；`wwNN.` 子域为品牌壳 | **skip/disable** — 非选择器。Harness：`no_auto:jwt_shell_disable` |
+| **chapter_verify_html_wall** (shuhui) | 迁域后详情/www TOC 可读，章节 **302→`/user/verify.html#…`**「加载中」；`/user/search.html` 恒 `[]` | **skip/disable** — 非选择器；勿空耗 webView。Harness：`no_auto:verify_wall` |
 | **没有找到站点 (521danmei)** | title=`没有找到站点` / 空壳 | L2 `deadish:没有找到站点` → **skip**。Harness：`sniff.rs` DEADISH_HINTS |
 | **apex_no_a_try_m (tongrenquan)** | 裸 IP/`没有找到站点`；`header.Host=tongrenquan.org`；apex/`www` 无 A，但 `m.` 有 CF A；备注 `Unable to resolve host` | **勿**对 IP 空壳/死 www **缓修当 skip**。读 Host/旧域 → **立刻** `hunt --probe`（种子常已有 `m.`）→ migrate+verify+书架 remap。见 `gate_hunt_deferred_unprobed`。Seeds：`domain_hunt_seeds.json` |
 | **nginx 空站 (cstxt)** | title=`Welcome to nginx!` | L2 `deadish:welcome to nginx` → **skip** |
@@ -235,6 +237,7 @@ source-cli progress next   # 先跑 closeout pending
 | **desktop_empty_mobile_content (xsw)** | PC 正文空；m. 可读 | 桌面搜+目录，章节改写 m.。Harness：`diagnose_tips` |
 | **debug_colon_explore** | `::URL` 当详情调试 | 用绝对 URL / `++URL`。Harness：`diagnose_tips` |
 | **check_keyword_too_broad** | 「我的」首条坏书 → 假目录失败 | 稀有书名片段作 checkKeyWord。Harness：`diagnose_tips` |
+| **l2_502_brand_cluster_dead** (18ys) | 主域 L2 **502**；同品牌镜像/`m.`/相关站也 502 或 NXDOMAIN/lander；hunt+OSINT 无活后继 | **skip/disable** — 勿把广告 lander（`www.18ys.com`→`/lander`）当后继。Harness：`no_auto:site_dead` |
 | **search_author_concat_sibling_div** (rouwen/xn--7dv) | 搜索 `class.author@text` 拼出 `新乙\n阅读量：882`；同级第二个 `div.author` 是阅读量；详情无 author | search `class.author.0@text##作者：`；bookInfo `class.booktag@tag.a.0@text`。Harness：`no_auto:站点 DOM 特例` |
 | **dict_url_decode_fake_name** (haici/dict.cn) | `name=@js:decodeURI(baseUrl…)` + `bookList=body` → 任意换源关键词都「书名命中」；详情「该词条未找到」 | bookList `@js` 遇未找到返回 `[]`；name 用页面 `tag.h1`/`.word`；换源侧 `isAcceptableChangeSourceHit`（空/假最新章、本地有作者却空作者、词典 intro）。Harness：`ChangeBookSourceQuality` |
 | **url_decode_fake_booklist_non_novel** (百度图片/知道) | `bookList=@js:[{title:decodeURIComponent(word…)}]` 把搜索词伪造成一书；非小说站 | `bookList=@js:[]`；换源 `isNonNovelSearchHost` 黑名单。Harness：`ChangeBookSourceQuality` |
