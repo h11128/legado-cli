@@ -111,6 +111,8 @@ source-cli progress next   # 先跑 closeout pending
 
 | Trap | Signal | Action |
 |------|--------|--------|
+| **content_qsbs_bb_base64** | 正文章节 HTML 含 `qsbs.bb('…base64…')`；`##…##@js:base64Decode` 易截断触发 Hutool AIOOBE | `ruleContent.content` 用 `@js`：`indexOf("qsbs.bb('")`→`substring`→`java.base64Decode`；搜索若 meta refresh 回首页则 `checkSearch=false` 或 disable §16。Harness：`no_auto:按正文脚本改` |
+| **toc_href_slash_twin_unreachable** | 详情 TOC 几乎全是 `href="/"`（仅最新章真链）；PC 孪生（如 `biquge5200.cc`/`b5200.org`）目录/搜索 OK，但手机 Cronet 对 `23.224.*` 60s timeout | **勿**浅判「站点活着就能修」；手机不可达孪生 → `skip`+留证据；可达再 migrate。Harness：`no_auto:PC探针+手机HTTP日志` |
 | 假详情 (wmp8) | list-empty + books≤1 + `/s.php` | **search** |
 | **empty_search_detail_fallback_h1** | debug：`列表为空,按详情页解析` → 书名=`…搜索结果` / `Books: {{key}}`；bookUrl=搜索 URL | `ruleBookInfo.name` 勿用裸 `h1@text`；改成详情页专属（如 `h1.article-title` / `class.book-title`）。空搜应 `书籍总数:0`。Harness：`no_auto:按站改详情选择器` |
 | **search_author_highlight_span** | 搜索作者=`{{key}}`；HTML 标题内 `<span style=color>` 高亮关键词，`span.0` 误当作者 | `ruleSearch.author` 改 `span[itemprop=author]` / 真作者节点，勿用标题内第一个 span。Harness：`no_auto:按DOM改author` |
