@@ -247,6 +247,7 @@ fn main() -> ExitCode {
                 url: None,
                 status: None,
                 note: None,
+                entry: None,
             }),
             CloseoutSub::Gate {
                 trap,
@@ -260,6 +261,7 @@ fn main() -> ExitCode {
                 url: None,
                 status: None,
                 note: None,
+                entry: None,
             }),
             CloseoutSub::SyncSkill => run_closeout(CloseoutArgs {
                 cmd: "sync-skill".into(),
@@ -269,6 +271,7 @@ fn main() -> ExitCode {
                 url: None,
                 status: None,
                 note: None,
+                entry: None,
             }),
             CloseoutSub::Status => run_closeout(CloseoutArgs {
                 cmd: "status".into(),
@@ -278,8 +281,9 @@ fn main() -> ExitCode {
                 url: None,
                 status: None,
                 note: None,
+                entry: None,
             }),
-            CloseoutSub::Claim { url, note } => run_closeout(CloseoutArgs {
+            CloseoutSub::Claim { url, note, entry } => run_closeout(CloseoutArgs {
                 cmd: "claim".into(),
                 trap: None,
                 skill_fix: false,
@@ -287,6 +291,7 @@ fn main() -> ExitCode {
                 url: Some(url),
                 status: None,
                 note: Some(note),
+                entry: if entry.trim().is_empty() { None } else { Some(entry) },
             }),
             CloseoutSub::Heartbeat => run_closeout(CloseoutArgs {
                 cmd: "heartbeat".into(),
@@ -296,6 +301,7 @@ fn main() -> ExitCode {
                 url: None,
                 status: None,
                 note: None,
+                entry: None,
             }),
             CloseoutSub::Release { url, status } => run_closeout(CloseoutArgs {
                 cmd: "release".into(),
@@ -305,6 +311,7 @@ fn main() -> ExitCode {
                 url: Some(url),
                 status: Some(status),
                 note: None,
+                entry: None,
             }),
             CloseoutSub::ClearActive => run_closeout(CloseoutArgs {
                 cmd: "clear-active".into(),
@@ -314,6 +321,7 @@ fn main() -> ExitCode {
                 url: None,
                 status: None,
                 note: None,
+                entry: None,
             }),
         },
         Cmd::Retro { cmd } => match cmd {
