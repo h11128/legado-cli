@@ -169,6 +169,7 @@ source-cli progress next   # 先跑 closeout pending
 | **migrate_false_friend_cms** | gate `l2_host_redirect`/301 新域通，但是**无关 CMS**（如 Z-Blog `zb_users`/`San_Media`）；旧 `/novel_*`、`modules/article/search.php` **404**；OSINT 真后继（如 `.net`）手机/PC **CF 522** | **勿**按「主机跳转」盲目 migrate。先嗅新域模板/旧路径；假友 → disable；真后继不可达 → skip+换源。Harness：`no_auto:sniff_cms_before_migrate` |
 | **meta_search_third_party_toc_dead** | 书源是夸克/神马等 **SERP 聚合**；新 DOM（`qk-title-text`）可搜出书，但 `bookUrl` 落在随机第三方（403/`TocEmpty`）；书架常是搜索 URL/起点搜书页 | **勿**只修选择器当 fixed。无稳定本站详情/目录 → **skip/disable**+换源。Harness：`no_auto:aggregator_disable` |
 | **desktop_ua_blocked_mobile_ok** | HTTP 日志 `403` + 正文 `The User-Agent has been blocked`；PC/默认桌面 Chrome UA 失败，Android Mobile UA 同路径 200 | header 改移动 UA；再验打开/发现。勿当整站死。Harness：`no_auto:set_mobile_ua` |
+| **js_loading_jwt_ad_hijack** | 首页/书 URL 仅 `Loading...` + `location.replace(...?ch=1&js=JWT)`；`webView` 后跳 `ovret.com` 等广告联盟；`wwNN.` 子域为品牌壳 | **skip/disable** — 非选择器。Harness：`no_auto:jwt_shell_disable` |
 | **没有找到站点 (521danmei)** | title=`没有找到站点` / 空壳 | L2 `deadish:没有找到站点` → **skip**。Harness：`sniff.rs` DEADISH_HINTS |
 | **apex_no_a_try_m (tongrenquan)** | 裸 IP/`没有找到站点`；`header.Host=tongrenquan.org`；apex/`www` 无 A，但 `m.` 有 CF A；备注 `Unable to resolve host` | **勿**对 IP 空壳/死 www **缓修当 skip**。读 Host/旧域 → **立刻** `hunt --probe`（种子常已有 `m.`）→ migrate+verify+书架 remap。见 `gate_hunt_deferred_unprobed`。Seeds：`domain_hunt_seeds.json` |
 | **nginx 空站 (cstxt)** | title=`Welcome to nginx!` | L2 `deadish:welcome to nginx` → **skip** |
