@@ -115,19 +115,27 @@ pub fn run_diagnose(args: DiagnoseArgs) -> ExitCode {
 
     // Claim deep_active so progress next / turn end cannot skip close-out.
     if let Ok(paths) = source_closeout::CloseoutPaths::from_repo() {
-        match source_closeout::claim_active(&paths, url.as_str(), "diagnose") {
+        match source_closeout::claim_active_entry(
+            &paths,
+            url.as_str(),
+            "diagnose",
+            source_closeout::ClaimEntry::Diagnose,
+        ) {
             Ok(_) => {}
             Err(e) => eprintln!("diagnose: warn: deep_active claim: {e}"),
         }
     }
 
     if gate_blocks_diagnose(&gate) {
-        let mut d = diagnose_gate_skip(url, gate);
+        let mut d = diagnose_gate_skip(url.clone(), gate);
         d.tips = layer_tips(&d);
         let v = serde_json::to_value(&d).unwrap_or_default();
         let _ = validate_diagnose(&v);
         let payload = serde_json::to_string_pretty(&d).unwrap_or_default();
         write_out(&args, &payload);
+        if let Ok(paths) = source_closeout::CloseoutPaths::from_repo() {
+            let _ = source_closeout::mark_diagnose_done(&paths, url.as_str(), &payload);
+        }
         println!("{payload}");
         return ExitCode::from(3);
     }
@@ -168,7 +176,7 @@ pub fn run_diagnose(args: DiagnoseArgs) -> ExitCode {
         (raw, Some(client))
     };
 
-    let mut d = diagnose_from_debug(url, &debug_text, Some(gate), None);
+    let mut d = diagnose_from_debug(url.clone(), &debug_text, Some(gate), None);
     attach_probe_tips(&mut d, &args.key);
     if let Some(ref client) = mcp_client {
         enrich_http_log_on_empty_search(client, &mut d, args.url.trim(), &args.key, &debug_text);
@@ -180,6 +188,13 @@ pub fn run_diagnose(args: DiagnoseArgs) -> ExitCode {
     }
     let payload = serde_json::to_string_pretty(&d).unwrap_or_default();
     write_out(&args, &payload);
+    // Always stamp canonical diagnose artifact (retro fixed gate).
+    if let Ok(paths) = source_closeout::CloseoutPaths::from_repo() {
+        match source_closeout::mark_diagnose_done(&paths, url.as_str(), &payload) {
+            Ok(p) => eprintln!("diagnose: wrote {}", p.display()),
+            Err(e) => eprintln!("diagnose: warn: artifact: {e}"),
+        }
+    }
     println!("{payload}");
     ExitCode::SUCCESS
 }

@@ -108,7 +108,12 @@ fn repair_one_outcome_depth(
     hunt_depth: u8,
 ) -> RepairOneOutcome {
     if let Ok(paths) = source_closeout::CloseoutPaths::from_repo() {
-        let _ = source_closeout::claim_active(&paths, url, "repair oneshot");
+        let _ = source_closeout::claim_active_entry(
+            &paths,
+            url,
+            "repair oneshot",
+            source_closeout::ClaimEntry::Oneshot,
+        );
     }
     let path = rules.unwrap_or_else(default_rules_path);
     let rules = match load_rules(&path) {

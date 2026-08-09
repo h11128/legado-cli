@@ -22,6 +22,9 @@ pub enum CloseoutSub {
         url: String,
         #[arg(long, default_value = "manual")]
         note: String,
+        /// diagnose | oneshot | mcp_fallback | create
+        #[arg(long, default_value = "")]
+        entry: String,
     },
     Heartbeat,
     /// Seal deep_active without full retro (escape hatch; prefer retro append).

@@ -4,9 +4,9 @@ use std::process::ExitCode;
 
 use serde_json::json;
 use source_closeout::{
-    claim_active, clear_active, ensure_ready_for_next, gate_script_fix, gate_trap,
+    claim_active_entry, clear_active, ensure_ready_for_next, gate_script_fix, gate_trap,
     heartbeat_active, pending_closeout, read_active, seal_active, skill_in_sync,
-    sync_skill_to_cursor, CloseoutPaths,
+    sync_skill_to_cursor, ClaimEntry, CloseoutPaths,
 };
 
 pub struct CloseoutArgs {
@@ -17,6 +17,7 @@ pub struct CloseoutArgs {
     pub url: Option<String>,
     pub status: Option<String>,
     pub note: Option<String>,
+    pub entry: Option<String>,
 }
 
 pub fn run_closeout(args: CloseoutArgs) -> ExitCode {
@@ -106,7 +107,12 @@ pub fn run_closeout(args: CloseoutArgs) -> ExitCode {
         "claim" => {
             let url = args.url.unwrap_or_default();
             let note = args.note.unwrap_or_else(|| "manual".into());
-            match claim_active(&paths, &url, &note) {
+            let entry = args
+                .entry
+                .as_deref()
+                .and_then(ClaimEntry::parse)
+                .unwrap_or_else(|| ClaimEntry::from_note(&note));
+            match claim_active_entry(&paths, &url, &note, entry) {
                 Ok(v) => {
                     println!("{}", v);
                     ExitCode::SUCCESS

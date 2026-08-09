@@ -99,6 +99,20 @@ pub fn run_after_gate(
             }
         }
     };
+    if !skip_diagnose && !debug_text.is_empty() {
+        if let Ok(paths) = source_closeout::CloseoutPaths::from_repo() {
+            let stub = serde_json::json!({
+                "url": url.trim(),
+                "via": "repair_oneshot",
+                "debug_chars": debug_text.chars().count(),
+            });
+            let _ = source_closeout::mark_diagnose_done(
+                &paths,
+                url.trim(),
+                &stub.to_string(),
+            );
+        }
+    }
 
     let mut builder = source_spine::RepairContext::builder(source_key, source)
         .gate(gate.clone())

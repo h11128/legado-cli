@@ -14,7 +14,9 @@ mod skill;
 mod trap;
 
 pub use active::{
-    claim_active, clear_active, gate_active_unsealed, heartbeat_active, read_active, seal_active,
+    claim_active, claim_active_entry, clear_active, diagnose_artifact_path, gate_active_unsealed,
+    gate_fixed_diagnose_path, has_diagnose_evidence, heartbeat_active, mark_diagnose_done,
+    read_active, seal_active, ClaimEntry,
 };
 pub use improve::{gate_script_fix, script_fix_ok};
 pub use jsonl::{read_jsonl, JsonRow};

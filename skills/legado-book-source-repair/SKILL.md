@@ -2,16 +2,25 @@
 name: legado-book-source-repair
 description: >-
   Repair failing Legado (阅读) book sources after check/debug failures.
-  Use when fixing 书源, 校验失败, 搜索失效, 目录失效, 正文失效, tocUrl bugs,
-  or iterating save_source → start_check_sources on one URL.
+  Default path: source-cli dig (or diagnose → repair oneshot) → device verify →
+  ledger/retro. Use when fixing 书源, 校验失败, 搜索失效, 目录失效, 正文失效,
+  tocUrl bugs. MCP save_source/debug is fallback only (diagnose transport fail).
 ---
 
 # Legado Book Source Repair
 
-Device MCP is authoritative. Enforce `.cursor/rules/book-source-repair-discipline.mdc`.
+Device MCP is authoritative for verify. Enforce `.cursor/rules/book-source-repair-discipline.mdc`.
 
-**Agents must follow the Deep-fix checklist in order.** After each fix/skip, refine
-skill/scripts if a new trap appeared, then continue the goal loop.
+**Agents MUST follow the Deep-fix checklist in order.** Entry command:
+
+```
+source-cli dig --url URL --key 我的
+```
+
+(`dig` = channel → gate → diagnose → oneshot unless `--no-repair`). Do **not** start with
+ad-hoc Python HTML + `LegadoMcp.save_source` unless diagnose transport failed.
+
+After each fix/skip, refine skill/scripts if a new trap appeared, then continue the goal loop.
 Track: `source-cli progress status`.
 
 | Doc | Path |
@@ -19,6 +28,7 @@ Track: `source-cli progress status`.
 | MCP defaults (SOT) | `E:/Projects/legadoSkill/config/mcp_defaults.json` |
 | MCP discover | `source-cli discover --write` |
 | Platform (Rust) | `docs/repair-adapter-architecture.md` — **full Rust cutover 2026-07-28** |
+| Anti-stall matrix | `docs/deep-diagnose-anti-stall.md` |
 
 **Entry:** **`source-cli` only** — no Python shims. Build: `(cd crates && cargo build -p source_cli)`.
 
@@ -64,7 +74,8 @@ Budget clock starts at **pick**. Diagnose+patch **2–3 min**; hard stop **5 min
 
 ```
 [ ] 0  channel idle
-[ ] 1  progress next  (script L2-gates walls/parked; ≤~20s)
+[ ] 0b preferred: source-cli dig --url URL   # channel+gate+diagnose+oneshot
+[ ] 1  progress next  (script L2-gates walls/parked; ≤~20s)  OR shelf remaining pick
 [ ] 2  if next.l2_gate.action=migrate → migrate first
 [ ] 2b if action=hunt (l1_unreachable / l2_http_dead / L0 timeout_cluster)
        OR brand may have migrated (parked/广告壳但仍可能换域) →
@@ -78,12 +89,14 @@ Budget clock starts at **pick**. Diagnose+patch **2–3 min**; hard stop **5 min
           `scripts/lib/wayback_cdx.py`（默认间隔 12s，429 指数退避）。
        C) migrate | disable(no_mirror/none_alive/empty) | skip(weak)
           未做 B 不得宣称 hunt-empty / 修不了（trap `hunt_osint_skipped`）
-[ ] 3  diagnose --url URL   # also L2-failfast BEFORE phone debug
+[ ] 3  diagnose --url URL   # also L2-failfast BEFORE phone debug（dig 已含）
 [ ] 4  if layer=skip → ledger already done → close-out (§ below) → **立刻汇报**
 [ ] 5  else patch ONLY layer → ONE verify → ledger
 [ ] 6  close-out: ledger → retro（自动 gate/sync）→ **git commit skill/scripts/docs** → progress next
 ```
 
+Shelf stale-tag: after picking from `shelf-stale-tag-remaining.md` / triage, still run
+steps 0/0b–6 — **same** path, not MCP-first.
 ## Per-URL close-out (mandatory)
 
 User standing preference (this repo): **every** oneshot (fixed / skip / fail) must:
@@ -127,7 +140,8 @@ source-cli progress next   # 先跑 closeout pending
 | **ip_url_host_header_parked** | `bookSourceUrl` 为裸 IP；`header.Host` 指向域名；IP 超时且 Host 域是「官网首页」/停车壳无小说 | **disable**；勿只换 Host。hunt 无后继则 skip。Harness：`no_auto:disable_ip_shell` |
 | **cf_520_origin_error_hunt_empty** | 首页/搜索 Cloudflare **520 Origin Error**；hunt empty；已有活孪生（如 69shuba.com） | disable 死域；书架 remap/换源到孪生；勿抠选择器。Harness：`no_auto:migrate_or_disable` |
 | **http_403_home_hunt_empty** | 首页 GET 403（手机 HTTP 日志）；searchUrl `@js`/`ajax` 抽 form 崩；`hunt --probe` empty；同名域停车/威胁页 | **skip/disable** — 非选择器问题。Harness：`no_auto:hunt_then_disable` |
-| **manual_mcp_bypass_closeout** | Agent 用 `LegadoMcp.debug/save/check` 或 IDE MCP 深挖，却不跑 `diagnose`/`push`，导致不 claim `deep_active`，收工跳过 retro/skill | **已修 harness**：LegadoMcp 自动 claim；`mcp-deep-dig-claim.py`；stop 找 sibling legadoSkill；未 seal 则 followup。Agent 仍须 ledger+retro+（新陷阱）SKILL。Harness：`legado_mcp.py`+hooks |
+| **manual_mcp_bypass_closeout** | Agent 用 `LegadoMcp.debug/save/check` 或 IDE MCP 深挖，却不跑 `diagnose`/`dig`，且想 `retro fixed` | **默认禁止当主路径**。仅 diagnose 传输失败或用户明示。`deep_active.entry=mcp_fallback`；`retro fixed` 须 trap 含 `manual_mcp_bypass` + `script_fix=no_auto:diagnose_transport…`/`no_auto:user_…`。Harness：`gate_fixed_diagnose_path` + `legado_mcp` claim `--entry mcp_fallback` |
+| **diagnose_path_skipped** | 书架/深挖直接 PC HTML + MCP patch，跳过 `dig`/`diagnose` | **MUST** `source-cli dig` 或 diagnose→oneshot。Harness：`source-cli dig`；hook ASK `legado_mcp_without_diagnose_ask` |
 | **host_phone_timeout_no_mirror** | PC 与手机均连不上（Cronet/URL 超时）；`hunt --probe` empty | 已 hunt 仍无后继 → disable/skip；勿反复 debug。Harness：`no_auto:hunt_then_disable` |
 | **dns_nxdomain_hunt_empty** | PC `NXDOMAIN` / 手机 `UnknownHostException`；`hunt --probe` empty；假镜像为 XDNS 威胁页或影视壳 | **disable/skip**；勿当超时反复 debug；有真小说孪生且路径可开再 migrate+remap。Harness：`no_auto:hunt_then_disable` |
 | **adb_db_push_stale_snapshot_wipes_source** | MCP `save_source(新URL)` 已成功，但随后 `push_legado_db` 用**更早 pull**（或缺 WAL checkpoint）的整库覆盖 → 新源从 `book_sources` 消失；或 `get_source` 仍像活着但 SQL 无行 | **禁止** MCP-save 后推旧快照。用 `legado-db-mutate` / 同文件 upsert + `require_source_urls`。`push` 默认 `merge_live_sources="auto"`（已在工作库→跳过；否则 MCP upsert；再否则 baseline 全量 merge）。校验 `wait_check_done`；PC probe≤12s。Guide：`docs/guides/book-source-repair-efficiency.md`。Postmortem：`docs/postmortem/2026-08-09-adb-db-push-wipes-mcp-source.md` |

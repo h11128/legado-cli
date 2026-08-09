@@ -139,7 +139,13 @@ fn push_source(file: &PathBuf, overwrite: bool) -> ExitCode {
             // Same anti-stall gate as diagnose/repair: must close-out before next site.
             // Claim failure is hard for create — otherwise stop/progress gates never arm.
             let claim = source_closeout::CloseoutPaths::from_repo().and_then(|paths| {
-                source_closeout::claim_active(&paths, url, "create push").map(|_| ())
+                source_closeout::claim_active_entry(
+                    &paths,
+                    url,
+                    "create push",
+                    source_closeout::ClaimEntry::Create,
+                )
+                .map(|_| ())
             });
             match claim {
                 Ok(()) => {

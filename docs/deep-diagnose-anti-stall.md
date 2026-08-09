@@ -7,16 +7,18 @@ auth/ad walls, or writes hedged ledger lines like `校验成功或见上` after 
 
 | Layer | What | Enforcement |
 |-------|------|-------------|
-| **CliCommand / Rust** | `deep_active.json` claim on `diagnose` / `repair oneshot` / **`source push` (create)** | Soft claim always |
+| **CliCommand / Rust** | `deep_active.json` claim on `diagnose` / `repair oneshot` / **`source push` (create)** / MCP | Soft claim; field `entry` = diagnose\|oneshot\|mcp_fallback\|create |
+| **CliCommand / Rust** | `source-cli dig` | Official entry: channel → gate → diagnose → oneshot |
 | **CliCommand / Rust** | `closeout pending` + `progress next` | **DENY** if unsealed claim |
-| **CliCommand / Rust** | `retro append` fixed/skip/fail | Seals `deep_active` |
-| **CliCommand / Rust** | `closeout claim\|heartbeat\|release\|clear-active` | Manual escape + heartbeat |
+| **CliCommand / Rust** | `retro append` fixed/skip/fail | Seals `deep_active`; **fixed DENY** without diagnose evidence unless documented mcp_fallback |
+| **CliCommand / Rust** | `closeout claim\|heartbeat\|release\|clear-active` | Manual escape + heartbeat; claim `--entry` |
 | **CliCommand / Rust** | `ledger append` | **DENY** hedged results (`ledger_gate.rs`) |
 | **CliCommand / Rust** | Goal `fixed_count` | Ignores hedged 「校验成功*」 |
 | **HookRule** | `legado_hedged_ledger_success` | beforeShell **deny** |
 | **HookRule** | `legado_l0_only_live_repair` | beforeShell **deny** (§15) |
 | **HookRule** | `legado_serial_long_await` | beforeShell **ask** on long sleep |
-| **Python LegadoMcp** | `debug_source` / `save_source` / `start_check_sources` auto `closeout claim` | Hard claim (closes manual bypass) |
+| **HookRule** | `legado_mcp_without_diagnose_ask` | beforeShell **ask** on LegadoMcp debug/save without `diagnose`/`dig` in same command |
+| **Python LegadoMcp** | `debug_source` / `save_source` / `start_check_sources` auto `closeout claim --entry mcp_fallback` | Hard claim (closes silent bypass) |
 | **hooks.json command** | `stop`: `.cursor/hooks/check-deep-active-stop.py` | **followup** if unsealed (`loop_limit` 3); finds sibling `legadoSkill` |
 | **hooks.json command** | `afterMCPExecution`: `.cursor/hooks/mcp-deep-dig-claim.py` | IDE `save_source`/`debug_source`/`start_check_sources` → claim |
 | **HookRule** | `legado_progress_next_unsealed_remind` | beforeShell **ask** on `progress next` |

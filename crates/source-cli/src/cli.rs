@@ -94,6 +94,27 @@ pub enum Cmd {
         #[arg(long)]
         out: Option<PathBuf>,
     },
+    /// Official deep-dig entry: channel → gate → diagnose → oneshot (unless --no-repair).
+    Dig {
+        #[arg(long)]
+        url: String,
+        #[arg(long, default_value = "我的")]
+        key: String,
+        #[arg(long)]
+        rules: Option<PathBuf>,
+        #[arg(long, default_value_t = false)]
+        l0_only: bool,
+        #[arg(long, default_value_t = 1.5)]
+        tcp_timeout: f64,
+        #[arg(long, default_value_t = 4.0)]
+        l2_timeout: f64,
+        #[arg(long, default_value_t = false)]
+        no_repair: bool,
+        #[arg(long, default_value_t = false)]
+        dry_run: bool,
+        #[arg(long, default_value_t = false)]
+        no_verify: bool,
+    },
     Fetch {
         #[arg(long)]
         url: String,
