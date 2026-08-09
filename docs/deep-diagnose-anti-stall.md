@@ -16,8 +16,10 @@ auth/ad walls, or writes hedged ledger lines like `校验成功或见上` after 
 | **HookRule** | `legado_hedged_ledger_success` | beforeShell **deny** |
 | **HookRule** | `legado_l0_only_live_repair` | beforeShell **deny** (§15) |
 | **HookRule** | `legado_serial_long_await` | beforeShell **ask** on long sleep |
-| **hooks.json command** | `stop`: `.cursor/hooks/check-deep-active-stop.py` | **followup** if unsealed (`loop_limit` 2) |
-| **hooks.json command** | `afterMCPExecution`: `mcp-save-source-closeout.py` | IDE `save_source` → claim + remind |
+| **Python LegadoMcp** | `debug_source` / `save_source` / `start_check_sources` auto `closeout claim` | Hard claim (closes manual bypass) |
+| **hooks.json command** | `stop`: `.cursor/hooks/check-deep-active-stop.py` | **followup** if unsealed (`loop_limit` 3); finds sibling `legadoSkill` |
+| **hooks.json command** | `afterMCPExecution`: `.cursor/hooks/mcp-deep-dig-claim.py` | IDE `save_source`/`debug_source`/`start_check_sources` → claim |
+| **HookRule** | `legado_progress_next_unsealed_remind` | beforeShell **ask** on `progress next` |
 | **CliCommand / Rust** | `diagnose` Search layer → HTTP log sniff | Tip `ss_search_delay` + clear-cookies CLI |
 | **CliCommand / Rust** | `source scaffold` / `source-cli install` | 笔趣阁 MVP draft / PATH install |
 | **MdcRule** | discipline §14b / §21–23 | Always-loaded agent guidance (repair **and** create) |

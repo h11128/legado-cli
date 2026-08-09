@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 """Cursor stop hook: if deep_active is unsealed, auto-follow up to finish close-out.
 
-Create (`source push`) and repair (`diagnose` / `oneshot`) both claim
-temp/full_fix/deep_active.json. Agents must ledger + retro append before the
-next site — do not wait for the user to remind.
+Create (`source push`) and repair (`diagnose` / `oneshot` / LegadoMcp debug|save|check)
+both claim temp/full_fix/deep_active.json (under legadoSkill). Agents must ledger +
+retro append before the next site — do not wait for the user to remind.
+
+Workspace may be `legado` while deep_active lives in sibling `legadoSkill` — search both.
 """
 from __future__ import annotations
 
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -20,7 +23,17 @@ def _candidate_roots(payload: dict) -> list[Path]:
             roots.append(Path(v))
     for v in payload.get("workspace_roots") or []:
         roots.append(Path(v))
-    # De-dupe while preserving order
+    env = (os.environ.get("LEGADO_SKILL_ROOT") or "").strip()
+    if env:
+        roots.append(Path(env))
+    # Sibling / fixed skill roots (agents often open legado, not legadoSkill)
+    extra: list[Path] = []
+    for r in list(roots):
+        extra.append(r.parent / "legadoSkill")
+        if r.name == "legado":
+            extra.append(r.parent / "legadoSkill")
+    roots.extend(extra)
+    roots.append(Path("E:/Projects/legadoSkill"))
     out: list[Path] = []
     seen: set[str] = set()
     for r in roots:
@@ -35,10 +48,10 @@ def _candidate_roots(payload: dict) -> list[Path]:
 
 
 def _find_active(payload: dict) -> Path | None:
-    """Prefer a root that already has deep_active.json; else legadoSkill markers."""
+    """Prefer a root that already has deep_active.json; else skill markers."""
     candidates = _candidate_roots(payload)
-    actives = [r / "temp" / "full_fix" / "deep_active.json" for r in candidates]
-    for p in actives:
+    for r in candidates:
+        p = r / "temp" / "full_fix" / "deep_active.json"
         if p.is_file():
             return p
     for r in candidates:
@@ -64,7 +77,7 @@ def main() -> int:
         loop_count = int(payload.get("loop_count") or 0)
     except (TypeError, ValueError):
         loop_count = 0
-    if loop_count >= 2:
+    if loop_count >= 3:
         # Cap auto-nudges; leftover claim needs explicit closeout release.
         print("{}")
         return 0
@@ -89,12 +102,12 @@ def main() -> int:
     msg = (
         f"deep_active is still unsealed for {url} (note={note}). "
         "Finish mandatory close-out before ending this turn "
-        "(create and repair share this gate):\n"
+        "(create/repair/manual LegadoMcp deep dig share this gate):\n"
         f"  source-cli ledger append --url '{url}' --step check --result '校验成功'|fail:…|skip:…\n"
         f"  source-cli retro append --url '{url}' --status fixed|skip|fail "
         "--trap '…' --skill-fix 0|1 --script-fix '…'\n"
-        "Novel trap → update skill + harness (diagnose_tips/sniff/patch) or "
-        "script_fix=no_auto:<reason>, then git commit. "
+        "Novel trap → update skill + harness (or script_fix=no_auto:<reason≥8>) "
+        "+ short note in docs/source-repair-retrospective.md → git commit.\n"
         "Escape only: source-cli closeout release --url … --status skip"
     )
     print(json.dumps({"followup_message": msg}, ensure_ascii=False))

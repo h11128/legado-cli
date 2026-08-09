@@ -112,6 +112,7 @@ source-cli progress next   # 先跑 closeout pending
 
 | Trap | Signal | Action |
 |------|--------|--------|
+| **manual_mcp_bypass_closeout** | Agent 用 `LegadoMcp.debug/save/check` 或 IDE MCP 深挖，却不跑 `diagnose`/`push`，导致不 claim `deep_active`，收工跳过 retro/skill | **已修 harness**：LegadoMcp 自动 claim；`mcp-deep-dig-claim.py`；stop 找 sibling legadoSkill；未 seal 则 followup。Agent 仍须 ledger+retro+（新陷阱）SKILL。Harness：`legado_mcp.py`+hooks |
 | **host_phone_timeout_no_mirror** | PC 与手机均连不上（Cronet/URL 超时）；`hunt --probe` empty | 已 hunt 仍无后继 → disable/skip；勿反复 debug。Harness：`no_auto:hunt_then_disable` |
 | **name_similar_video_not_novel_twin** | 原站超时；同名 `.com` 等可开但是影视/视频壳（标题含影院/电影）；hunt 无小说候选 | **勿**迁到影视站。`skip`+disable；靠自动换源。Harness：`no_auto:title_sniff_video` |
 | **search_empty_shell_open_ok** | `search.html` 200 但无结果节点（`#sitembox`/`dl` 空）；混淆字段（如 `369koolearn`）POST 仍空壳；详情 `#list`+`#content` 可读 | **勿**浅判整源死。修/保留打开路径；`checkSearch=false`+`checkDiscovery=false` 验证；有活 `m.` 孪生则优先；假搜索勿用热门按钮当 bookList。Harness：`no_auto:open_path_verify` |
