@@ -112,6 +112,7 @@ source-cli progress next   # 先跑 closeout pending
 
 | Trap | Signal | Action |
 |------|--------|--------|
+| **http_403_home_hunt_empty** | 首页 GET 403（手机 HTTP 日志）；searchUrl `@js`/`ajax` 抽 form 崩；`hunt --probe` empty；同名域停车/威胁页 | **skip/disable** — 非选择器问题。Harness：`no_auto:hunt_then_disable` |
 | **manual_mcp_bypass_closeout** | Agent 用 `LegadoMcp.debug/save/check` 或 IDE MCP 深挖，却不跑 `diagnose`/`push`，导致不 claim `deep_active`，收工跳过 retro/skill | **已修 harness**：LegadoMcp 自动 claim；`mcp-deep-dig-claim.py`；stop 找 sibling legadoSkill；未 seal 则 followup。Agent 仍须 ledger+retro+（新陷阱）SKILL。Harness：`legado_mcp.py`+hooks |
 | **host_phone_timeout_no_mirror** | PC 与手机均连不上（Cronet/URL 超时）；`hunt --probe` empty | 已 hunt 仍无后继 → disable/skip；勿反复 debug。Harness：`no_auto:hunt_then_disable` |
 | **name_similar_video_not_novel_twin** | 原站超时；同名 `.com` 等可开但是影视/视频壳（标题含影院/电影）；hunt 无小说候选 | **勿**迁到影视站。`skip`+disable；靠自动换源。Harness：`no_auto:title_sniff_video` |
