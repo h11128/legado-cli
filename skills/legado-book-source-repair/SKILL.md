@@ -112,6 +112,7 @@ source-cli progress next   # 先跑 closeout pending
 
 | Trap | Signal | Action |
 |------|--------|--------|
+| **stream_protocol_error_reset** | 手机校验/HTTP 日志 `stream was reset: PROTOCOL_ERROR` / StreamResetException；http/https 同失败；hunt empty | **skip/disable** — 传输层挂，非选择器。Harness：`no_auto:transport_dead` |
 | **ip_url_host_header_parked** | `bookSourceUrl` 为裸 IP；`header.Host` 指向域名；IP 超时且 Host 域是「官网首页」/停车壳无小说 | **disable**；勿只换 Host。hunt 无后继则 skip。Harness：`no_auto:disable_ip_shell` |
 | **cf_520_origin_error_hunt_empty** | 首页/搜索 Cloudflare **520 Origin Error**；hunt empty；已有活孪生（如 69shuba.com） | disable 死域；书架 remap/换源到孪生；勿抠选择器。Harness：`no_auto:migrate_or_disable` |
 | **http_403_home_hunt_empty** | 首页 GET 403（手机 HTTP 日志）；searchUrl `@js`/`ajax` 抽 form 崩；`hunt --probe` empty；同名域停车/威胁页 | **skip/disable** — 非选择器问题。Harness：`no_auto:hunt_then_disable` |
