@@ -48,6 +48,7 @@ while fixed_n < 100:
 **Anti-pattern (banned):** classify/probe 20–50 tagged fails to “find a good one”.
 That burned minutes and violated the 2–3 min budget. Pick → diagnose → patch → verify.
 **Also banned:** batch/oneshot 对 `l2_http_dead` / timeout **直接 disable** 而不跑 hunt（见 trap `dead_skip_without_hunt`）。
+**Also banned:** 仅凭 gate/serial/hunt-empty/「搜索失效」标签口头「修不了」收工（见 trap `shallow_unfixable_claim`）；批次 deep dig 结束必须写 `docs/source-repair-retrospective.md` 总教训，不只 per-URL retro。
 
 ## Report modes (both supported)
 
@@ -111,6 +112,7 @@ source-cli progress next   # 先跑 closeout pending
 
 | Trap | Signal | Action |
 |------|--------|--------|
+| **shallow_unfixable_claim** | Agent 仅凭 `gate`/`serial`/`hunt empty`/「搜索失效」标签口头判「修不了」；用户再深挖又能迁域/修打开路径 | **禁止**浅层终局。收工前至少：PC 首页+搜索+一本 TOC/正文，或手机 `debug_source`+`get_http_logs`。搜索死仍要看打开路径；批次结束写 `docs/source-repair-retrospective.md` 总教训。Harness：`no_auto:agent_must_html_or_phone_debug` |
 | **content_qsbs_bb_base64** | 正文章节 HTML 含 `qsbs.bb('…base64…')`；`##…##@js:base64Decode` 易截断触发 Hutool AIOOBE | `ruleContent.content` 用 `@js`：`indexOf("qsbs.bb('")`→`substring`→`java.base64Decode`；搜索若 meta refresh 回首页则 `checkSearch=false` 或 disable §16。Harness：`no_auto:按正文脚本改` |
 | **toc_href_slash_twin_unreachable** | 详情 TOC 几乎全是 `href="/"`（仅最新章真链）；PC 孪生（如 `biquge5200.cc`/`b5200.org`）目录/搜索 OK，但手机 Cronet 对 `23.224.*` 60s timeout | **勿**浅判「站点活着就能修」；手机不可达孪生 → `skip`+留证据；可达再 migrate。Harness：`no_auto:PC探针+手机HTTP日志` |
 | 假详情 (wmp8) | list-empty + books≤1 + `/s.php` | **search** |
