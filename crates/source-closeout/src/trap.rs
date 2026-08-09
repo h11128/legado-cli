@@ -33,7 +33,14 @@ pub fn trap_in_skill(trap: &str, skill_text: &str) -> bool {
         return true;
     }
     let section = traps_section(skill_text).to_lowercase();
-    let slug = trap.to_lowercase().replace(['_', '-'], " ");
+    // Prefer the raw slug (underscores): SKILL rows are `**apex_no_a_try_m (…)**`.
+    // Expanding `_`→space then requiring len≥4 tokens falsely misses short segments
+    // (`no`/`a`/`m`/`try`) and fails `section.contains("apex no a try m")`.
+    let raw = trap.to_lowercase();
+    if section.contains(&raw) {
+        return true;
+    }
+    let slug = raw.replace(['_', '-'], " ");
     if section.contains(&slug) {
         return true;
     }
@@ -103,5 +110,22 @@ mod tests {
     #[test]
     fn known_trap_always_passes() {
         assert!(trap_in_skill("known:foo", ""));
+    }
+
+    #[test]
+    fn underscored_slug_matches_skill_row_with_parenthetical() {
+        let skill = r#"
+## Traps
+
+| Trap | Signal | Action |
+|------|--------|--------|
+| **apex_no_a_try_m (tongrenquan)** | apex no A; m. live | migrate |
+| **dead_skip_without_hunt** | l1_unreachable disable | hunt first |
+
+## Other
+"#;
+        assert!(trap_in_skill("apex_no_a_try_m", skill));
+        assert!(trap_in_skill("dead_skip_without_hunt", skill));
+        assert!(!trap_in_skill("totally_missing_trap_xyz", skill));
     }
 }

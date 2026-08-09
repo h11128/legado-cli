@@ -22,6 +22,9 @@ const HARNESS_NEEDLES: &[&str] = &[
     "diagnose_tips",
     "crates/",
     "crates\\",
+    // Repo workflow scripts (e.g. shelf stale-tag triage) count as harness.
+    "scripts/",
+    "scripts\\",
 ];
 
 /// True when `script_fix` is an acceptable Improve claim.
@@ -38,7 +41,9 @@ pub fn script_fix_ok(script_fix: &str) -> bool {
         return rest.trim().chars().count() >= 8;
     }
     let lower = s.to_ascii_lowercase();
-    HARNESS_NEEDLES.iter().any(|n| lower.contains(&n.to_ascii_lowercase()))
+    HARNESS_NEEDLES
+        .iter()
+        .any(|n| lower.contains(&n.to_ascii_lowercase()))
 }
 
 /// When `skill_fix=1`, require a non-empty valid `script_fix`.
@@ -65,14 +70,21 @@ mod tests {
 
     #[test]
     fn accepts_crate_path() {
-        assert!(script_fix_ok("source_patch/smells.rs:17mb_empty_index_tocUrl"));
+        assert!(script_fix_ok(
+            "source_patch/smells.rs:17mb_empty_index_tocUrl"
+        ));
         assert!(script_fix_ok("diagnose_tips TOC tip"));
         assert!(script_fix_ok("crates/source-probe live.rs"));
+        assert!(script_fix_ok(
+            "scripts/shelf-stale-tag-triage.py:hunt_probe_promote"
+        ));
     }
 
     #[test]
     fn accepts_no_auto() {
-        assert!(script_fix_ok("no_auto: site-specific CSS only, not reusable"));
+        assert!(script_fix_ok(
+            "no_auto: site-specific CSS only, not reusable"
+        ));
         assert!(!script_fix_ok("no_auto: short"));
         assert!(!script_fix_ok("no_auto:"));
     }

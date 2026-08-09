@@ -133,7 +133,7 @@ source-cli progress next   # 先跑 closeout pending
 | **placeholder_web_accesible_google** | 首页 title=`Web accesible`（或西语「La web está accesible」）+ `meta refresh`→Google；书/搜索路径 404 | **disable/skip** — 占位壳非小说站。同名孪生若 CF 522/超时勿当可迁。Harness：`no_auto:placeholder_disable` |
 | **name_similar_video_not_novel_twin** | 原站超时；同名 `.com` 等可开但是影视/视频壳（标题含影院/电影）；hunt 无小说候选 | **勿**迁到影视站。`skip`+disable；靠自动换源。Harness：`no_auto:title_sniff_video` |
 | **search_empty_shell_open_ok** | `search.html` 200 但无结果节点（`#sitembox`/`dl` 空）；混淆字段（如 `369koolearn`）POST 仍空壳；详情 `#list`+`#content` 可读 | **勿**浅判整源死。修/保留打开路径；`checkSearch=false`+`checkDiscovery=false` 验证；有活 `m.` 孪生则优先；假搜索勿用热门按钮当 bookList。Harness：`no_auto:open_path_verify` |
-| **shallow_unfixable_claim** | Agent 仅凭 `gate`/`serial`/`hunt empty`/「搜索失效」标签口头判「修不了」；用户再深挖又能迁域/修打开路径 | **禁止**浅层终局。收工前至少：PC 首页+搜索+一本 TOC/正文，或手机 `debug_source`+`get_http_logs`。搜索死仍要看打开路径；批次结束写 `docs/source-repair-retrospective.md` 总教训。Harness：`no_auto:agent_must_html_or_phone_debug` |
+| **shallow_unfixable_claim** | Agent 仅凭 `gate`/`serial`/`hunt empty`/「搜索失效」标签口头判「修不了」；或把 `action=hunt` 缓修说成 skip；用户再深挖又能迁域/修打开路径 | **禁止**浅层终局。收工前至少：PC 首页+搜索+一本 TOC/正文，或手机 `debug_source`+`get_http_logs`；hunt 桶必须先 probe。搜索死仍要看打开路径；批次结束写 `docs/source-repair-retrospective.md` 总教训。Harness：`no_auto:agent_must_html_or_phone_debug` |
 | **content_qsbs_bb_base64** | 正文章节 HTML 含 `qsbs.bb('…base64…')`；`##…##@js:base64Decode` 易截断触发 Hutool AIOOBE | `ruleContent.content` 用 `@js`：`indexOf("qsbs.bb('")`→`substring`→`java.base64Decode`；搜索若 meta refresh 回首页则 `checkSearch=false` 或 disable §16。Harness：`no_auto:按正文脚本改` |
 | **toc_href_slash_twin_unreachable** | 详情 TOC 几乎全是 `href="/"`（仅最新章真链）；PC 孪生（如 `biquge5200.cc`/`b5200.org`）目录/搜索 OK，但手机 Cronet 对 `23.224.*` 60s timeout | **勿**浅判「站点活着就能修」；手机不可达孪生 → `skip`+留证据；可达再 migrate。Harness：`no_auto:PC探针+手机HTTP日志` |
 | 假详情 (wmp8) | list-empty + books≤1 + `/s.php` | **search** |
@@ -155,6 +155,7 @@ source-cli progress next   # 先跑 closeout pending
 | 验证码搜索 | getcode / yzm / actyzm | **skip** |
 | 域名停车/过期 | L2 GET 正文含 for sale/出售/域名到期 / Redirecting shell | **disable/skip**（勿当搜索规则坏；**不** hunt） |
 | **dead_skip_without_hunt** | batch/agent 对 `l1_unreachable`/`l2_http_dead` 直接 disable | **禁止** — 先 `hunt --probe` / oneshot 自动 hunt；无后继再 disable。Harness：`classify.rs`→`Hunt`；`oneshot_live` resolve；wave 不把 hunt ledger 成 final skip |
+| **gate_hunt_deferred_unprobed** | 分流把 `gate_action=hunt` / DNS `Unable to resolve host` 丢进「maybe later / 像 skip」却**不跑** `hunt --probe`（tongrenquan：www 无 A，种子已有 `m.`） | **禁止** — triage 时 hunt 必须当场 probe；有 migrate/verify 候选 → **立刻升优先**深挖，勿口头缓修。Harness：`scripts/shelf-stale-tag-triage.py`；`no_auto:triage_must_hunt_probe` |
 | **hunt_osint_skipped** | 只跑 `hunt --probe` empty 就结案；不做 Google / crt.sh / 限流 Wayback /（有 key 时）付费 DNS 档案；或对 archive.org 连发触发 429 | **禁止** — deep dig 迁域嫌疑必须跑 `scripts/domain-successor-hunt.py` + 浏览器 Google（书名+站名）。Wayback 只走 `scripts/lib/wayback_cdx.py`。Harness：`no_auto:osint_then_disable` |
 | **serial_await_idle** | Agent 对整批 `serial`/`batch` 长 AwaitShell（数小时） | **禁止** — 最多短轮询 60–90s；看 `serial_heartbeat.json` / `serial_last.json` mtime；心跳停滞 > `url-timeout-s+30` → kill 父进程、`check channel --force-clear`、续跑。Harness：`serial_cmd`/`serial_spawn` |
 | **agent_turn_stall** | 后台 diagnose 后收工；或 login/AES/广告源反复抠 >2min；或 MCP `10060` 堵死整环 | **禁止** — 回合结束前必须 close-out 当前 URL 或写明下一动作；auth/广告证据够就 seal；diagnose 传输失败 → PC probe + 直连 MCP debug/check，或 `skip:mcp_transient` 下一源。**Harness：** `deep_active.json` claim；`closeout pending`/`progress next` 未 seal 则拒；`closeout release`；Discipline §21–23 |
@@ -165,7 +166,7 @@ source-cli progress next   # 先跑 closeout pending
 | **mcp_timeout_sot** | 超时写死在代码 / 找不到配置 | 改 `config/mcp_defaults.json`：`http_timeout_s`（默认90）、`debug_timeout_s`（默认45，仅 `debug_source`）、`verify_timeout_ms` / `verify_max_wait_s`。Harness：`timeouts.rs`；discover 重写 URL 会保留这些字段 |
 | 主机跳转 | bookSourceUrl host ≠ final host（如 .org→.com） | **migrate** 再修搜索 |
 | **没有找到站点 (521danmei)** | title=`没有找到站点` / 空壳 | L2 `deadish:没有找到站点` → **skip**。Harness：`sniff.rs` DEADISH_HINTS |
-| **apex_no_a_try_m (tongrenquan)** | 裸 IP/`没有找到站点`；`header.Host=tongrenquan.org`；apex 无 A，但 `m.` 有 CF A | **勿**对 IP 空壳直接封死；读 Host/旧域 → 试 `m.`/`www.` → migrate+verify。Seeds：`domain_hunt_seeds.json` |
+| **apex_no_a_try_m (tongrenquan)** | 裸 IP/`没有找到站点`；`header.Host=tongrenquan.org`；apex/`www` 无 A，但 `m.` 有 CF A；备注 `Unable to resolve host` | **勿**对 IP 空壳/死 www **缓修当 skip**。读 Host/旧域 → **立刻** `hunt --probe`（种子常已有 `m.`）→ migrate+verify+书架 remap。见 `gate_hunt_deferred_unprobed`。Seeds：`domain_hunt_seeds.json` |
 | **nginx 空站 (cstxt)** | title=`Welcome to nginx!` | L2 `deadish:welcome to nginx` → **skip** |
 | **域名广告劫持 (pyzht)** | title=精选推荐 / `gg_card` / 18+广告壳 | L2 deadish 广告标记 → **skip** |
 | **Empire 搜索体 (fuxsb)** | debug 有书但 check「搜索失效」；`show=a,b,c` 体 | 简化 `keyboard={{key}}&show=title&tempid=1` + Referer；正文 `.co-by`→`.conbd` |
