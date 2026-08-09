@@ -1119,6 +1119,12 @@ Harness：`source-gate/alias_url.rs`（gate `alias_bookSourceUrl_skip_host_probe
 4. **改进**：新 trap → patch SKILL + Rust/Python **再** next URL（2026-07-28 补：thread trap + `diagnose_tips.rs`）
 
 
+### 2026-08-09 PO文屋 https://www.powenwu1.com (toc related-list)
+- Scan: 启用源里同模板 POST search.php 共 73 host；**双 list-charts 黄链污染仅 jile1 + powenwu1**
+- jile1: 已 `.0` + 校验成功（见上条）
+- powenwu1: `chapterList` → `class.list-charts.0@li@a`（已 save）；PC HTML 块=[48,6]→取首块 48
+- Verify: 手机 Cronet **ERR_TIMED_OUT**（源分组含「网站失效」）→ **未**宣称校验成功；ledger `fail:phone_timeout`
+
 ### 2026-08-09 PO18文学 https://www.jile1.com (toc related-list)
 - Trap: `multi_list_charts_toc` — 双 `ul.list-group.list-charts`；第二块是相关推荐黄链（非「最新几章」）
 - Fix: `ruleToc.chapterList` → `class.list-charts.0@li@a`（只取第一块正文目录）
