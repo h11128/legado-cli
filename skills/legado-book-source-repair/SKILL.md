@@ -123,6 +123,7 @@ source-cli progress next   # 先跑 closeout pending
 |------|--------|--------|
 | **stream_protocol_error_reset** | 手机校验/HTTP 日志 `stream was reset: PROTOCOL_ERROR` / StreamResetException；http/https 同失败；hunt empty | **skip/disable** — 传输层挂，非选择器。Harness：`no_auto:transport_dead` |
 | **tls_packet_header_corrupt** | 备注/日志 `Unable to parse TLS packet header` / Cronet `ERR_SSL_PROTOCOL_ERROR`；PC `SSL: record layer failure` / L2 `corrupt message`；TCP:443 通但握手崩；hunt empty | **skip/disable** — 源站 TLS 损坏，非选择器；勿只改 http。Harness：`no_auto:tls_origin_corrupt` |
+| **content_font_encrypt_dynamic** | 后继站详情/目录 OK，但正文 `#nr1` 为 `font-family:YHFixed` + `&#13xxxx` 实体；每章 `/style/_*.css` 内嵌不同 woff2（cmap PUA→uniXXXX 会变）；`webJs`/裸 `@text` 仍乱码 | **勿**只凭详情/目录宣称 fixed。无 Rhino 可跑的 woff2/cmap 解法则 **skip/disable**+换源；PC 可证 fontTools 解得通≠可进书源。Harness：`no_auto:needs_woff2_cmap_in_rhino` |
 | **ip_url_host_header_parked** | `bookSourceUrl` 为裸 IP；`header.Host` 指向域名；IP 超时且 Host 域是「官网首页」/停车壳无小说 | **disable**；勿只换 Host。hunt 无后继则 skip。Harness：`no_auto:disable_ip_shell` |
 | **cf_520_origin_error_hunt_empty** | 首页/搜索 Cloudflare **520 Origin Error**；hunt empty；已有活孪生（如 69shuba.com） | disable 死域；书架 remap/换源到孪生；勿抠选择器。Harness：`no_auto:migrate_or_disable` |
 | **http_403_home_hunt_empty** | 首页 GET 403（手机 HTTP 日志）；searchUrl `@js`/`ajax` 抽 form 崩；`hunt --probe` empty；同名域停车/威胁页 | **skip/disable** — 非选择器问题。Harness：`no_auto:hunt_then_disable` |
@@ -165,6 +166,7 @@ source-cli progress next   # 先跑 closeout pending
 | **mcp_lock_zombie** | Windows 死 PID 仍占 `mcp_channel.lock`（旧实现永远 alive） | `check channel` 自动清；repair stale **15m**；Win32 `OpenProcess`。Harness：`channel.rs`/`channel_pid.rs`；卡死活进程用 `--force-clear` |
 | **mcp_timeout_sot** | 超时写死在代码 / 找不到配置 | 改 `config/mcp_defaults.json`：`http_timeout_s`（默认90）、`debug_timeout_s`（默认45，仅 `debug_source`）、`verify_timeout_ms` / `verify_max_wait_s`。Harness：`timeouts.rs`；discover 重写 URL 会保留这些字段 |
 | 主机跳转 | bookSourceUrl host ≠ final host（如 .org→.com） | **migrate** 再修搜索 |
+| **migrate_false_friend_cms** | gate `l2_host_redirect`/301 新域通，但是**无关 CMS**（如 Z-Blog `zb_users`/`San_Media`）；旧 `/novel_*`、`modules/article/search.php` **404**；OSINT 真后继（如 `.net`）手机/PC **CF 522** | **勿**按「主机跳转」盲目 migrate。先嗅新域模板/旧路径；假友 → disable；真后继不可达 → skip+换源。Harness：`no_auto:sniff_cms_before_migrate` |
 | **没有找到站点 (521danmei)** | title=`没有找到站点` / 空壳 | L2 `deadish:没有找到站点` → **skip**。Harness：`sniff.rs` DEADISH_HINTS |
 | **apex_no_a_try_m (tongrenquan)** | 裸 IP/`没有找到站点`；`header.Host=tongrenquan.org`；apex/`www` 无 A，但 `m.` 有 CF A；备注 `Unable to resolve host` | **勿**对 IP 空壳/死 www **缓修当 skip**。读 Host/旧域 → **立刻** `hunt --probe`（种子常已有 `m.`）→ migrate+verify+书架 remap。见 `gate_hunt_deferred_unprobed`。Seeds：`domain_hunt_seeds.json` |
 | **nginx 空站 (cstxt)** | title=`Welcome to nginx!` | L2 `deadish:welcome to nginx` → **skip** |
