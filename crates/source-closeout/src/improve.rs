@@ -19,6 +19,8 @@ const HARNESS_NEEDLES: &[&str] = &[
     "source-spine",
     "source_types",
     "source-types",
+    "source_gate",
+    "source-gate",
     "diagnose_tips",
     "crates/",
     "crates\\",

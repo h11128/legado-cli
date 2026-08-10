@@ -51,6 +51,15 @@ pub fn classify_one(url: &str, rules: &[SkipRule], opts: &ClassifyOpts) -> GateR
 
     let l2 = probe_l2(url, opts.l2_timeout_s);
     if !l2.ok {
+        // PC rustls rejects expired/invalid peer certs; Android OkHttp often still
+        // fetches. Do not hunt→disable — leave Verify for phone debug/check.
+        if l2_snippet_is_cert_problem(l2.snippet.as_deref()) {
+            let mut out = GateResult::new(to_gate_url(url), GateAction::Verify, "l2_cert_expired");
+            out.verify = true;
+            out.l1 = Some(l1);
+            out.l2 = Some(l2);
+            return out;
+        }
         let (reason, action) = deadish_reason_action(l2.deadish.as_deref());
         let mut out = GateResult::new(to_gate_url(url), action, reason);
         out.verify = false;
@@ -100,6 +109,18 @@ fn deadish_reason_action(dead: Option<&str>) -> (&'static str, GateAction) {
         // HTTP dead / timeout body — hunt seeds before disable.
         ("l2_http_dead", GateAction::Hunt)
     }
+}
+
+fn l2_snippet_is_cert_problem(snippet: Option<&str>) -> bool {
+    let s = snippet.unwrap_or("").to_ascii_lowercase();
+    if !(s.contains("certificate") || s.contains("cert")) {
+        return false;
+    }
+    s.contains("expired")
+        || s.contains("not valid")
+        || s.contains("unknown issuer")
+        || s.contains("invalid peer certificate")
+        || s.contains("certificateunknown")
 }
 
 #[cfg(test)]
@@ -160,5 +181,19 @@ mod tests {
         let http_dead = deadish_reason_action(None);
         assert_eq!(http_dead.0, "l2_http_dead");
         assert_eq!(http_dead.1, GateAction::Hunt);
+    }
+
+    #[test]
+    fn cert_snippet_maps_to_verify_helper() {
+        assert!(l2_snippet_is_cert_problem(Some(
+            "tls: invalid peer certificate: certificate expired"
+        )));
+        assert!(l2_snippet_is_cert_problem(Some(
+            "Connection Failed: certificate is not valid after …"
+        )));
+        assert!(!l2_snippet_is_cert_problem(Some(
+            "tls connection init failed: received corrupt message"
+        )));
+        assert!(!l2_snippet_is_cert_problem(None));
     }
 }
