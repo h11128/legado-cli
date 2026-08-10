@@ -255,6 +255,7 @@ source-cli progress next   # 先跑 closeout pending
 | **booksourcecomment_holds_js_helpers** | 规则 `eval(String(source.bookSourceComment))`；改备注后 SyntaxError/找不到 map | **禁止**白话覆盖 comment；备份后再改。Harness：`no_auto:restore_comment_js` |
 | **alias_label_host_nxdomain_api_alive** | `bookSourceUrl` NXDOMAIN，但 `type=`/API/`data:;base64` 搜索仍通 | 勿仅凭 L1 hunt_empty 禁用；先 `debug_source`。Harness：`no_auto:debug_before_disable_alias` |
 | **alias_booksourceurl_false_dead** | PC gate `l2_bot_shell`/CF，但手机可跟 301 到 `.org` 等活域；或备注仍写 Unable to resolve | **勿**只凭 PC CF 禁用。先 `debug_source`/校验；清陈旧 DNS 备注。Harness：`no_auto:phone_debug_before_disable_cf` |
+| **dig_migrate_report_without_persist** | dig/oneshot 报 `status=migrated`，但手机 `bookSourceUrl` 未改、新 host 源不存在 | **勿**信报告 alone。`get_source`/SQL 确认后手工 upsert+remap+校验；再禁旧 URL。Harness：`no_auto:migrate_upsert_remap` |
 | **l2_502_brand_cluster_dead** (18ys) | 主域 L2 **502**；同品牌镜像/`m.`/相关站也 502 或 NXDOMAIN/lander；hunt+OSINT 无活后继 | **skip/disable** — 勿把广告 lander（`www.18ys.com`→`/lander`）当后继。Harness：`no_auto:site_dead` |
 | **search_author_concat_sibling_div** (rouwen/xn--7dv) | 搜索 `class.author@text` 拼出 `新乙\n阅读量：882`；同级第二个 `div.author` 是阅读量；详情无 author | search `class.author.0@text##作者：`；bookInfo `class.booktag@tag.a.0@text`。Harness：`no_auto:站点 DOM 特例` |
 | **dict_url_decode_fake_name** (haici/dict.cn) | `name=@js:decodeURI(baseUrl…)` + `bookList=body` → 任意换源关键词都「书名命中」；详情「该词条未找到」 | bookList `@js` 遇未找到返回 `[]`；name 用页面 `tag.h1`/`.word`；换源侧 `isAcceptableChangeSourceHit`（空/假最新章、本地有作者却空作者、词典 intro）。Harness：`ChangeBookSourceQuality` |
