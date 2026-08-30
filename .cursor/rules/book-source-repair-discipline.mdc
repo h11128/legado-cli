@@ -1,6 +1,7 @@
 ---
 description: Hard discipline for Legado book-source repair AND create (anti fake-fixed / missing close-out)
-alwaysApply: true
+globs: ["**/*.json", "sources/**", "scripts/**"]
+alwaysApply: false
 ---
 
 # Book-source repair & create discipline
