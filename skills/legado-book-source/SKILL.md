@@ -39,12 +39,12 @@ surface named `legado` (server may appear as `legado` / `user-legado`).
 | Knowledge repo | `E:/Projects/legadoSkill` |
 | Official app source | `E:/Projects/legado` (junction: `legadoSkill/legado`) |
 | Upstream Trae mega-skill | `legadoSkill/skills/SKILLV0.7.md` |
-| Essential knowledge | `legadoSkill/docs/ESSENTIAL_KNOWLEDGE_SUMMARY.md` |
-| Self-check notes | `legadoSkill/assets/智能体自我认知.md` |
-| CSS rules | `legadoSkill/assets/css选择器规则.txt` |
-| Example sources | `legadoSkill/assets/knowledge_base/book_sources/` |
-| Local debugger | `legadoSkill/debugger/test_universal.py` |
-| Local venv | `legadoSkill/.venv` |
+| Essential knowledge | `docs/reference/essential-knowledge-summary.md` |
+| CSS rules | `skills/legado-book-source/references/css-rules.md` |
+| JS Extensions | `skills/legado-book-source/references/js-extensions.md` |
+| Crypto methods | `skills/legado-book-source/references/crypto-methods.md` |
+| Source template | `skills/legado-book-source/references/source-schema-template.md` |
+| Example sources | `fixtures/samples/book_source_database/` |
 
 ## Device MCP (`legado`)
 
