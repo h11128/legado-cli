@@ -9,8 +9,8 @@ use chrono::Utc;
 use regex::Regex;
 use serde_json::{json, Value};
 use source_mcp::{
-    batch_check_urls, batch_max_wait_s, FsChannelPort, McpClient, McpEndpoint, McpSourceRepository,
-    repo_root,
+    batch_check_urls, batch_max_wait_s, repo_root, FsChannelPort, McpClient, McpEndpoint,
+    McpSourceRepository,
 };
 use source_ports::{ChannelPort, LedgerPort, SourceRepository};
 use source_types::{LedgerRow, LedgerStep, PortError, SourceKey, Url};
@@ -29,7 +29,10 @@ pub fn run_debug_vs_check(args: DebugVsCheckArgs) -> ExitCode {
                 eprintln!("debug-vs-check: {e}");
                 return ExitCode::from(2);
             }
-            println!("{}", serde_json::to_string_pretty(&report).unwrap_or_default());
+            println!(
+                "{}",
+                serde_json::to_string_pretty(&report).unwrap_or_default()
+            );
             println!("wrote {}", args.out.display());
             if check_ok {
                 ExitCode::SUCCESS
@@ -68,10 +71,8 @@ fn run_inner(args: &DebugVsCheckArgs) -> Result<(Value, bool), PortError> {
     let _ = client.tools_call("set_http_log_recording", json!({ "enabled": true }));
 
     let t0 = Instant::now();
-    let debug_result = client.tools_call(
-        "debug_source",
-        json!({ "url": args.url, "key": args.key }),
-    )?;
+    let debug_result =
+        client.tools_call("debug_source", json!({ "url": args.url, "key": args.key }))?;
     let debug_text = McpClient::extract_text(&debug_result);
     report["debug_ms"] = json!(t0.elapsed().as_millis() as u64);
     report["debug_has_m3u8"] = json!(debug_text.contains("m3u8"));
@@ -90,13 +91,15 @@ fn run_inner(args: &DebugVsCheckArgs) -> Result<(Value, bool), PortError> {
     report["check_ms"] = json!(t1.elapsed().as_millis() as u64);
     let row = rows.first().cloned().unwrap_or_default();
     let msg = row.get("message").and_then(|v| v.as_str()).unwrap_or("");
-    let check_ok = row.get("success").and_then(|v| v.as_bool()).unwrap_or(false);
+    let check_ok = row
+        .get("success")
+        .and_then(|v| v.as_bool())
+        .unwrap_or(false);
     report["check_ok"] = json!(check_ok);
     report["check_msg"] = json!(msg);
 
-    let logs_raw = McpClient::extract_text(
-        &client.tools_call("get_http_logs", json!({ "limit": 12 }))?,
-    );
+    let logs_raw =
+        McpClient::extract_text(&client.tools_call("get_http_logs", json!({ "limit": 12 }))?);
     let host = host_of(&args.url);
     let urls = parse_log_urls(&logs_raw, &host);
     report["http_urls"] = json!(urls.iter().rev().take(8).collect::<Vec<_>>());
@@ -125,8 +128,7 @@ fn run_inner(args: &DebugVsCheckArgs) -> Result<(Value, bool), PortError> {
 
 fn write_report(path: &PathBuf, report: &Value) -> Result<(), PortError> {
     if let Some(parent) = path.parent() {
-        std::fs::create_dir_all(parent)
-            .map_err(|e| PortError::Permanent(format!("mkdir: {e}")))?;
+        std::fs::create_dir_all(parent).map_err(|e| PortError::Permanent(format!("mkdir: {e}")))?;
     }
     std::fs::write(
         path,
@@ -147,15 +149,18 @@ fn parse_log_urls(raw: &str, host: &str) -> Vec<String> {
     static RE: std::sync::OnceLock<Regex> = std::sync::OnceLock::new();
     let re = RE.get_or_init(|| Regex::new(r"GET (https?://\S+)").expect("log url re"));
     re.captures_iter(raw)
-        .filter_map(|c| c.get(1).map(|m| m.as_str().trim_end_matches(',').to_string()))
+        .filter_map(|c| {
+            c.get(1)
+                .map(|m| m.as_str().trim_end_matches(',').to_string())
+        })
         .filter(|u| host.is_empty() || u.to_lowercase().contains(host))
         .collect()
 }
 
 fn classify(debug_text: &str, check_msg: &str, http_urls: &[String]) -> &'static str {
-    let has_detail = http_urls.iter().any(|u| {
-        u.contains("/detail") || u.contains("/vod/detail") || u.contains("softdown")
-    });
+    let has_detail = http_urls
+        .iter()
+        .any(|u| u.contains("/detail") || u.contains("/vod/detail") || u.contains("softdown"));
     let has_search = http_urls.iter().any(|u| {
         u.contains("search") || u.contains("wd=") || u.contains("keyword") || u.contains("q=")
     });

@@ -80,7 +80,10 @@ pub fn run_claim(cmd: ClaimCmd) -> ExitCode {
             });
             match append_index(&index, &entry) {
                 Ok(data) => {
-                    println!("{}", serde_json::to_string_pretty(&data).unwrap_or_default());
+                    println!(
+                        "{}",
+                        serde_json::to_string_pretty(&data).unwrap_or_default()
+                    );
                     ExitCode::SUCCESS
                 }
                 Err(e) => {

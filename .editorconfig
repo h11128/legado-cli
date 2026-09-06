@@ -1,0 +1,32 @@
+# Code Quality Standards — EditorConfig
+# See: docs/code-quality-standards.md §11
+#
+# Copy to project root as `.editorconfig`
+
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.{js,ts,tsx,vue,json,yaml,yml,html,css,scss}]
+indent_size = 2
+
+[*.{kt,kts}]
+indent_size = 4
+
+[*.dart]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+
+[Makefile]
+indent_style = tab
+
+[*.gradle.kts]
+indent_size = 4

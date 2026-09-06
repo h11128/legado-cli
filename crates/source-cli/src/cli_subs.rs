@@ -173,6 +173,31 @@ pub enum SourceSub {
         #[arg(long)]
         out: Option<PathBuf>,
     },
+    /// Single-flight `debug_source` (search keyword, or absolute/::/++/-- URL).
+    Debug {
+        #[arg(long)]
+        url: String,
+        #[arg(long)]
+        key: String,
+        #[arg(long, default_value_t = 120)]
+        timeout_sec: u64,
+    },
+    /// Raw `get_source` — full BookSource JSON by bookSourceUrl (unlike `triage`,
+    /// which prints a smell/layer summary instead of the source itself).
+    Get {
+        #[arg(long)]
+        url: String,
+    },
+    /// `list_sources` — paginated summaries, optional name/URL substring filter.
+    List {
+        #[arg(long)]
+        search: Option<String>,
+    },
+    /// `delete_sources` — permanently remove one or more by bookSourceUrl.
+    Delete {
+        #[arg(long, value_delimiter = ',')]
+        urls: Vec<String>,
+    },
     Log {
         #[arg(long)]
         url: String,
@@ -220,7 +245,10 @@ pub enum SourceSub {
         url: String,
         #[arg(long)]
         name: Option<String>,
-        #[arg(long, help = "default: temp/full_fix/cache/new_sources/<host>_scaffold.json")]
+        #[arg(
+            long,
+            help = "default: temp/full_fix/cache/new_sources/<host>_scaffold.json"
+        )]
         out: Option<PathBuf>,
     },
 }

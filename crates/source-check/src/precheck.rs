@@ -56,18 +56,16 @@ fn probe_http(url: &str, timeout: Duration) -> (bool, Option<u16>, Option<String
             ((200..500).contains(&st), Some(st), None)
         }
         Err(ureq::Error::Status(code, _)) => (code < 500, Some(code), Some(format!("http:{code}"))),
-        Err(_) => {
-            match agent.get(url).call() {
-                Ok(resp) => {
-                    let st = resp.status();
-                    ((200..500).contains(&st), Some(st), None)
-                }
-                Err(ureq::Error::Status(code, _)) => {
-                    (code < 500, Some(code), Some(format!("http:{code}")))
-                }
-                Err(e) => (false, None, Some(format!("http:{e}"))),
+        Err(_) => match agent.get(url).call() {
+            Ok(resp) => {
+                let st = resp.status();
+                ((200..500).contains(&st), Some(st), None)
             }
-        }
+            Err(ureq::Error::Status(code, _)) => {
+                (code < 500, Some(code), Some(format!("http:{code}")))
+            }
+            Err(e) => (false, None, Some(format!("http:{e}"))),
+        },
     }
 }
 

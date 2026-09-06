@@ -255,7 +255,9 @@ mod tests {
     fn desktop_mobile_content_tip() {
         let d = DiagnoseResult::new(Url::new("https://www.xsw.tw/").unwrap(), Layer::Content);
         let tips = layer_tips(&d);
-        assert!(tips.iter().any(|t| t.contains("desktop_empty_mobile_content")));
+        assert!(tips
+            .iter()
+            .any(|t| t.contains("desktop_empty_mobile_content")));
     }
 
     #[test]

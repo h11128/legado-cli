@@ -6,7 +6,8 @@ use source_gate::sniff_search_rate_limit;
 use source_mcp::McpClient;
 use source_types::{DiagnoseResult, Layer};
 
-const TIP: &str = "TRAP ss_search_delay_cookie (HTTP log): App search body has 搜索间隔/ss_search_delay — \
+const TIP: &str =
+    "TRAP ss_search_delay_cookie (HTTP log): App search body has 搜索间隔/ss_search_delay — \
 NOT a selector bug. Run `source-cli check clear-cookies --url <bookSourceUrl>` \
 (Cursor MCP catalog may omit clear_cookies; CLI is the SOT entry). \
 Set enabledCookieJar=false; optional searchUrl @js cookie.removeCookie(base). Retest.";

@@ -8,7 +8,7 @@ use std::time::{Duration, Instant};
 
 use chrono::Utc;
 use serde_json::{json, Value};
-use source_mcp::{McpClient, McpEndpoint, McpSourceRepository, McpVerifyPort, FsChannelPort};
+use source_mcp::{FsChannelPort, McpClient, McpEndpoint, McpSourceRepository, McpVerifyPort};
 use source_ports::{ChannelPort, SourceRepository, VerifyPort};
 use source_types::{CheckOpts, PortError, SourceKey};
 
@@ -38,7 +38,11 @@ fn header_map(source: &Value) -> Vec<(String, String)> {
     h
 }
 
-fn fetch_page(url: &str, headers: &[(String, String)], timeout: Duration) -> Result<String, PortError> {
+fn fetch_page(
+    url: &str,
+    headers: &[(String, String)],
+    timeout: Duration,
+) -> Result<String, PortError> {
     let agent = ureq::AgentBuilder::new().timeout(timeout).build();
     let mut req = agent.get(url);
     for (k, v) in headers {
@@ -52,21 +56,13 @@ fn fetch_page(url: &str, headers: &[(String, String)], timeout: Duration) -> Res
 }
 
 fn debug_book_count(client: &McpClient, url: &str, key: &str) -> Result<usize, PortError> {
-    let raw = client.tools_call(
-        "debug_source",
-        json!({"url": url, "key": key}),
-    )?;
+    let raw = client.tools_call("debug_source", json!({"url": url, "key": key}))?;
     let text = McpClient::extract_text(&raw);
     let n = text.matches("bookUrl").count();
     Ok(n)
 }
 
-fn deep_one(
-    client: Arc<McpClient>,
-    url: &str,
-    key: &str,
-    budget_s: f64,
-) -> Value {
+fn deep_one(client: Arc<McpClient>, url: &str, key: &str, budget_s: f64) -> Value {
     let t0 = Instant::now();
     let mut row = json!({ "url": url, "steps": [] });
     let left = || budget_s - t0.elapsed().as_secs_f64();
@@ -95,7 +91,11 @@ fn deep_one(
     if n > 0 && left() > 10.0 {
         let mut v = src.as_value().clone();
         if let Some(info) = v.get_mut("ruleBookInfo").and_then(|x| x.as_object_mut()) {
-            if info.get("tocUrl").and_then(|x| x.as_str()).is_some_and(|s| !s.is_empty()) {
+            if info
+                .get("tocUrl")
+                .and_then(|x| x.as_str())
+                .is_some_and(|s| !s.is_empty())
+            {
                 info.insert("tocUrl".into(), json!(""));
                 v["ruleBookInfo"] = json!(info);
                 if v.get("concurrentRate").is_none() {
@@ -111,7 +111,11 @@ fn deep_one(
                     let verify = McpVerifyPort::new(client.clone());
                     if let Ok(vr) = verify.check(&SourceKey::new(url), CheckOpts::default()) {
                         row["check"] = json!({"success": vr.success, "message": vr.message});
-                        row["result"] = json!(if vr.success { "fixed" } else { "failed_after_toc_clear" });
+                        row["result"] = json!(if vr.success {
+                            "fixed"
+                        } else {
+                            "failed_after_toc_clear"
+                        });
                         row["wall_s"] = json!(t0.elapsed().as_secs_f64());
                         return row;
                     }
@@ -153,8 +157,11 @@ fn deep_one(
                         let verify = McpVerifyPort::new(client);
                         if let Ok(vr) = verify.check(&SourceKey::new(url), CheckOpts::default()) {
                             row["check"] = json!({"success": vr.success, "message": vr.message});
-                            row["result"] =
-                                json!(if vr.success { "fixed" } else { "failed_after_searchUrl" });
+                            row["result"] = json!(if vr.success {
+                                "fixed"
+                            } else {
+                                "failed_after_searchUrl"
+                            });
                             row["wall_s"] = json!(t0.elapsed().as_secs_f64());
                             return row;
                         }

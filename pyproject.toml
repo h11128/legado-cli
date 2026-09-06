@@ -1,0 +1,58 @@
+# Code Quality Standards — Python quality configuration (ruff + pyright)
+# See: docs/code-quality-standards.md §4.3
+#
+# Usage: merge into your project's pyproject.toml.
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    # ── Format conflicts (with ruff format) ──────────────────────
+    "COM812",   # missing-trailing-comma (formatter handles)
+    "ISC001",   # single-line-implicit-string-concatenation (formatter conflict)
+
+    # ── Docstrings (internal scripts don't need) ─────────────────
+    "D100",     # missing module docstring
+    "D101",     # missing class docstring
+    "D102",     # missing method docstring
+    "D103",     # missing function docstring
+    "D104",     # missing package docstring
+    "D107",     # missing __init__ docstring
+    "D203",     # one-blank-line-before-class (conflicts with D211)
+    "D213",     # multi-line-summary-second-line (conflicts with D212)
+
+    # ── Practical exemptions ─────────────────────────────────────
+    "T201",     # print (scripts legitimately use print)
+    "ANN",      # type annotations (covered by pyright)
+    "ERA001",   # commented-out code (common during WIP)
+    "FIX002",   # line-contains-todo
+    "TD003",    # missing-todo-link (internal projects don't need issue links)
+    "S101",     # assert (reasonable in scripts)
+    "INP001",   # implicit-namespace-package (script dirs without __init__.py)
+    "TRY003",   # raise-vanilla-args
+]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 15
+
+[tool.ruff.lint.pylint]
+max-args = 7
+max-statements = 50
+max-branches = 12
+max-returns = 6
+max-bool-expr = 5
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101", "PLR2004", "ARG"]
+"scripts/**/*.py" = ["PLR0913", "C901"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.pyright]
+pythonVersion = "3.11"
+typeCheckingMode = "basic"

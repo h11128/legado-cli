@@ -181,7 +181,11 @@ mod tests {
 
     #[test]
     fn migrate_step_is_attempt_closed() {
-        let lines = [row("http://m.old.test", "migrate", "migrated_to:http://i.new.test")];
+        let lines = [row(
+            "http://m.old.test",
+            "migrate",
+            "migrated_to:http://i.new.test",
+        )];
         let blocked = blocked_from_lines(lines.iter().map(String::as_str));
         assert!(blocked.contains("http://m.old.test"));
     }

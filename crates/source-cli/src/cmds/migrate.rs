@@ -140,7 +140,7 @@ pub fn run_migrate(args: MigrateArgs) -> ExitCode {
     ExitCode::SUCCESS
 }
 
-fn seal_migrated_from(from_url: &str, to_url: &str) {
+pub(crate) fn seal_migrated_from(from_url: &str, to_url: &str) {
     let Ok(ledger) = DualLedgerPort::from_defaults() else {
         eprintln!("migrate: warn: could not open ledger to seal from_url");
         return;
@@ -169,5 +169,8 @@ fn print_report(report: &serde_json::Value, out: Option<&PathBuf>) {
             serde_json::to_string_pretty(report).unwrap_or_default(),
         );
     }
-    println!("{}", serde_json::to_string_pretty(report).unwrap_or_default());
+    println!(
+        "{}",
+        serde_json::to_string_pretty(report).unwrap_or_default()
+    );
 }

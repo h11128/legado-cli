@@ -152,7 +152,11 @@ pub fn claim_active_entry(
 }
 
 /// Record that `source-cli diagnose` produced evidence for this URL.
-pub fn mark_diagnose_done(paths: &CloseoutPaths, url: &str, payload: &str) -> Result<PathBuf, String> {
+pub fn mark_diagnose_done(
+    paths: &CloseoutPaths,
+    url: &str,
+    payload: &str,
+) -> Result<PathBuf, String> {
     let url = norm_url(url);
     let path = diagnose_artifact_path(paths, &url);
     if let Some(parent) = path.parent() {
@@ -244,8 +248,8 @@ pub fn gate_fixed_diagnose_path(
     if entry == ClaimEntry::McpFallback {
         let trap_ok = trap.to_ascii_lowercase().contains("manual_mcp_bypass");
         let sf = script_fix.trim().to_ascii_lowercase();
-        let script_ok = sf.starts_with("no_auto:diagnose_transport")
-            || sf.starts_with("no_auto:user_");
+        let script_ok =
+            sf.starts_with("no_auto:diagnose_transport") || sf.starts_with("no_auto:user_");
         if trap_ok && script_ok {
             return Ok(());
         }
@@ -328,10 +332,7 @@ pub fn gate_active_unsealed(paths: &CloseoutPaths) -> Result<(), Vec<String>> {
     let url = norm_url(v.get("url").and_then(|x| x.as_str()).unwrap_or(""));
     let claimed = v.get("claimed_at").and_then(|x| x.as_u64()).unwrap_or(0);
     let age = now_epoch().saturating_sub(claimed);
-    let entry = v
-        .get("entry")
-        .and_then(|x| x.as_str())
-        .unwrap_or("?");
+    let entry = v.get("entry").and_then(|x| x.as_str()).unwrap_or("?");
     let mut errs = vec![format!(
         "deep_active unsealed for {url:?} entry={entry} (age {age}s) — finish close-out: \
          ledger + retro append, or `source-cli closeout release --url … --status skip|fail|fixed`"
@@ -395,13 +396,7 @@ mod tests {
     fn diagnose_artifact_counts_as_evidence() {
         let tmp = TempDir::new().unwrap();
         let p = paths(&tmp);
-        claim_active_entry(
-            &p,
-            "https://d.test/",
-            "legado_mcp",
-            ClaimEntry::McpFallback,
-        )
-        .unwrap();
+        claim_active_entry(&p, "https://d.test/", "legado_mcp", ClaimEntry::McpFallback).unwrap();
         mark_diagnose_done(&p, "https://d.test/", "{\"layer\":\"search\"}").unwrap();
         assert!(has_diagnose_evidence(&p, "https://d.test/"));
         assert!(gate_fixed_diagnose_path(&p, "https://d.test/", "", "").is_ok());

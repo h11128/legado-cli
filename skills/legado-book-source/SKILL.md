@@ -259,6 +259,8 @@ Use when the user asks to **find sites** or make **出版/公版/古籍** source
 
 | Trap | Signal | Fix |
 |------|--------|-----|
+| `empire_cms_search_path` | list=0 but 浏览器手动提交表单能搜到; searchUrl 是 `/e/search/index.php` | 帝国CMS(EmpireCMS)真实搜索脚本是 `/e/search/indexsearch.php`（多 "search" 几个字），不是 `index.php`；改路径，不动 selector |
+| `booksourceurl_typo_masked_by_absolute_url` | bookSourceUrl 域名打错但 debug 仍能搜到 | searchUrl/exploreUrl 用了绝对 URL 绕过了错误域名，掩盖问题；用 curl/探针分别测两个域名确认哪个真实可解析，订正 bookSourceUrl 后 save+delete 旧记录 |
 | `ss_search_delay_cookie` | list=0; body `搜索间隔`; Cookie `ss_search_delay` | **`source-cli check clear-cookies`** + `enabledCookieJar=false` |
 | `cookiejar_cf_needs_on` | CF search empty without cookies | jar true + webView; else skip/manual |
 | `multi_toc_pick_longest` | TOC only latest N chapters | @js max link-count container |

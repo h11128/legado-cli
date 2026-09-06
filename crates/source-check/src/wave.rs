@@ -148,7 +148,9 @@ fn append_prefilter_ledger(
 ) -> Result<(), PortError> {
     let ledger = source_mcp::DualLedgerPort::from_defaults()?;
     let ts = Utc::now().to_rfc3339();
-    for bucket in [&pref.skip, &pref.disable, &pref.video, &pref.hunt] {
+    // Hunt is NOT a final skip — policy requires seed probe before disable.
+    // Leave hunt rows in the report for `source-cli repair` / `hunt --probe`.
+    for bucket in [&pref.skip, &pref.disable, &pref.video] {
         for row in bucket {
             let url_s = row.get("url").and_then(|v| v.as_str()).unwrap_or("");
             if url_s.is_empty() {
@@ -166,6 +168,20 @@ fn append_prefilter_ledger(
                 "reason": reason,
             }));
         }
+    }
+    for row in &pref.hunt {
+        let url_s = row.get("url").and_then(|v| v.as_str()).unwrap_or("");
+        if url_s.is_empty() {
+            continue;
+        }
+        let reason = row.get("reason").and_then(|v| v.as_str()).unwrap_or("");
+        per.push(json!({
+            "url": url_s,
+            "action": "prefilter_hunt",
+            "reason": reason,
+            "policy": "hunt_before_disable",
+            "next": "source-cli repair --mode oneshot --url …  OR  source-cli hunt --url … --probe",
+        }));
     }
     Ok(())
 }

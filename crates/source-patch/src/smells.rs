@@ -271,7 +271,9 @@ mod tests {
         );
         let smells = smell_rules(&src);
         assert!(
-            !smells.iter().any(|s| s["issue"] == "17mb_empty_index_unapproved"),
+            !smells
+                .iter()
+                .any(|s| s["issue"] == "17mb_empty_index_unapproved"),
             "after fix smell should clear"
         );
         let mut dirty = BookSource::new(json!({

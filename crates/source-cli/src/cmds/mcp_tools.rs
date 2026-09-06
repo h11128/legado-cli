@@ -9,7 +9,9 @@ use serde_json::{json, Value};
 use source_mcp::{McpClient, McpEndpoint};
 
 pub enum McpToolsCmd {
-    ClearCookies { url: String },
+    ClearCookies {
+        url: String,
+    },
     Push {
         file: PathBuf,
         /// When true: use JSON enabled/group (new drafts). When false: preserve phone flags.

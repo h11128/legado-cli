@@ -45,7 +45,13 @@ fn norm(u: &str) -> String {
 
 fn host_key(url: &str) -> String {
     let n = norm(url);
-    let raw = n.split("##").next().unwrap_or("").split('#').next().unwrap_or("");
+    let raw = n
+        .split("##")
+        .next()
+        .unwrap_or("")
+        .split('#')
+        .next()
+        .unwrap_or("");
     let with = if raw.contains("://") {
         raw.to_string()
     } else {
@@ -90,7 +96,9 @@ fn ledger_sets(path: &Path) -> (HashSet<String>, HashSet<String>, HashSet<String
         let result = row.get("result").and_then(|v| v.as_str()).unwrap_or("");
         let step = row.get("step").and_then(|v| v.as_str()).unwrap_or("");
         if step == "check"
-            && (result.contains("校验成功") || result.starts_with("fixed") || result.starts_with("fixed:"))
+            && (result.contains("校验成功")
+                || result.starts_with("fixed")
+                || result.starts_with("fixed:"))
         {
             fixed.insert(u.clone());
         }
@@ -109,7 +117,10 @@ fn ledger_sets(path: &Path) -> (HashSet<String>, HashSet<String>, HashSet<String
         }
         if DEAD_SKIP_PREFIXES.iter().any(|p| reason.starts_with(p)) {
             hard.insert(u);
-        } else if reason.contains("no_patch") || reason.contains("搜索") || reason.contains("verify_fail") {
+        } else if reason.contains("no_patch")
+            || reason.contains("搜索")
+            || reason.contains("verify_fail")
+        {
             retryable.insert(u);
         } else {
             hard.insert(u);
@@ -131,7 +142,11 @@ fn load_rt_map(path: &Path) -> HashMap<String, i64> {
             let Some(obj) = s.as_object() else {
                 continue;
             };
-            let u = norm(obj.get("bookSourceUrl").and_then(|v| v.as_str()).unwrap_or(""));
+            let u = norm(
+                obj.get("bookSourceUrl")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or(""),
+            );
             if u.is_empty() {
                 continue;
             }
@@ -148,9 +163,10 @@ pub fn build_rt_queue_full(index_path: &Path, opts: &RtBuildOpts) -> Result<Valu
         .map_err(|e| PortError::Permanent(format!("read index: {e}")))?;
     let phone: Value =
         serde_json::from_str(&raw).map_err(|e| PortError::Permanent(format!("json: {e}")))?;
-    let by_url = phone.get("by_url").and_then(|v| v.as_object()).ok_or_else(|| {
-        PortError::Permanent("phone index missing by_url".into())
-    })?;
+    let by_url = phone
+        .get("by_url")
+        .and_then(|v| v.as_object())
+        .ok_or_else(|| PortError::Permanent("phone index missing by_url".into()))?;
 
     let rt_map = opts
         .all_sources_path
@@ -163,7 +179,11 @@ pub fn build_rt_queue_full(index_path: &Path, opts: &RtBuildOpts) -> Result<Valu
         .ledger_path
         .clone()
         .or_else(|| default_jsonl_path().ok())
-        .unwrap_or_else(|| repo_root().unwrap_or_default().join("temp/full_fix/repair_session_ledger.jsonl"));
+        .unwrap_or_else(|| {
+            repo_root()
+                .unwrap_or_default()
+                .join("temp/full_fix/repair_session_ledger.jsonl")
+        });
     let (fixed, hard_skipped, retryable) = if ledger_path.is_file() {
         ledger_sets(&ledger_path)
     } else {
@@ -239,8 +259,14 @@ pub fn build_rt_queue_full(index_path: &Path, opts: &RtBuildOpts) -> Result<Valu
         }));
     }
     rows.sort_by(|a, b| {
-        let ra = a.get("respondTime").and_then(|v| v.as_i64()).unwrap_or(i64::MAX);
-        let rb = b.get("respondTime").and_then(|v| v.as_i64()).unwrap_or(i64::MAX);
+        let ra = a
+            .get("respondTime")
+            .and_then(|v| v.as_i64())
+            .unwrap_or(i64::MAX);
+        let rb = b
+            .get("respondTime")
+            .and_then(|v| v.as_i64())
+            .unwrap_or(i64::MAX);
         ra.cmp(&rb).then_with(|| {
             a.get("url")
                 .and_then(|v| v.as_str())

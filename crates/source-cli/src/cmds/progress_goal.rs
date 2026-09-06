@@ -60,10 +60,7 @@ pub fn goal_status(goal: usize, ledger_path: Option<&Path>) -> Value {
             "remaining".into(),
             json!(goal.saturating_sub(fixed.min(goal))),
         );
-        obj.insert(
-            "updated".into(),
-            json!(chrono::Utc::now().to_rfc3339()),
-        );
+        obj.insert("updated".into(), json!(chrono::Utc::now().to_rfc3339()));
     }
     let _ = std::fs::create_dir_all(path.parent().unwrap_or(Path::new(".")));
     let _ = std::fs::write(

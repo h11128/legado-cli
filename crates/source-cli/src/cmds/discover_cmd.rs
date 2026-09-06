@@ -3,9 +3,7 @@
 use std::path::PathBuf;
 use std::process::ExitCode;
 
-use source_mcp::{
-    apply_discovery, discover, repo_root, sync_cursor_mcp_json,
-};
+use source_mcp::{apply_discovery, discover, repo_root, sync_cursor_mcp_json};
 
 pub struct DiscoverArgs {
     pub write: bool,

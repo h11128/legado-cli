@@ -61,9 +61,7 @@ pub fn assert_fixed_allowed(check: Option<&Value>) -> Result<(), PortError> {
         .get("message")
         .and_then(|v| v.as_str())
         .unwrap_or("check-json success!=true");
-    Err(PortError::Permanent(format!(
-        "Refuse status=fixed: {msg}"
-    )))
+    Err(PortError::Permanent(format!("Refuse status=fixed: {msg}")))
 }
 
 fn entry_item(entry: &Value) -> Map<String, Value> {
@@ -85,10 +83,7 @@ fn dedupe_url(bucket: &mut Vec<Value>, url: &str) {
 
 /// Append/update session index row by status bucket.
 pub fn append_index(index_path: &Path, entry: &Value) -> Result<Value, PortError> {
-    let status = entry
-        .get("status")
-        .and_then(|v| v.as_str())
-        .unwrap_or("");
+    let status = entry.get("status").and_then(|v| v.as_str()).unwrap_or("");
     let url = entry.get("url").and_then(|v| v.as_str()).unwrap_or("");
     if url.is_empty() {
         return Err(PortError::Permanent("index entry missing url".into()));
@@ -103,7 +98,10 @@ pub fn append_index(index_path: &Path, entry: &Value) -> Result<Value, PortError
     let item = Value::Object(entry_item(entry));
     match status {
         "fixed" => {
-            if let Some(arr) = data.get_mut("verified_fixed").and_then(|v| v.as_array_mut()) {
+            if let Some(arr) = data
+                .get_mut("verified_fixed")
+                .and_then(|v| v.as_array_mut())
+            {
                 dedupe_url(arr, url);
                 arr.push(item);
             }

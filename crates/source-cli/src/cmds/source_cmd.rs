@@ -11,7 +11,8 @@ use serde_json::{json, Value};
 use source_cache::{cooldown_for, note_rate_limit, note_verify, CachePaths};
 use source_closeout::{append_index, assert_fixed_allowed, load_check_json};
 use source_mcp::{
-    channel_status, FsChannelPort, McpClient, McpEndpoint, McpSourceRepository, McpVerifyPort,
+    channel_status, force_clear_locks, repo_root, FsChannelPort, McpClient, McpEndpoint,
+    McpSourceRepository, McpVerifyPort,
 };
 use source_patch::smell_rules;
 use source_ports::{ChannelPort, SourceRepository, VerifyPort};
@@ -49,16 +50,15 @@ pub enum SourceCmd {
         from_log: PathBuf,
         index: PathBuf,
     },
-    Channel,
+    Channel {
+        clear_stale: bool,
+        force_clear: bool,
+    },
 }
 
 pub fn run_source(cmd: SourceCmd) -> ExitCode {
     match cmd {
-        SourceCmd::Triage {
-            url,
-            fail_msg,
-            out,
-        } => run_triage(&url, fail_msg.as_deref(), out),
+        SourceCmd::Triage { url, fail_msg, out } => run_triage(&url, fail_msg.as_deref(), out),
         SourceCmd::Fetch(args) => run_fetch(args),
         SourceCmd::Verify {
             url,
@@ -90,20 +90,36 @@ pub fn run_source(cmd: SourceCmd) -> ExitCode {
             agent.as_deref(),
         ),
         SourceCmd::Index { from_log, index } => run_index(&from_log, &index),
-        SourceCmd::Channel => match channel_status() {
-            Ok(v) => {
-                println!("{}", v);
-                if v.get("idle") == Some(&json!(true)) {
-                    ExitCode::SUCCESS
-                } else {
+        SourceCmd::Channel {
+            clear_stale,
+            force_clear,
+        } => {
+            if force_clear {
+                match repo_root().and_then(|r| force_clear_locks(&r)) {
+                    Ok(n) => eprintln!("source channel: force_clear removed {n} lock(s)"),
+                    Err(e) => {
+                        eprintln!("source channel: force_clear: {e}");
+                        return ExitCode::from(1);
+                    }
+                }
+            } else if clear_stale {
+                eprintln!("source channel: clear_stale (also runs on plain status)");
+            }
+            match channel_status() {
+                Ok(v) => {
+                    println!("{}", v);
+                    if v.get("idle") == Some(&json!(true)) {
+                        ExitCode::SUCCESS
+                    } else {
+                        ExitCode::from(1)
+                    }
+                }
+                Err(e) => {
+                    eprintln!("source channel: {e}");
                     ExitCode::from(1)
                 }
             }
-            Err(e) => {
-                eprintln!("source channel: {e}");
-                ExitCode::from(1)
-            }
-        },
+        }
     }
 }
 
@@ -148,7 +164,10 @@ fn run_triage(url: &str, fail_msg: Option<&str>, out: Option<PathBuf>) -> ExitCo
         "tocUrl": info.and_then(|i| i.get("tocUrl")),
     });
     write_optional(out.as_ref(), &report);
-    println!("{}", serde_json::to_string_pretty(&report).unwrap_or_default());
+    println!(
+        "{}",
+        serde_json::to_string_pretty(&report).unwrap_or_default()
+    );
     ExitCode::SUCCESS
 }
 
@@ -220,21 +239,20 @@ fn run_verify(
         "cooldown_s": cool,
     });
     if let Some(paths) = cache_paths.as_ref() {
-        let _ = note_verify(
-            paths,
-            url,
-            vr.success,
-            vr.duration_ms.unwrap_or(0),
-            cool,
-        );
+        let _ = note_verify(paths, url, vr.success, vr.duration_ms.unwrap_or(0), cool);
         if !vr.success
-            && (vr.message.contains("403") || vr.message.contains("429") || vr.message.contains("频繁"))
+            && (vr.message.contains("403")
+                || vr.message.contains("429")
+                || vr.message.contains("频繁"))
         {
             let _ = note_rate_limit(paths, url, (cool + 5.0).max(20.0));
         }
     }
     write_optional(out.as_ref(), &out_doc);
-    println!("{}", serde_json::to_string_pretty(&out_doc).unwrap_or_default());
+    println!(
+        "{}",
+        serde_json::to_string_pretty(&out_doc).unwrap_or_default()
+    );
     if vr.success {
         ExitCode::SUCCESS
     } else {
@@ -282,7 +300,12 @@ fn run_log(
     if let Some(parent) = out.parent() {
         let _ = fs::create_dir_all(parent);
     }
-    if fs::write(out, serde_json::to_string_pretty(&payload).unwrap_or_default()).is_err() {
+    if fs::write(
+        out,
+        serde_json::to_string_pretty(&payload).unwrap_or_default(),
+    )
+    .is_err()
+    {
         eprintln!("source log: write {}", out.display());
         return ExitCode::from(1);
     }

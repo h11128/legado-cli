@@ -174,6 +174,12 @@ pub enum CheckSub {
         /// Force-remove repair+bulk locks even if PID still looks alive (hung agent).
         #[arg(long, default_value_t = false)]
         force_clear: bool,
+        /// Also call phone `reset_mcp_channel` — force-release a stuck App-side
+        /// debug/batch-check channel (only the phone, separate from the local
+        /// file locks above). Emergency recovery; prefer stopping the batch check
+        /// normally when it's just running long.
+        #[arg(long, default_value_t = false)]
+        reset_remote: bool,
     },
     Precheck {
         #[arg(long)]
@@ -263,6 +269,33 @@ pub enum CheckSub {
     ClearCookies {
         #[arg(long)]
         url: String,
+    },
+    /// Read persisted+session cookies for a URL's registrable domain (MCP `get_cookies`).
+    CookieGet {
+        #[arg(long)]
+        url: String,
+    },
+    /// Merge-write a persisted cookie for a URL's registrable domain (MCP `set_cookie`).
+    CookieSet {
+        #[arg(long)]
+        url: String,
+        #[arg(long)]
+        cookie: String,
+    },
+    /// Toggle App HTTP log capture (MCP `set_http_log_recording`).
+    LogRecording {
+        #[arg(long)]
+        enabled: bool,
+    },
+    /// Recent redacted HTTP request summaries (MCP `get_http_logs`).
+    LogList {
+        #[arg(long, default_value_t = 50)]
+        limit: u32,
+    },
+    /// One redacted HTTP request/response by id (MCP `get_http_log`).
+    LogGet {
+        #[arg(long)]
+        id: i64,
     },
 }
 

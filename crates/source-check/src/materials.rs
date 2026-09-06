@@ -92,8 +92,12 @@ fn safe_filename(url: &str) -> String {
 }
 
 /// Write per-tag JSON files + summary.tsv (skips success bucket).
-pub fn dump_fail_materials(classified: &Map<String, Value>, out_dir: &Path) -> Result<(), PortError> {
-    fs::create_dir_all(out_dir).map_err(|e| PortError::Permanent(format!("mkdir materials: {e}")))?;
+pub fn dump_fail_materials(
+    classified: &Map<String, Value>,
+    out_dir: &Path,
+) -> Result<(), PortError> {
+    fs::create_dir_all(out_dir)
+        .map_err(|e| PortError::Permanent(format!("mkdir materials: {e}")))?;
     let mut summary = String::new();
     for (tag, items) in classified {
         if tag == "success" {
@@ -114,7 +118,8 @@ pub fn dump_fail_materials(classified: &Map<String, Value>, out_dir: &Path) -> R
             let path = tag_dir.join(format!("{}.json", safe_filename(url)));
             let body = serde_json::to_string_pretty(item)
                 .map_err(|e| PortError::Permanent(e.to_string()))?;
-            fs::write(&path, body).map_err(|e| PortError::Permanent(format!("write material: {e}")))?;
+            fs::write(&path, body)
+                .map_err(|e| PortError::Permanent(format!("write material: {e}")))?;
         }
     }
     fs::write(out_dir.join("summary.tsv"), summary)

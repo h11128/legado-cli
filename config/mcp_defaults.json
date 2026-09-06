@@ -1,12 +1,12 @@
 {
   "debug_timeout_s": 90.0,
-  "discovered_via": "adb",
+  "discovered_via": "manual-curl-probe",
   "http_timeout_s": 90.0,
-  "mcp_url": "http://10.0.0.139:1236/mcp",
-  "note": "Single SOT for phone LAN endpoint + MCP timeouts. debug_timeout_s=90 for slow create/debug; verify_timeout_ms for check. Updated by source-cli discover (preserves these fields).",
+  "mcp_url": "http://10.0.0.44:1236/mcp",
+  "note": "Single SOT for phone LAN endpoint + MCP timeouts. Updated by source-cli discover.",
   "token": "1234",
-  "updated": "2026-08-04",
+  "updated": "2026-08-29",
   "verify_max_wait_s": 120.0,
   "verify_timeout_ms": 90000,
-  "web_api": "http://10.0.0.139:1122"
+  "web_api": "http://10.0.0.44:1122"
 }

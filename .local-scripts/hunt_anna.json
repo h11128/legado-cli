@@ -1,0 +1,13 @@
+{
+  "action": "empty",
+  "best_candidate": null,
+  "candidates": [],
+  "confidence": "normal",
+  "host": "zh.annas-archive.org",
+  "note": null,
+  "probes": [],
+  "schema_version": "1",
+  "shutdown": false,
+  "status": "empty",
+  "url": "https://zh.annas-archive.org"
+}

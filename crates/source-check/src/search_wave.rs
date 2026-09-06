@@ -9,8 +9,8 @@ use std::time::Instant;
 use chrono::Utc;
 use serde_json::{json, Value};
 use source_mcp::{
-    batch_check_urls, batch_max_wait_s, is_repair_success, McpClient, McpEndpoint,
-    McpSourceRepository, FsChannelPort,
+    batch_check_urls, batch_max_wait_s, is_repair_success, FsChannelPort, McpClient, McpEndpoint,
+    McpSourceRepository,
 };
 use source_ports::{ChannelPort, SourceRepository};
 use source_types::{PortError, SourceKey};
@@ -141,7 +141,9 @@ pub fn run_search_wave(opts: SearchWaveOpts) -> Result<Value, PortError> {
         let rows = Arc::clone(&rows);
         handles.push(thread::spawn(move || {
             for url in part {
-                rows.lock().expect("rows").push(work_one(Arc::clone(&client), &url));
+                rows.lock()
+                    .expect("rows")
+                    .push(work_one(Arc::clone(&client), &url));
             }
         }));
     }
@@ -183,10 +185,7 @@ pub fn run_search_wave(opts: SearchWaveOpts) -> Result<Value, PortError> {
                 .iter()
                 .find(|r| r.get("url").and_then(|v| v.as_str()) == Some(url));
             if let Some(cr) = cr {
-                let msg = cr
-                    .get("message")
-                    .and_then(|v| v.as_str())
-                    .unwrap_or("");
+                let msg = cr.get("message").and_then(|v| v.as_str()).unwrap_or("");
                 row["check"] = cr.clone();
                 row["fixed"] = json!(is_repair_success(msg));
             }

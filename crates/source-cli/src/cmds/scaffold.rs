@@ -33,14 +33,14 @@ pub fn run_scaffold(host_url: &str, name: Option<&str>, out: &Path) -> ExitCode 
         "bookSourceGroup": "小说",
         "bookSourceType": 0,
         "bookSourceComment": "scaffold MVP 笔趣阁系 — REWRITE selectors from live HTML; \
-GET search; enabledCookieJar=false; clear-cookies on 搜索间隔; TOC pick longest list",
+    GET search; enabledCookieJar=false; clear-cookies on 搜索间隔; TOC pick longest list",
         "enabled": true,
         "enabledExplore": false,
         "enabledCookieJar": false,
         "concurrentRate": "2000",
         "header": format!(
             "{{\"User-Agent\": \"Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 \
-(KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36\", \"Referer\": \"{base}/\"}}"
+    (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36\", \"Referer\": \"{base}/\"}}"
         ),
         "bookUrlPattern": format!("https?://(www\\.)?{host_esc}/"),
         "searchUrl": format!(
@@ -60,9 +60,9 @@ GET search; enabledCookieJar=false; clear-cookies on 搜索间隔; TOC pick long
         },
         "ruleToc": {
             "chapterList": "@js:\nvar doc=org.jsoup.Jsoup.parse(result);\nvar cands=doc.select(\
-'ul.list-group.list-charts, #list dl, .listmain dl, .chapter-list, #chapterlist');\
-nvar best=null,max=0;\nfor(var i=0;i<cands.size();i++){\n var n=cands.get(i).select('a').size();\n \
-if(n>max){max=n;best=cands.get(i);}\n}\nbest?best.select('a'):doc.select('#list a, .chapter-list a');\n",
+    'ul.list-group.list-charts, #list dl, .listmain dl, .chapter-list, #chapterlist');\
+    nvar best=null,max=0;\nfor(var i=0;i<cands.size();i++){\n var n=cands.get(i).select('a').size();\n \
+    if(n>max){max=n;best=cands.get(i);}\n}\nbest?best.select('a'):doc.select('#list a, .chapter-list a');\n",
             "chapterName": "text",
             "chapterUrl": "href"
         },
@@ -76,9 +76,15 @@ if(n>max){max=n;best=cands.get(i);}\n}\nbest?best.select('a'):doc.select('#list 
     if let Some(parent) = out.parent() {
         let _ = fs::create_dir_all(parent);
     }
-    match fs::write(out, serde_json::to_string_pretty(&draft).unwrap_or_default()) {
+    match fs::write(
+        out,
+        serde_json::to_string_pretty(&draft).unwrap_or_default(),
+    ) {
         Ok(()) => {
-            println!("{}", serde_json::to_string_pretty(&draft).unwrap_or_default());
+            println!(
+                "{}",
+                serde_json::to_string_pretty(&draft).unwrap_or_default()
+            );
             eprintln!(
                 "scaffold: wrote {} — fetch HTML, fix selectors, then:\n\
                  source-cli source push --file {}\n\
@@ -128,7 +134,9 @@ pub fn default_out_for(host_url: &str) -> PathBuf {
         .and_then(|b| host_of(&b))
         .unwrap_or_else(|| "site".into())
         .replace('.', "_");
-    PathBuf::from(format!("temp/full_fix/cache/new_sources/{host}_scaffold.json"))
+    PathBuf::from(format!(
+        "temp/full_fix/cache/new_sources/{host}_scaffold.json"
+    ))
 }
 
 #[cfg(test)]
@@ -138,10 +146,7 @@ mod tests {
 
     #[test]
     fn normalize_adds_scheme() {
-        assert_eq!(
-            normalize_base("www.15u.cc").unwrap(),
-            "http://www.15u.cc"
-        );
+        assert_eq!(normalize_base("www.15u.cc").unwrap(), "http://www.15u.cc");
     }
 
     #[test]

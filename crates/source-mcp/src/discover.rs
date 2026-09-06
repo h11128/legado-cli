@@ -305,7 +305,10 @@ pub fn sync_cursor_mcp_json(mcp_url: &str, token: &str) -> Value {
     headers.insert("X-Legado-Token".into(), json!(token));
     headers.insert(
         "X-Legado-Client".into(),
-        json!(format!("discover-{}", chrono::Utc::now().format("%Y-%m-%d"))),
+        json!(format!(
+            "discover-{}",
+            chrono::Utc::now().format("%Y-%m-%d")
+        )),
     );
     if fs::write(
         &mcp_json,
@@ -331,17 +334,15 @@ fn dirs_home() -> PathBuf {
 
 pub fn apply_discovery(write: bool, timeout_s: f64, path: &Path) -> Result<Value, PortError> {
     let data = if path.is_file() {
-        serde_json::from_str::<Value>(&fs::read_to_string(path).map_err(|e| {
-            PortError::Permanent(format!("read {}: {e}", path.display()))
-        })?)
+        serde_json::from_str::<Value>(
+            &fs::read_to_string(path)
+                .map_err(|e| PortError::Permanent(format!("read {}: {e}", path.display())))?,
+        )
         .map_err(|e| PortError::Permanent(format!("json: {e}")))?
     } else {
         json!({})
     };
-    let token = data
-        .get("token")
-        .and_then(|v| v.as_str())
-        .unwrap_or("1234");
+    let token = data.get("token").and_then(|v| v.as_str()).unwrap_or("1234");
     let hits = discover_all(token, timeout_s);
     let chosen = hits.first().cloned();
     let mut result = json!({
@@ -357,16 +358,17 @@ pub fn apply_discovery(write: bool, timeout_s: f64, path: &Path) -> Result<Value
         .get("mcp_url")
         .and_then(|v| v.as_str())
         .ok_or_else(|| PortError::Permanent("chosen missing mcp_url".into()))?;
-    let host = ch.get("host").and_then(|v| v.as_str()).unwrap_or("127.0.0.1");
+    let host = ch
+        .get("host")
+        .and_then(|v| v.as_str())
+        .unwrap_or("127.0.0.1");
     let mut out_data = data.clone();
     out_data["mcp_url"] = json!(mcp_url);
     out_data["token"] = json!(token);
     out_data["web_api"] = json!(format!("http://{host}:1122"));
     out_data["updated"] = json!(chrono::Utc::now().format("%Y-%m-%d").to_string());
     out_data["discovered_via"] = ch.get("via").cloned().unwrap_or(json!("probe"));
-    out_data["note"] = json!(
-        "Single SOT for phone LAN endpoint. Updated by source-cli discover."
-    );
+    out_data["note"] = json!("Single SOT for phone LAN endpoint. Updated by source-cli discover.");
     if write {
         write_defaults(
             &json!({
@@ -388,13 +390,12 @@ pub fn apply_discovery(write: bool, timeout_s: f64, path: &Path) -> Result<Value
 }
 
 /// Return reachable endpoint; rediscover+write if current URL is dead.
-pub fn ensure_reachable(
-    path: Option<&Path>,
-    timeout_s: f64,
-) -> Result<McpEndpoint, PortError> {
-    let path = path
-        .map(Path::to_path_buf)
-        .unwrap_or_else(|| repo_root().unwrap_or_default().join("config/mcp_defaults.json"));
+pub fn ensure_reachable(path: Option<&Path>, timeout_s: f64) -> Result<McpEndpoint, PortError> {
+    let path = path.map(Path::to_path_buf).unwrap_or_else(|| {
+        repo_root()
+            .unwrap_or_default()
+            .join("config/mcp_defaults.json")
+    });
     let current = McpEndpoint::load_path(&path).ok();
     if let Some(ep) = &current {
         if probe_mcp(&ep.mcp_url, &ep.token, timeout_s) {
@@ -405,7 +406,8 @@ pub fn ensure_reachable(
     if discovered.get("wrote") == Some(&json!(true)) {
         return McpEndpoint::load_path(&path);
     }
-    current.ok_or_else(|| PortError::Transient("MCP unreachable and discovery found nothing".into()))
+    current
+        .ok_or_else(|| PortError::Transient("MCP unreachable and discovery found nothing".into()))
 }
 
 pub fn write_defaults(discovery: &Value, path: &Path) -> Result<(), PortError> {
@@ -424,14 +426,17 @@ pub fn write_defaults(discovery: &Value, path: &Path) -> Result<(), PortError> {
         .get("web_api")
         .and_then(|v| v.as_str())
         .unwrap_or("http://127.0.0.1:1122");
-    let payload = json!({
+    // Keep timeout knobs across discover rewrites (SOT: mcp_defaults.json).
+    let timeouts = crate::timeouts::timeouts_from_existing_defaults(path);
+    let mut payload = json!({
         "mcp_url": mcp_url,
         "token": token,
         "web_api": web_api,
         "updated": chrono::Utc::now().format("%Y-%m-%d").to_string(),
-        "note": "Single SOT for phone LAN endpoint. Updated by source-cli discover.",
+        "note": "Single SOT for phone LAN endpoint + MCP timeouts. Updated by source-cli discover.",
         "discovered_via": discovery.get("via").cloned().unwrap_or(json!("probe")),
     });
+    payload = crate::timeouts::McpTimeouts::merge_into_defaults_json(&payload, &timeouts);
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent).map_err(|e| PortError::Permanent(e.to_string()))?;
     }

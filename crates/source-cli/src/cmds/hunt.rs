@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use std::process::ExitCode;
 
 use source_gate::{classify_one, load_rules, ClassifyOpts};
-use source_hunt::{hunt_candidates, HuntSeeds};
+use source_hunt::{HuntResolve, HuntSeeds};
 use source_types::GateAction;
 
 pub struct HuntArgs {
@@ -16,7 +16,7 @@ pub struct HuntArgs {
     pub out: Option<PathBuf>,
 }
 
-fn default_seeds() -> PathBuf {
+pub fn default_seeds() -> PathBuf {
     let candidates = [
         PathBuf::from("config/domain_hunt_seeds.json"),
         PathBuf::from("../config/domain_hunt_seeds.json"),
@@ -34,6 +34,63 @@ fn default_rules() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../config/verify_skip_rules.json")
 }
 
+/// Probe seed candidates; first that passes L2 Verify **or** Migrate (live redirect).
+pub fn probe_best_candidate(
+    candidates: &[String],
+    rules: &[source_gate::SkipRule],
+    l2_timeout: f64,
+) -> (Option<String>, Vec<serde_json::Value>) {
+    let mut probes = Vec::new();
+    let mut best: Option<String> = None;
+    for c in candidates {
+        let row = classify_one(
+            c,
+            rules,
+            &ClassifyOpts {
+                tcp_timeout_s: 1.5,
+                l2_timeout_s: l2_timeout,
+            },
+        );
+        let alive = matches!(row.action, GateAction::Verify | GateAction::Migrate)
+            || row.l2.as_ref().is_some_and(|l| l.ok);
+        let row_json = serde_json::to_value(&row).unwrap_or(serde_json::json!({}));
+        if alive && best.is_none() {
+            // Prefer migrate_to URL when candidate itself redirects.
+            if row.action == GateAction::Migrate {
+                if let Some(ref m) = row.migrate_to {
+                    let to = match m {
+                        source_types::MigrateTarget::Url(u) => u.as_str().to_string(),
+                        source_types::MigrateTarget::Host(h) => format!("http://{}/", h.as_str()),
+                    };
+                    best = Some(to);
+                } else {
+                    best = Some(c.clone());
+                }
+            } else {
+                best = Some(c.clone());
+            }
+        }
+        probes.push(row_json);
+    }
+    (best, probes)
+}
+
+/// Full hunt resolve used by CLI + oneshot (always probes when rules available).
+pub fn resolve_hunt(
+    url: &str,
+    seeds: &HuntSeeds,
+    rules: &[source_gate::SkipRule],
+    l2_timeout: f64,
+    probe: bool,
+) -> (HuntResolve, Vec<serde_json::Value>) {
+    let base = HuntResolve::from_seeds(seeds, url);
+    if !probe || base.shutdown || base.candidates.is_empty() {
+        return (base, Vec::new());
+    }
+    let (best, probes) = probe_best_candidate(&base.candidates, rules, l2_timeout);
+    (base.with_best_alive(best), probes)
+}
+
 fn hunt_one(
     url: &str,
     seeds: &HuntSeeds,
@@ -41,82 +98,19 @@ fn hunt_one(
     l2_timeout: f64,
     probe: bool,
 ) -> serde_json::Value {
-    let host = {
-        let with = if url.contains("://") {
-            url.to_string()
-        } else {
-            format!("http://{url}")
-        };
-        url::Url::parse(&with)
-            .ok()
-            .and_then(|u| u.host_str().map(str::to_string))
-            .unwrap_or_default()
-    };
-    let entry = seeds.lookup_host(&host);
-    let cands = hunt_candidates(seeds, url);
-    let shutdown = entry.map(|e| e.shutdown).unwrap_or(false);
-    let confidence = entry
-        .and_then(|e| e.confidence.as_deref())
-        .unwrap_or("normal");
-    let note = entry.and_then(|e| e.note.clone());
-    let mut probes = Vec::new();
-    let mut best: Option<String> = None;
-    if probe {
-        for c in &cands {
-            let row = classify_one(
-                c,
-                rules,
-                &ClassifyOpts {
-                    tcp_timeout_s: 1.5,
-                    l2_timeout_s: l2_timeout,
-                },
-            );
-            let verify = row.action == GateAction::Verify;
-            let row_json = serde_json::to_value(&row).unwrap_or(serde_json::json!({}));
-            if verify && best.is_none() {
-                best = Some(c.clone());
-            }
-            probes.push(row_json);
-        }
-    }
-    let same = best.as_ref().is_some_and(|b| {
-        b.split('#')
-            .next()
-            .unwrap_or(b)
-            .trim_end_matches('/')
-            .replace("https://", "http://")
-            == url
-                .split('#')
-                .next()
-                .unwrap_or(url)
-                .trim_end_matches('/')
-                .replace("https://", "http://")
-    });
-    let action = if shutdown {
-        "no_mirror"
-    } else if best.is_some() && !same && confidence != "low" {
-        "migrate"
-    } else if best.is_some() && !same {
-        "weak_candidate"
-    } else if best.is_some() {
-        "original_alive"
-    } else if probe {
-        "none_alive"
-    } else {
-        "candidates_only"
-    };
+    let (resolved, probes) = resolve_hunt(url, seeds, rules, l2_timeout, probe);
     serde_json::json!({
         "schema_version": "1",
-        "url": url,
-        "host": host,
-        "note": note,
-        "shutdown": shutdown,
-        "confidence": confidence,
-        "candidates": cands,
-        "best_candidate": best,
+        "url": resolved.url,
+        "host": resolved.host,
+        "note": resolved.note,
+        "shutdown": resolved.shutdown,
+        "confidence": resolved.confidence,
+        "candidates": resolved.candidates,
+        "best_candidate": resolved.best_candidate,
         "probes": probes,
-        "action": action,
-        "status": if cands.is_empty() { "empty" } else { "hunted" },
+        "action": resolved.action.as_str(),
+        "status": if resolved.candidates.is_empty() { "empty" } else { "hunted" },
     })
 }
 

@@ -5,6 +5,7 @@
 
 mod batch_verify;
 mod channel;
+mod channel_pid;
 mod client;
 mod discover;
 mod endpoint;
@@ -12,10 +13,14 @@ mod fakes;
 mod ledger;
 mod root;
 mod source_repo;
+mod timeouts;
 mod verify;
 
 pub use batch_verify::{batch_check_urls, batch_max_wait_s};
-pub use channel::{status as channel_status_raw, FsChannelGuard, FsChannelPort};
+pub use channel::{
+    clear_stale_locks, force_clear_locks, status as channel_status_raw, FsChannelGuard,
+    FsChannelPort, BULK_STALE_S, REPAIR_STALE_S,
+};
 pub use client::McpClient;
 pub use discover::{
     apply_discovery, discover, ensure_reachable, probe_mcp, sync_cursor_mcp_json,
@@ -30,6 +35,7 @@ pub use ledger::{
 };
 pub use root::repo_root;
 pub use source_repo::{url_candidates, McpSourceRepository};
+pub use timeouts::{timeouts_from_existing_defaults, McpTimeouts};
 pub use verify::{is_repair_success, McpVerifyPort};
 pub fn channel_status() -> Result<serde_json::Value, source_types::PortError> {
     let root = repo_root()?;

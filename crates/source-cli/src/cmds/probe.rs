@@ -38,7 +38,11 @@ pub fn run_probe(args: ProbeArgs) -> ExitCode {
                 format!(
                     "{}{}",
                     args.base_url.trim_end_matches('/'),
-                    if src.starts_with('/') { src } else { format!("/{src}") }
+                    if src.starts_with('/') {
+                        src
+                    } else {
+                        format!("/{src}")
+                    }
                 )
             };
             if let Ok(resp) = ureq::get(&url).call() {

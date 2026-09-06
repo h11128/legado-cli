@@ -73,8 +73,8 @@ impl McpSourceRepository {
             return Ok(());
         }
         let root = repo_root()?;
-        let (db, _cfg) = Db::connect_defaults(&root)
-            .map_err(|e| PortError::Permanent(format!("db: {e}")))?;
+        let (db, _cfg) =
+            Db::connect_defaults(&root).map_err(|e| PortError::Permanent(format!("db: {e}")))?;
         let key = norm_source_key(url);
         db.delete_source_snapshot(&key)
             .map_err(|e| PortError::Permanent(format!("snapshot delete: {e}")))?;
@@ -86,13 +86,12 @@ impl McpSourceRepository {
             return Ok(());
         }
         let root = repo_root()?;
-        let (db, _cfg) = Db::connect_defaults(&root)
-            .map_err(|e| PortError::Permanent(format!("db: {e}")))?;
+        let (db, _cfg) =
+            Db::connect_defaults(&root).map_err(|e| PortError::Permanent(format!("db: {e}")))?;
         let key = norm_source_key(url);
         let mut v = src.as_value().clone();
         strip_ephemeral(&mut v);
-        let payload =
-            serde_json::to_string(&v).map_err(|e| PortError::Permanent(e.to_string()))?;
+        let payload = serde_json::to_string(&v).map_err(|e| PortError::Permanent(e.to_string()))?;
         let row = SourceSnapshotRow {
             source_key: key.clone(),
             host_key: host_key(&key),
@@ -173,7 +172,11 @@ impl SourceRepository for McpSourceRepository {
                 "preserveGroup": true,
             }),
         )?;
-        if let Some(u) = v.get("bookSourceUrl").and_then(|x| x.as_str()).map(str::to_string) {
+        if let Some(u) = v
+            .get("bookSourceUrl")
+            .and_then(|x| x.as_str())
+            .map(str::to_string)
+        {
             let _ = self.cache_put(&u, &BookSource::new(v));
         }
         Ok(())

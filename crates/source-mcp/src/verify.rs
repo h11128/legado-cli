@@ -13,10 +13,9 @@ use source_ports::VerifyPort;
 use source_types::{CheckOpts, Mode, PortError, SourceKey, VerifyResult};
 
 use crate::client::McpClient;
+use crate::timeouts::McpTimeouts;
 
 const DEFAULT_KEYWORD: &str = "我的";
-const DEFAULT_TIMEOUT_MS: u64 = 45_000;
-const DEFAULT_MAX_WAIT_S: f64 = 90.0;
 
 /// Device verify over MCP check tools.
 pub struct McpVerifyPort {
@@ -29,12 +28,13 @@ pub struct McpVerifyPort {
 
 impl McpVerifyPort {
     pub fn new(client: Arc<McpClient>) -> Self {
+        let t = McpTimeouts::load_defaults();
         Self {
             client,
             ready: std::sync::OnceLock::new(),
             keyword: DEFAULT_KEYWORD.into(),
-            timeout_ms: DEFAULT_TIMEOUT_MS,
-            max_wait_s: DEFAULT_MAX_WAIT_S,
+            timeout_ms: t.verify_timeout_ms,
+            max_wait_s: t.verify_max_wait_s,
         }
     }
 

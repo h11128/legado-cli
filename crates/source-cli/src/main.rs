@@ -291,7 +291,11 @@ fn main() -> ExitCode {
                 url: Some(url),
                 status: None,
                 note: Some(note),
-                entry: if entry.trim().is_empty() { None } else { Some(entry) },
+                entry: if entry.trim().is_empty() {
+                    None
+                } else {
+                    Some(entry)
+                },
             }),
             CloseoutSub::Heartbeat => run_closeout(CloseoutArgs {
                 cmd: "heartbeat".into(),
@@ -532,6 +536,18 @@ fn main() -> ExitCode {
                 cooldown,
                 out,
             }),
+            SourceSub::Debug {
+                url,
+                key,
+                timeout_sec,
+            } => run_mcp_raw(McpRawCmd::Debug {
+                url,
+                key,
+                timeout_sec,
+            }),
+            SourceSub::Get { url } => run_mcp_raw(McpRawCmd::Get { url }),
+            SourceSub::List { search } => run_mcp_raw(McpRawCmd::List { search }),
+            SourceSub::Delete { urls } => run_mcp_raw(McpRawCmd::Delete { urls }),
             SourceSub::Log {
                 url,
                 name,

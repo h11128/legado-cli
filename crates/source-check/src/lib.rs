@@ -28,9 +28,6 @@ pub use disable_dead::{
     plan_disable_dead, strip_tag, write_report, DisableDeadError, DisableDeadOpts, DEAD_TAG,
 };
 // Re-export alias helpers used by disable-dead / ops scans.
-pub use source_gate::{
-    classify_alias_row, is_alias_book_source_url, refuse_dead_tag_reason, ALIAS_GATE_REASON,
-};
 pub use harvest::{default_fails_path, run_harvest, HarvestOpts};
 pub use materials::{classify_results, dump_fail_materials, FAIL_TAGS};
 pub use precheck::{
@@ -41,5 +38,8 @@ pub use search_wave::{run_search_wave, SearchWaveOpts};
 pub use shard::{
     build_ring, load_urls_file as load_shard_urls_file, mix, node_for, shard_urls, str_hash32,
     write_shards, ShardError,
+};
+pub use source_gate::{
+    classify_alias_row, is_alias_book_source_url, refuse_dead_tag_reason, ALIAS_GATE_REASON,
 };
 pub use wave::{default_rules_path, run_wave, WaveOpts};

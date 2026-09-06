@@ -8,9 +8,16 @@ use source_check::{
     channel_status, dedupe_urls, load_alive_from_precheck, load_urls_file, precheck_report,
     run_batch_check, BatchCheckOpts,
 };
+use source_mcp::{force_clear_locks, repo_root};
+
+use super::mcp_raw::{run_mcp_raw, McpRawCmd};
 
 pub enum CheckCmd {
-    Channel,
+    Channel {
+        clear_stale: bool,
+        force_clear: bool,
+        reset_remote: bool,
+    },
     Precheck {
         urls_file: PathBuf,
         timeout: f64,
@@ -62,16 +69,41 @@ fn run_batch(opts: BatchCheckOpts) -> ExitCode {
 
 pub fn run_check(cmd: CheckCmd) -> ExitCode {
     match cmd {
-        CheckCmd::Channel => match channel_status() {
-            Ok(v) => {
-                println!("{}", v);
-                ExitCode::SUCCESS
+        CheckCmd::Channel {
+            clear_stale,
+            force_clear,
+            reset_remote,
+        } => {
+            if force_clear {
+                match repo_root().and_then(|r| force_clear_locks(&r)) {
+                    Ok(n) => eprintln!("check channel: force_clear removed {n} lock(s)"),
+                    Err(e) => {
+                        eprintln!("check channel: force_clear: {e}");
+                        return ExitCode::from(1);
+                    }
+                }
+            } else if clear_stale {
+                // status() already clears stale; explicit flag is documentation for agents.
+                eprintln!("check channel: clear_stale (also runs on plain status)");
             }
-            Err(e) => {
-                eprintln!("check channel: {e}");
-                ExitCode::from(1)
+            if reset_remote {
+                eprintln!("check channel: reset_remote (phone-side reset_mcp_channel)");
+                let rc = run_mcp_raw(McpRawCmd::ChannelReset);
+                if rc != ExitCode::SUCCESS {
+                    return rc;
+                }
             }
-        },
+            match channel_status() {
+                Ok(v) => {
+                    println!("{}", v);
+                    ExitCode::SUCCESS
+                }
+                Err(e) => {
+                    eprintln!("check channel: {e}");
+                    ExitCode::from(1)
+                }
+            }
+        }
         CheckCmd::Precheck {
             urls_file,
             timeout,
@@ -166,11 +198,7 @@ pub fn run_check(cmd: CheckCmd) -> ExitCode {
                     .unwrap_or_default()
             };
             let alive = dedupe_urls(alive);
-            eprintln!(
-                "check full: precheck alive {}/{}",
-                alive.len(),
-                urls.len()
-            );
+            eprintln!("check full: precheck alive {}/{}", alive.len(), urls.len());
             run_batch(BatchCheckOpts {
                 urls: alive,
                 keyword,

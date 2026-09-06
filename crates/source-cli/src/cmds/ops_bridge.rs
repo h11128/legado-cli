@@ -8,6 +8,7 @@ use crate::cmds::check_cmd::{run_check, CheckCmd};
 use crate::cmds::check_ops::{run_check_ops, CheckOpsCmd};
 use crate::cmds::db_cmd::{run_db, DbCmd};
 use crate::cmds::knowledge_cmd::{run_knowledge, KnowledgeCmd};
+use crate::cmds::mcp_raw::{run_mcp_raw, McpRawCmd};
 use crate::cmds::mcp_tools::{run_mcp_tools, McpToolsCmd};
 use crate::cmds::pattern_cmd::{run_pattern, PatternCmd};
 use crate::cmds::queue_cmd::{run_queue, QueueCmd};
@@ -170,9 +171,11 @@ pub fn run_check_sub(cmd: CheckSub) -> ExitCode {
         CheckSub::Channel {
             clear_stale,
             force_clear,
+            reset_remote,
         } => run_check(CheckCmd::Channel {
             clear_stale,
             force_clear,
+            reset_remote,
         }),
         CheckSub::Precheck {
             urls_file,
@@ -261,6 +264,11 @@ pub fn run_check_sub(cmd: CheckSub) -> ExitCode {
             rules,
         }),
         CheckSub::ClearCookies { url } => run_mcp_tools(McpToolsCmd::ClearCookies { url }),
+        CheckSub::CookieGet { url } => run_mcp_raw(McpRawCmd::CookieGet { url }),
+        CheckSub::CookieSet { url, cookie } => run_mcp_raw(McpRawCmd::CookieSet { url, cookie }),
+        CheckSub::LogRecording { enabled } => run_mcp_raw(McpRawCmd::LogRecording { enabled }),
+        CheckSub::LogList { limit } => run_mcp_raw(McpRawCmd::LogList { limit }),
+        CheckSub::LogGet { id } => run_mcp_raw(McpRawCmd::LogGet { id }),
     }
 }
 

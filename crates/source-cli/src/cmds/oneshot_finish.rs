@@ -106,11 +106,7 @@ pub fn run_after_gate(
                 "via": "repair_oneshot",
                 "debug_chars": debug_text.chars().count(),
             });
-            let _ = source_closeout::mark_diagnose_done(
-                &paths,
-                url.trim(),
-                &stub.to_string(),
-            );
+            let _ = source_closeout::mark_diagnose_done(&paths, url.trim(), &stub.to_string());
         }
     }
 

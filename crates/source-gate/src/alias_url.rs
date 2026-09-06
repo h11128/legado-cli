@@ -106,10 +106,7 @@ pub fn is_alias_book_source_url(url: &str) -> bool {
         .strip_prefix('[')
         .and_then(|h| h.strip_suffix(']'))
         .unwrap_or(host);
-    if LOCAL_HOSTS
-        .iter()
-        .any(|h| host_cmp.eq_ignore_ascii_case(h))
-    {
+    if LOCAL_HOSTS.iter().any(|h| host_cmp.eq_ignore_ascii_case(h)) {
         return false;
     }
     if hostish_re().is_match(host_cmp) {

@@ -10,7 +10,9 @@ pub fn run_install(force: bool) -> ExitCode {
         return ExitCode::from(1);
     }
     let mut cmd = Command::new("cargo");
-    cmd.arg("install").arg("--path").arg(manifest.parent().unwrap());
+    cmd.arg("install")
+        .arg("--path")
+        .arg(manifest.parent().unwrap());
     if force {
         cmd.arg("--force");
     }

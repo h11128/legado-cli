@@ -13,7 +13,11 @@ pub struct JsEngineHit {
 }
 
 /// Probe homepage HTML (+ optional fetched script bodies) for JS/search shells.
-pub fn probe_js_engine(base_url: &str, home_html: &str, script_bodies: &[String]) -> Vec<JsEngineHit> {
+pub fn probe_js_engine(
+    base_url: &str,
+    home_html: &str,
+    script_bodies: &[String],
+) -> Vec<JsEngineHit> {
     let mut hits = Vec::new();
     if let Some(j) = detect_js_search_api(home_html, base_url) {
         hits.push(JsEngineHit {

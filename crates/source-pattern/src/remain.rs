@@ -98,7 +98,10 @@ pub fn cluster_remain(samples: &[ClusterSample], config: &RepairConfig) -> Remai
     let batch_ok_buckets = buckets.iter().filter(|b| b.batch_ok).count();
     // Oneshot = URLs that appear in no batch_ok structural_hash bucket.
     let mut in_batch = std::collections::HashSet::new();
-    for b in buckets.iter().filter(|b| b.batch_ok && b.kind == "structural_hash") {
+    for b in buckets
+        .iter()
+        .filter(|b| b.batch_ok && b.kind == "structural_hash")
+    {
         for u in &b.urls {
             in_batch.insert(u.clone());
         }

@@ -268,11 +268,7 @@ mod tests {
     fn dry_run_skips_alias_urls() {
         let dir = TempDir::new().unwrap();
         let p = dir.path().join("pre.json");
-        std::fs::write(
-            &p,
-            r#"{"dead_urls":["QQ浏览器","https://dead.example/"]}"#,
-        )
-        .unwrap();
+        std::fs::write(&p, r#"{"dead_urls":["QQ浏览器","https://dead.example/"]}"#).unwrap();
         let plan = plan_disable_dead(
             &p,
             &DisableDeadOpts {

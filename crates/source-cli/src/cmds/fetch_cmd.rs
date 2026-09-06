@@ -82,11 +82,7 @@ pub fn run_fetch(args: FetchArgs) -> ExitCode {
             return ExitCode::from(2);
         }
     };
-    let page = args
-        .page
-        .as_deref()
-        .unwrap_or(args.url.trim())
-        .to_string();
+    let page = args.page.as_deref().unwrap_or(args.url.trim()).to_string();
     let headers = header_map(source.as_value());
     let (status, body) = match fetch_page(&page, &headers) {
         Ok(v) => v,
@@ -111,11 +107,12 @@ pub fn run_fetch(args: FetchArgs) -> ExitCode {
         "html_path": html_path.to_string_lossy(),
         "bytes": body.len(),
     });
-    if fs::write(&html_path, &body).is_err() || fs::write(
-        &meta_path,
-        serde_json::to_string_pretty(&meta).unwrap_or_default(),
-    )
-    .is_err()
+    if fs::write(&html_path, &body).is_err()
+        || fs::write(
+            &meta_path,
+            serde_json::to_string_pretty(&meta).unwrap_or_default(),
+        )
+        .is_err()
     {
         eprintln!("fetch: write dump failed");
         return ExitCode::from(1);
@@ -124,8 +121,14 @@ pub fn run_fetch(args: FetchArgs) -> ExitCode {
         if let Some(parent) = out.parent() {
             let _ = fs::create_dir_all(parent);
         }
-        let _ = fs::write(&out, serde_json::to_string_pretty(&meta).unwrap_or_default());
+        let _ = fs::write(
+            &out,
+            serde_json::to_string_pretty(&meta).unwrap_or_default(),
+        );
     }
-    println!("{}", serde_json::to_string_pretty(&meta).unwrap_or_default());
+    println!(
+        "{}",
+        serde_json::to_string_pretty(&meta).unwrap_or_default()
+    );
     ExitCode::SUCCESS
 }

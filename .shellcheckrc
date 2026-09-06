@@ -1,0 +1,6 @@
+# Code Quality Standards — ShellCheck configuration
+# See: docs/code-quality-standards.md §9.2
+
+shell=bash
+disable=SC1091
+enable=all

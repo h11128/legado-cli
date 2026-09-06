@@ -28,6 +28,7 @@ pub fn run_dig(args: DigArgs) -> ExitCode {
     let ch = run_check(CheckCmd::Channel {
         clear_stale: true,
         force_clear: false,
+        reset_remote: false,
     });
     if ch != ExitCode::SUCCESS {
         eprintln!("dig: channel not idle — clear bulk/repair lock first");
@@ -56,9 +57,7 @@ pub fn run_dig(args: DigArgs) -> ExitCode {
     });
     // 3 = gate-blocked diagnose skip — still an official diagnose artifact.
     if diag != ExitCode::SUCCESS && diag != ExitCode::from(3) {
-        eprintln!(
-            "dig: diagnose failed (exit {diag:?}) — MCP fallback only if transport dead"
-        );
+        eprintln!("dig: diagnose failed (exit {diag:?}) — MCP fallback only if transport dead");
         return diag;
     }
 

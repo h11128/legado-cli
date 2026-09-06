@@ -8,9 +8,13 @@ use serde_json::{json, Value};
 use source_ports::{ChannelGuard, ChannelPort};
 use source_types::PortError;
 
+use crate::channel_pid::pid_alive;
 use crate::root::repo_root;
 
-const STALE_S: f64 = 6.0 * 3600.0;
+/// Repair lock max age before treated stale (even if pid look-alive fails).
+pub const REPAIR_STALE_S: f64 = 15.0 * 60.0;
+/// Bulk runner lock max age.
+pub const BULK_STALE_S: f64 = 2.0 * 3600.0;
 
 /// Exclusive repair vs bulk lock under `<root>/temp/`.
 pub struct FsChannelPort {
@@ -127,6 +131,7 @@ fn now_s() -> f64 {
 }
 
 pub fn status(root: &Path) -> Result<Value, PortError> {
+    let cleared = clear_stale_locks(root)?;
     let paths = [
         (root.join("temp/mcp_channel.lock"), "repair"),
         (root.join("temp/full_check/runner.lock"), "bulk"),
@@ -136,10 +141,6 @@ pub fn status(root: &Path) -> Result<Value, PortError> {
         let Some(mut info) = read_lock(&path)? else {
             continue;
         };
-        if stale(&info, &path) {
-            let _ = fs::remove_file(&path);
-            continue;
-        }
         if info.get("owner").is_none() {
             if let Some(obj) = info.as_object_mut() {
                 obj.insert("owner".into(), json!(default_owner));
@@ -155,7 +156,46 @@ pub fn status(root: &Path) -> Result<Value, PortError> {
     Ok(json!({
         "idle": holders.is_empty(),
         "holders": holders,
+        "cleared_stale": cleared,
+        "repair_stale_s": REPAIR_STALE_S,
+        "bulk_stale_s": BULK_STALE_S,
     }))
+}
+
+/// Remove locks whose owner PID is dead or older than stale threshold.
+pub fn clear_stale_locks(root: &Path) -> Result<usize, PortError> {
+    let paths = [
+        (root.join("temp/mcp_channel.lock"), REPAIR_STALE_S),
+        (root.join("temp/full_check/runner.lock"), BULK_STALE_S),
+    ];
+    let mut n = 0;
+    for (path, stale_s) in paths {
+        let Some(info) = read_lock(&path)? else {
+            continue;
+        };
+        if is_stale(&info, &path, stale_s) {
+            let _ = fs::remove_file(&path);
+            n += 1;
+        }
+    }
+    Ok(n)
+}
+
+/// Force-remove repair + bulk locks (agent recovery after hung live PID).
+pub fn force_clear_locks(root: &Path) -> Result<usize, PortError> {
+    let paths = [
+        root.join("temp/mcp_channel.lock"),
+        root.join("temp/full_check/runner.lock"),
+    ];
+    let mut n = 0;
+    for path in paths {
+        if path.exists() {
+            fs::remove_file(&path)
+                .map_err(|e| PortError::Permanent(format!("remove {}: {e}", path.display())))?;
+            n += 1;
+        }
+    }
+    Ok(n)
 }
 
 fn read_lock(path: &Path) -> Result<Option<Value>, PortError> {
@@ -193,39 +233,16 @@ fn mtime_s(path: &Path) -> f64 {
         .unwrap_or(0.0)
 }
 
-fn stale(info: &Value, path: &Path) -> bool {
+fn is_stale(info: &Value, path: &Path, stale_s: f64) -> bool {
     let mtime = info
         .get("mtime")
         .and_then(|v| v.as_f64())
         .unwrap_or_else(|| mtime_s(path));
-    if now_s() - mtime > STALE_S {
+    if now_s() - mtime > stale_s {
         return true;
     }
     let pid = info.get("pid").and_then(|v| v.as_u64()).unwrap_or(0) as u32;
     pid != 0 && !pid_alive(pid)
-}
-
-fn pid_alive(pid: u32) -> bool {
-    if pid == 0 {
-        return false;
-    }
-    #[cfg(unix)]
-    {
-        std::process::Command::new("kill")
-            .args(["-0", &pid.to_string()])
-            .status()
-            .map(|s| s.success())
-            .unwrap_or(false)
-    }
-    #[cfg(windows)]
-    {
-        // Match Python Windows fallback: non-zero pid treated alive; rely on STALE_S.
-        true
-    }
-    #[cfg(not(any(unix, windows)))]
-    {
-        true
-    }
 }
 
 fn release(root: &Path, owner: &str, pid: u32) -> Result<(), PortError> {
@@ -277,5 +294,36 @@ mod tests {
         let port = FsChannelPort::new(dir.path());
         let err = port.assert_idle_for_repair().unwrap_err();
         assert!(matches!(err, PortError::ChannelBusy(_)));
+    }
+
+    #[test]
+    fn clear_stale_removes_dead_or_aged_lock() {
+        let dir = TempDir::new().unwrap();
+        let lock = dir.path().join("temp/mcp_channel.lock");
+        fs::create_dir_all(lock.parent().unwrap()).unwrap();
+        fs::write(
+            &lock,
+            json!({"owner":"repair","pid":1u32,"mtime": now_s() - REPAIR_STALE_S - 10.0})
+                .to_string(),
+        )
+        .unwrap();
+        let n = clear_stale_locks(dir.path()).unwrap();
+        assert!(n >= 1);
+        assert!(!lock.exists());
+    }
+
+    #[test]
+    fn force_clear_removes_live_lock() {
+        let dir = TempDir::new().unwrap();
+        let lock = dir.path().join("temp/mcp_channel.lock");
+        fs::create_dir_all(lock.parent().unwrap()).unwrap();
+        fs::write(
+            &lock,
+            json!({"owner":"repair","pid": std::process::id(),"mtime": now_s()}).to_string(),
+        )
+        .unwrap();
+        let n = force_clear_locks(dir.path()).unwrap();
+        assert_eq!(n, 1);
+        assert!(!lock.exists());
     }
 }

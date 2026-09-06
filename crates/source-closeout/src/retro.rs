@@ -39,12 +39,7 @@ pub fn append_retro(paths: &CloseoutPaths, opts: RetroAppendOpts) -> Result<Retr
     gate_script_fix(&opts.script_fix, opts.skill_fix)?;
     let status_lc = opts.status.trim().to_lowercase();
     if status_lc == "fixed" {
-        crate::active::gate_fixed_diagnose_path(
-            paths,
-            &opts.url,
-            trap,
-            &opts.script_fix,
-        )?;
+        crate::active::gate_fixed_diagnose_path(paths, &opts.url, trap, &opts.script_fix)?;
     }
 
     let row = json!({
