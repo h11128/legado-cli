@@ -22,12 +22,13 @@
 
 `legadoSkill` 是专为 Android **[Legado (开源阅读 3.0+)](https://github.com/gedoor/legado)** 打造的现代化书源工程开发套件与自动化运维基础设施。
 
-在 Legado 生态中，书源规则复杂且脆弱（涵盖 CSS/JQuery 选择器、XPath、JSONPath、正则提取、Rhino JS 引擎、加密解密、登录鉴权、反爬对抗等）。当目标网站改版、域名变更或增加防护盾时，传统的手工排查调试极度繁琐。
+在 Legado 生态中，书源规则非常脆弱（涵盖 CSS/JQuery 选择器、XPath、JSONPath、正则提取、Rhino JS 引擎、加密解密、登录鉴权、反爬对抗等）。当目标网站改版、域名变更或增加防护盾时，传统的手工抓包与调试极其耗时耗力。
 
 本项目将书源开发与修复演进为**工业级自动化工程体系**：
-- **纯 Rust 全栈重写**：告别零散低效的脚本，提供毫秒级响应的高性能命令行工具 `source-cli`。
+- **纯 Rust 全栈重写**：告别散装低效的 Python 脚本，提供毫秒级响应的高性能命令行工具 `source-cli`。
 - **真机闭环联动**：通过 **MCP (Model Context Protocol)** 协议直连 Android 设备端 Legado 官方客户端，实现**“分析 -> 编写 -> 推送 -> 调试 -> 真机验证”**全自动化闭环。
 - **多 Agent 智能体技能**：原生赋能 Claude Code、Codex、Cursor、Hermes 等主流 AI 编码助手，内置 9 大专业规约参考库与单向排障直觉。
+- **人类极简体验**：人类用户无需死记硬背复杂的 CLI 命令与参数，只需开启手机服务并与 AI 对话，AI 智能体即可全自主在后台驱动引擎完成一切工作。
 
 ---
 
@@ -47,24 +48,63 @@
 
 ---
 
-## 🏗 系统架构 (System Architecture)
+## 🏗 系统架构图 (System Architecture)
 
-工程根目录位于 `crates/`，严格遵循分层解耦原则：
+```mermaid
+graph TD
+    subgraph UserInterface["交互层 / Interface Layer"]
+        Human["👤 人类开发者 (自然语言对话)"]
+        Agent["🤖 AI Agent (Cursor / Claude Code / Codex / Hermes)"]
+        CLI["💻 source-cli (统一命令行工具)"]
+    end
 
-```text
-crates/
-├── source-core/        # [核心层] 领域实体、JSON 数据契约、站点指纹分类与视频规则
-├── source-storage/     # [存储层] SQLite 事务数据库、EWMA 频控与域名状态缓存
-├── source-engine/      # [引擎层] CSS/JS/正则解析、单向诊断链与动态探针测试
-├── source-flow/        # [流程层] 补丁引擎、域名迁移、全网猎取、波次编排与关门门禁
-├── source-mcp/         # [通信层] Legado 协议适配器、MCP 客户端与批检桥接器
-└── source-cli/         # [交互层] 统一命令行控制台 (source-cli 二进制程序)
+    subgraph FlowLayer["流程编排层 / Workflow Layer: source-flow"]
+        Queue["波次调度 (source-queue)"]
+        Patch["补丁生成 (source-patch)"]
+        Migrate["域名迁移 (source-migrate)"]
+        Hunt["新站猎取 (source-hunt)"]
+        Closeout["收尾门禁 (source-closeout)"]
+    end
+
+    subgraph EngineLayer["引擎与诊断层 / Engine Layer: source-engine"]
+        Diagnose["单向诊断链 (Search -> Detail -> TOC -> Content)"]
+        Parse["规则解析 (CSS / JS / 正则)"]
+        Probe["网络与表单探针 (source-probe)"]
+    end
+
+    subgraph CoreStorage["核心契约与存储层 / Core & Storage"]
+        Core["核心实体与契约 (source-core / contracts)"]
+        Storage["SQLite 数据库与缓存 (source-db / cache)"]
+    end
+
+    subgraph MCPLayer["真机通信层 / Protocol Layer: source-mcp"]
+        MCPClient["MCP 协议客户端"]
+        CheckBridge["真机批检桥接器"]
+    end
+
+    subgraph Device["Android 手机 / 模拟器 (Real Device)"]
+        LegadoApp["📱 Legado (开源阅读 3.x)\n(:1236 Web / MCP 服务)"]
+    end
+
+    Human -->|自然语言指令| Agent
+    Agent -->|调用 Skills 驱动后台| CLI
+    Human -.->|高级排查直接使用| CLI
+    CLI --> FlowLayer
+    FlowLayer --> EngineLayer
+    EngineLayer --> CoreStorage
+    FlowLayer --> MCPLayer
+    MCPLayer -->|HTTP / JSON-RPC| LegadoApp
+    LegadoApp -->|真实网络抓取与校验结果| MCPLayer
 ```
 
-| Crate 模块 | 核心职责 | 子模块包含 |
+### 6 大分层 Crate 职责表
+
+工程核心位于 `crates/` 目录下：
+
+| Crate 模块 | 层级职责 | 核心模块包含 |
 |---|---|---|
 | **`source-core`** | 业务契约与基础类型 | `source-types` (实体), `source-contracts` (Schema), `source-identify` (站点指纹), `source-pattern` (特征聚类), `source-video` (视音频流) |
-| **`source-storage`** | 状态持久化与缓存 | `source-db` (嵌入式 SQLite), `source-cache` (EWMA 冷却时间与域名状态) |
+| **`source-storage`** | 状态持久化与缓存 | `source-db` (嵌入式 SQLite), `source-cache` (EWMA 频控冷却与域名状态) |
 | **`source-engine`** | 规则解析与探测 | `source-parse` (选择器/解析), `source-diagnose` (单向排障链), `source-probe` (网络与表单探针) |
 | **`source-flow`** | 编排与工作流 | `source-patch` (补丁生成), `source-migrate` (域名替换), `source-hunt` (新站搜寻), `source-queue` (波次调度), `source-closeout` (收尾门禁) |
 | **`source-mcp`** | 真机接口与通信 | `source-adapters` (Legado 接口映射), `source-mcp` (MCP 协议), `source-check` (真机批检桥接) |
@@ -72,120 +112,130 @@ crates/
 
 ---
 
-## 🚀 快速上手 (Quick Start & Onboarding)
+## 🔄 真机协同闭环流程图 (Collaborative Workflow)
 
-### 1. 前置准备 (Prerequisites)
+人类只需提需求，Agent 在后台自动完成诊断、推送与真机校验：
 
-- **开发环境**：Windows / Linux / macOS，安装 **Rust 1.75+** (`rustup update stable`)
-- **Android 设备**：
-  - 安装 [Legado (开源阅读) 3.0+](https://github.com/gedoor/legado) 官方客户端
-  - 手机与电脑处于**同一局域网 (Wi-Fi)**
-  - 打开 Legado，进入 **「我的」->「Web服务」**，开启服务；或开启内置的 **MCP 服务**（默认端口 `1236`）
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Human as 👤 人类开发者
+    participant Agent as 🤖 AI Agent (Cursor / Claude)
+    participant CLI as 🦀 source-cli 引擎
+    participant Phone as 📱 Android Legado (真机)
 
-### 2. 编译与安装 CLI
-
-```bash
-# 克隆仓库
-git clone https://github.com/h11128/legadoSkill.git
-cd legadoSkill
-
-# 编译并安装 source-cli
-cd crates
-cargo build --release -p source_cli
-cargo install --path source-cli --force
-
-# 验证安装（新开终端或确保 ~/.cargo/bin 在 PATH 中）
-source-cli --help
-```
-
-### 3. 配置真机 MCP 连接
-
-编辑项目根目录下的配置文件 [`config/mcp_defaults.json`](config/mcp_defaults.json)：
-
-```json
-{
-  "device_ip": "192.168.1.100",    // 替换为您手机在局域网的真实 IP
-  "device_port": 1236,              // Legado MCP 默认端口
-  "http_timeout_s": 30,             // 基础 HTTP 请求超时
-  "debug_timeout_s": 60,            // 单源调试超时时间
-  "verify_timeout_ms": 90000        // 全链路真机校验超时时间
-}
-```
-
-测试设备通信与通道状态：
-```bash
-# 检查手机 MCP 信道是否通畅与空闲
-source-cli check channel
+    Human->>Phone: 开启「Web服务」或内置 MCP (默认端口 1236)
+    Human->>Agent: "帮我修这个失效书源 / 做这个新站的书源: https://..."
+    Note over Agent: Agent 自动唤起技能 (legado-book-source)
+    Agent->>CLI: source-cli check channel (检查手机通道空闲)
+    CLI->>Phone: 查询通道占用状态
+    Phone-->>CLI: 通道空闲 (Idle)
+    Agent->>CLI: source-cli diagnose / site-probe (单向诊断链 / 站点探测)
+    Note over CLI: 严格执行: 搜索 -> 详情 -> 目录 -> 正文<br/>自动识别频控 alert("搜索间隔") 与 5秒盾
+    CLI-->>Agent: 输出结构化诊断分析与修复规则 JSON
+    Agent->>CLI: source-cli source push --file source.json (推送到手机)
+    CLI->>Phone: 规则直接载入手机端 Legado 内存
+    Agent->>Phone: 触发真机 debug_source 与 check_source
+    Phone-->>Agent: 回传真实网络环境下的各步骤执行状态
+    alt 手机端全流程校验成功 (校验成功)
+        Agent->>CLI: source-cli ledger append & retro append (台账记录)
+        Agent-->>Human: ✅ 报告完成！书源已在手机上可用，并列出关键修复说明
+    else 某环节校验失败
+        Note over Agent: 根据真实报错微调规则，重新推源验证，直至真机变绿
+    end
 ```
 
 ---
 
-## 💡 典型使用场景 (Workflows & Usage)
+## 🚀 快速上手 (Quick Start & Onboarding)
 
-### 场景一：深度诊断与修复失效书源 (Repair Workflow)
+### 👤 针对人类用户：零记忆、纯自然语言上手
 
-当某个书源失效（搜索不到、目录乱码、正文空白）时，遵循严格的诊断修复流程：
+**你不需要死记硬背任何复杂的 CLI 命令！** 本项目的核心理念就是让 AI Agent 承担一切繁重的工程执行，你只需按以下 2 步操作：
 
+#### 步骤 1：连接手机与配置 IP
+1. 确保手机和电脑连接在**同一个 Wi-Fi 网络**。
+2. 打开手机上的 **Legado (开源阅读)**，进入 **「我的」->「Web服务」** 并开启；或者开启内置的 **MCP 服务**（默认端口 `1236`）。
+3. 打开本项目根目录下的 [`config/mcp_defaults.json`](config/mcp_defaults.json)，将 `device_ip` 改为你手机当前的局域网 IP（例如 `192.168.1.100`）。
+
+#### 步骤 2：在 AI 工具中直接下达自然语言指令
+在 Cursor、Claude Code、Codex 或 Hermes 中直接对话即可：
+- 🗣️ **“帮我修复这个书源，搜索失效了：`https://www.example-novel.com`”**
+- 🗣️ **“我发现了一个新的小说网站 `https://novel.sample.com`，帮我写一个书源并推送到手机上测试。”**
+- 🗣️ **“把书架里报错的书源批量巡检一遍，能修的自动修掉。”**
+
+Agent 会自动载入 Skills，在后台调度 `source-cli` 自动完成探针、生成规则、推送到手机、执行真机验证，并在手机验证通过后向你汇报！
+
+---
+
+### 🤖 针对 AI Agent 与 CLI 高级开发者：底层命令与工作流
+
+当 Agent 在后台执行任务，或开发者需要手动排查时，使用 `source-cli` 交互：
+
+#### 1. 编译安装
 ```bash
-# 步骤 1：确认手机端通道空闲
+cd crates
+cargo build --release -p source_cli
+cargo install --path source-cli --force
+source-cli --help
+```
+
+#### 2. 场景 A：失效书源深度诊断与修复
+```bash
+# 1. 确保通道空闲（防挂死冲突）
 source-cli check channel
 
-# 步骤 2：自动运行单向诊断链 (自动嗅探 Search/Detail/TOC/Content 问题)
-source-cli diagnose --url "https://failing-novel-site.com" --key "我的"
+# 2. 单源诊断：严格按单向诊断链自动嗅探各层问题
+source-cli diagnose --url "https://target-site.com" --key "我的"
 
-# 步骤 3：单步自动化修复并推送到真机即时验证
-source-cli repair --mode oneshot --url "https://failing-novel-site.com"
+# 3. 自动生成补丁、推到真机并执行单步校验
+source-cli repair --mode oneshot --url "https://target-site.com"
 
-# 步骤 4：记录维修日志与沉淀陷阱（遵循项目闭环纪律）
-source-cli ledger append --url "https://failing-novel-site.com" --step check --result "校验成功"
-source-cli retro append --url "https://failing-novel-site.com" --status fixed --trap "搜索页表单改为POST且需GBK转码" --skill-fix 0
+# 4. 记录台账与经验沉淀（闭环收工门禁）
+source-cli ledger append --url "https://target-site.com" --step check --result "校验成功"
+source-cli retro append --url "https://target-site.com" --status fixed --trap "搜索改为POST且需GBK编码" --skill-fix 0
 ```
 
-### 场景二：从零创作新书源 (Create Workflow)
-
-发现新的小说网站并快速生成书源：
-
+#### 3. 场景 B：从零创作新站书源
 ```bash
-# 步骤 1：对目标站点执行探针扫描，自动识别网站类型、编码与搜索表单
-source-cli site-probe --url "https://new-novel-site.com"
+# 1. 站点结构、编码、搜索表单探针扫描
+source-cli site-probe --url "https://new-site.com"
 
-# 步骤 2：基于探测结果生成书源脚手架模板 (例如笔趣阁通用架构)
-source-cli source scaffold --host "new-novel-site.com" --type biquge --name "新站笔趣阁"
+# 2. 基于探测特征生成书源脚手架
+source-cli source scaffold --host "new-site.com" --type biquge --name "笔趣新站"
 
-# 步骤 3：人工或由 AI Agent 微调规则后，一键直推至手机 Legado
+# 3. 推送到真机 Legado（自动申明 deep_active 锁）
 source-cli source push --file temp/new_source.json
 
-# 步骤 4：触发真机全链路校验（搜索、详情、目录、正文）
-# 手机端自动运行并回传校验结果，只有显示“校验成功”方可交付
+# 4. 真机全链路检验，校验成功后完成关门
 ```
 
-### 场景三：多站点批量巡检与波次修复 (Batch Wave)
-
+#### 4. 场景 C：批量巡检与波次调度
 ```bash
-# 批量检测并自动调度波次修复
+# 多线程并发波次修复
 source-cli wave --urls-file failing_urls.txt --thread-count 8
 ```
 
 ---
 
-## 🤖 与 AI Agent 协同开发 (Multi-Agent Integration)
+## 🤖 多 Agent 技能配置 (Multi-Agent Integration)
 
-本项目专为 AI 辅助编程打造。您可以在 **Claude Code**, **Codex**, **Cursor**, **Hermes** 中直接调用本项目的技能：
+本项目专为 AI 辅助编程深度优化，支持主流 AI 编程助手：
 
-- **技能入口**：`skills/legado-book-source` 与 `skills/legado-book-source-repair`
-- **配置方法**：参考详细配置指南 [`MULTI_AGENT_SETUP.md`](MULTI_AGENT_SETUP.md)
+- **技能核心入口**：`skills/legado-book-source`（书源创作）与 `skills/legado-book-source-repair`（书源修复）。
+- **多端同步配置**：参考详细指南 [`MULTI_AGENT_SETUP.md`](MULTI_AGENT_SETUP.md)。
 - **排障心法与硬纪律**：
-  1. **未在手机验证通过绝不宣称修复成功**：严禁凭“本地跑通”或猜测臆断结果。
-  2. **严格单向诊断链**：`搜索 -> 详情 -> 目录 -> 正文`，搜索未通前严禁盲改后续规则。
-  3. **频控保护与反爬嗅探**：遇到 `alert("搜索间隔")`、403、5秒盾时，依靠冷却机制，禁止乱改选择器。
+  1. **真机未验过绝不宣称修复成功**：严禁凭“本地脚本跑通”就向人类汇报完成，以手机返回为准。
+  2. **严格单向诊断链**：`搜索 -> 详情 -> 目录 -> 正文`，搜索未通前严禁修改目录或正文。
+  3. **频控保护与反爬嗅探**：遇到 `alert("搜索间隔")`、403、5 秒盾时，依靠 EWMA 冷却机制，严禁乱改选择器。
   4. **动态内容加权**：遇到 JS 动态渲染时，使用 `,{"webView": true}`（二级规则使用 `##$##,{"webView":true}`）。
-  5. **负向禁止约束**：引擎不存在 `ruleContent.prevContentUrl` 字段；禁止从 `<select>` 直接提取 `@value`（应写 `select option@value`）。
+  5. **负向禁止约束**：Legado 引擎不存在 `ruleContent.prevContentUrl`；禁止从 `<select>` 直接提取 `@value`（应写 `select option@value`）。
 
 ---
 
 ## 📚 9 大标准参考库索引 (Skills References)
 
-位于 [`skills/legado-book-source/references/`](skills/legado-book-source/references/)：
+位于 [`skills/legado-book-source/references/`](skills/legado-book-source/references/)，供 Agent 与开发者在开发时按需查阅：
 
 1. 📑 **[书源核心 Schema 与模板](skills/legado-book-source/references/source-schema-template.md)** - 必填字段、类型约束与标准输出模板。
 2. 🎯 **[CSS 选择器与伪类规范](skills/legado-book-source/references/css-rules.md)** - Legado 定制伪类（`:matches`, `:has` 等）与选择器提取语法。
@@ -196,6 +246,12 @@ source-cli wave --urls-file failing_urls.txt --thread-count 8
 7. 🔤 **[编码识别与乱码修复指南](skills/legado-book-source/references/encoding-guide.md)** - GBK / UTF-8 嗅探、URL 转码与响应解码实战。
 8. 📡 **[订阅源完整开发规范](skills/legado-book-source/references/subscription-rules.md)** - 订阅源配置、发现页瀑布流与更新规则。
 9. 💡 **[高级排障直觉与避坑速查](skills/legado-book-source/references/advanced-features.md)** - 倒序目录、瀑布流分页、动态目录合并与负向禁令速查。
+
+---
+
+## ⚙️ 配置文件说明 (Configuration)
+
+详见 [`config/README.md`](config/README.md)。核心事实源为 [`config/mcp_defaults.json`](config/mcp_defaults.json)，门禁与黑白名单位于 [`config/verify_skip_rules.json`](config/verify_skip_rules.json)，数据契约位于 [`config/repair_contracts/`](config/repair_contracts/)。
 
 ---
 

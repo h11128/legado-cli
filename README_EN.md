@@ -22,12 +22,13 @@
 
 `legadoSkill` is a modern book-source development toolkit and automated maintenance infrastructure designed for the Android **[Legado (阅读 3.0+)](https://github.com/gedoor/legado)** reading application.
 
-Legado book source rules are complex and delicate, spanning CSS/JQuery selectors, XPath, JSONPath, regular expressions, Rhino JS engines, encryption/decryption, login authentication, and anti-scraping challenges. When target websites update their DOM, rotate domains, or introduce bot protection, manual debugging becomes exhausting.
+Legado book source rules are notoriously delicate (spanning CSS/JQuery selectors, XPath, JSONPath, regular expressions, Rhino JS engines, encryption/decryption, login authentication, and anti-scraping challenges). When target websites update their DOM, rotate domains, or introduce bot protection, manual debugging becomes exhausting.
 
-`legadoSkill` transforms book source development and repair into an **industrial-grade automated engineering pipeline**:
-- **Full Rust Rewrite**: Replaces ad-hoc scripts with a high-performance, single-binary CLI (`source-cli`).
+`legadoSkill` transforms book source engineering into an **industrial-grade automated system**:
+- **Full Rust Rewrite**: Replaces ad-hoc Python scripts with a high-performance, single-binary CLI (`source-cli`).
 - **Real-Device MCP Automation**: Connects directly to the Android Legado app via the **Model Context Protocol (MCP)**, forming a complete closed loop: **Analyze -> Draft -> Push -> Debug -> Real-Device Verify**.
 - **Multi-Agent Skills**: Equips AI coding assistants (Claude Code, Codex, Cursor, Hermes) with 9 standard reference manuals and strict diagnostic heuristics.
+- **Effortless for Humans**: Human developers do not need to memorize or type complex CLI commands! Simply talk to your AI Agent in natural language while your phone handles live verification in the background.
 
 ---
 
@@ -47,19 +48,58 @@ This repository originated from `rezmdie/legadoSkill` but has undergone a comple
 
 ---
 
-## 🏗 System Architecture
+## 🏗 System Architecture Diagram
 
-The core workspace resides in `crates/`, partitioned into 6 high-cohesion layers:
+```mermaid
+graph TD
+    subgraph UserInterface["Interface Layer"]
+        Human["👤 Human Developer (Natural Language)"]
+        Agent["🤖 AI Agent (Cursor / Claude Code / Codex / Hermes)"]
+        CLI["💻 source-cli (Unified Engine CLI)"]
+    end
 
-```text
-crates/
-├── source-core/        # [Core] Domain types, JSON contracts, site fingerprinting & video rules
-├── source-storage/     # [Storage] SQLite session DB, EWMA cooldown & domain cache
-├── source-engine/      # [Engine] Selectors parser, unidirectional diagnostic chain & live probes
-├── source-flow/        # [Flow] Patch generator, domain migration, site hunter & wave scheduler
-├── source-mcp/         # [Protocol] Legado adapters, MCP client & real-device check bridge
-└── source-cli/         # [CLI] Unified command-line interface (source-cli binary)
+    subgraph FlowLayer["Workflow Layer: source-flow"]
+        Queue["Wave Scheduler (source-queue)"]
+        Patch["Patch Generator (source-patch)"]
+        Migrate["Domain Migration (source-migrate)"]
+        Hunt["Site Hunter (source-hunt)"]
+        Closeout["Closeout Gate (source-closeout)"]
+    end
+
+    subgraph EngineLayer["Engine Layer: source-engine"]
+        Diagnose["Diagnostic Chain (Search -> Detail -> TOC -> Content)"]
+        Parse["Selector Parser (CSS / JS / Regex)"]
+        Probe["Web & Form Probes (source-probe)"]
+    end
+
+    subgraph CoreStorage["Core & Storage Layer"]
+        Core["Core Entities & Contracts (source-core / contracts)"]
+        Storage["SQLite Database & Cache (source-db / cache)"]
+    end
+
+    subgraph MCPLayer["Protocol Layer: source-mcp"]
+        MCPClient["MCP Protocol Client"]
+        CheckBridge["Batch Check Bridge"]
+    end
+
+    subgraph Device["Android Real Device / Emulator"]
+        LegadoApp["📱 Legado 3.x App\n(:1236 Web / MCP Service)"]
+    end
+
+    Human -->|Natural Language Instructions| Agent
+    Agent -->|Calls Skills to invoke| CLI
+    Human -.->|Direct CLI usage (Optional)| CLI
+    CLI --> FlowLayer
+    FlowLayer --> EngineLayer
+    EngineLayer --> CoreStorage
+    FlowLayer --> MCPLayer
+    MCPLayer -->|HTTP / JSON-RPC| LegadoApp
+    LegadoApp -->|Live Fetching & Verification Results| MCPLayer
 ```
+
+### 6 Layer Crates Breakdown
+
+The codebase in `crates/` is strictly partitioned:
 
 | Crate | Layer Role | Included Components |
 |---|---|---|
@@ -72,97 +112,107 @@ crates/
 
 ---
 
-## 🚀 Quick Start & Onboarding
+## 🔄 Real-Device Closed-Loop Workflow
 
-### 1. Prerequisites
+Humans simply express intent; AI Agents autonomously orchestrate the diagnostics, pushing, and verification:
 
-- **Host Environment**: Windows, Linux, or macOS with **Rust 1.75+** (`rustup update stable`).
-- **Android Device**:
-  - Install [Legado (开源阅读) 3.0+](https://github.com/gedoor/legado).
-  - Ensure the device is on the same local network (LAN/Wi-Fi) as your PC.
-  - Enable **Web Service** or the built-in **MCP Service** in Legado (default port: `1236`).
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Human as 👤 Human Developer
+    participant Agent as 🤖 AI Agent (Cursor / Claude)
+    participant CLI as 🦀 source-cli Engine
+    participant Phone as 📱 Android Legado (Real Device)
 
-### 2. Build and Install CLI
-
-```bash
-# Clone this repository
-git clone https://github.com/h11128/legadoSkill.git
-cd legadoSkill
-
-# Build and install source-cli
-cd crates
-cargo build --release -p source_cli
-cargo install --path source-cli --force
-
-# Verify installation (ensure ~/.cargo/bin is in your PATH)
-source-cli --help
-```
-
-### 3. Configure Real-Device MCP Connection
-
-Edit [`config/mcp_defaults.json`](config/mcp_defaults.json) in the project root:
-
-```json
-{
-  "device_ip": "192.168.1.100",    // Replace with your Android device LAN IP
-  "device_port": 1236,              // Legado MCP default port
-  "http_timeout_s": 30,             // HTTP request timeout in seconds
-  "debug_timeout_s": 60,            // Single source debug timeout in seconds
-  "verify_timeout_ms": 90000        // Full verification timeout in milliseconds
-}
-```
-
-Check communication with the device:
-```bash
-# Verify the MCP channel is idle and operational
-source-cli check channel
+    Human->>Phone: Enable "Web Service" or built-in MCP (default port: 1236)
+    Human->>Agent: "Fix this broken source / create a source for: https://..."
+    Note over Agent: Agent loads skill: legado-book-source
+    Agent->>CLI: source-cli check channel (verify channel is idle)
+    CLI->>Phone: Query active check jobs
+    Phone-->>CLI: Channel Idle
+    Agent->>CLI: source-cli diagnose / site-probe (run diagnostic chain / site probe)
+    Note over CLI: Strict order: Search -> Detail -> TOC -> Content<br/>Auto-detects rate-limit alert("搜索间隔") & Cloudflare challenge
+    CLI-->>Agent: Returns structured diagnosis and proposed rule JSON
+    Agent->>CLI: source-cli source push --file source.json (push to device)
+    CLI->>Phone: Ingests book source directly into Legado memory
+    Agent->>Phone: Triggers real-device debug_source & check_source
+    Phone-->>Agent: Returns real execution status under live network
+    alt Live Verification Succeeded ("校验成功")
+        Agent->>CLI: source-cli ledger append & retro append (log ledger)
+        Agent-->>Human: ✅ Report success! The source is ready on your phone.
+    else Live Verification Failed
+        Note over Agent: Adjust selectors based on live error, re-push and verify until green.
+    end
 ```
 
 ---
 
-## 💡 Typical Workflows & Usage
+## 🚀 Quick Start & Onboarding
 
-### Scenario 1: Diagnose and Repair a Failing Book Source
+### 👤 For Humans: Zero Memorization, Natural Language Only
 
-When a book source breaks (empty search, broken TOC, or empty content), follow the unidirectional diagnosis workflow:
+**You do not need to memorize or type complex CLI commands!** The core philosophy of this project is to let AI Agents handle the heavy engineering lifting. You only need two simple steps:
 
+#### Step 1: Connect Phone and Configure IP
+1. Ensure your phone and computer are connected to the **same Wi-Fi network**.
+2. Open **Legado (开源阅读)** on your phone, go to **"My" -> "Web Service"** and enable it; or enable the built-in **MCP Service** (default port: `1236`).
+3. Open [`config/mcp_defaults.json`](config/mcp_defaults.json) in this repository and update `device_ip` to your phone's LAN IP (e.g. `192.168.1.100`).
+
+#### Step 2: Talk to Your AI Assistant
+In Cursor, Claude Code, Codex, or Hermes, chat directly using natural language:
+- 🗣️ **"Fix this book source, search is broken: `https://www.example-novel.com`"**
+- 🗣️ **"I found a new novel site `https://novel.sample.com`, please create a working book source and push it to my phone."**
+- 🗣️ **"Check all book sources in my library and auto-repair any broken ones."**
+
+Your AI Agent will automatically invoke skills, run `source-cli` in the background, push candidate rules to the phone, verify them in live execution, and report back once verified!
+
+---
+
+### 🤖 For AI Agents & CLI Power Users: Underlying Commands
+
+When an Agent works autonomously or a developer needs manual inspection, use `source-cli`:
+
+#### 1. Build and Install CLI
 ```bash
-# Step 1: Ensure phone MCP channel is idle
+cd crates
+cargo build --release -p source_cli
+cargo install --path source-cli --force
+source-cli --help
+```
+
+#### 2. Scenario A: Deep Diagnostic & Repair Workflow
+```bash
+# 1. Verify channel is idle
 source-cli check channel
 
-# Step 2: Run diagnosis (automatically detects Search/Detail/TOC/Content bottlenecks)
-source-cli diagnose --url "https://failing-novel-site.com" --key "我的"
+# 2. Run diagnosis along the strict unidirectional chain
+source-cli diagnose --url "https://target-site.com" --key "我的"
 
-# Step 3: Apply automatic patches and verify on real device
-source-cli repair --mode oneshot --url "https://failing-novel-site.com"
+# 3. Generate patch, push to real device, and verify
+source-cli repair --mode oneshot --url "https://target-site.com"
 
-# Step 4: Record repair ledger and lessons learned
-source-cli ledger append --url "https://failing-novel-site.com" --step check --result "校验成功"
-source-cli retro append --url "https://failing-novel-site.com" --status fixed --trap "Search form converted to POST with GBK encoding" --skill-fix 0
+# 4. Record ledger entry and lessons learned (mandatory closeout gate)
+source-cli ledger append --url "https://target-site.com" --step check --result "校验成功"
+source-cli retro append --url "https://target-site.com" --status fixed --trap "Search converted to POST with GBK" --skill-fix 0
 ```
 
-### Scenario 2: Create a New Book Source from Scratch
-
-When discovering a novel site and building a rule set:
-
+#### 3. Scenario B: Create a Book Source from Scratch
 ```bash
-# Step 1: Probe the target site to inspect structure, encoding, and search forms
-source-cli site-probe --url "https://new-novel-site.com"
+# 1. Probe target site structure, encoding, and search forms
+source-cli site-probe --url "https://new-site.com"
 
-# Step 2: Generate a scaffold JSON based on recognized patterns (e.g. Biquge architecture)
-source-cli source scaffold --host "new-novel-site.com" --type biquge --name "Biquge Mirror"
+# 2. Generate scaffold based on recognized patterns
+source-cli source scaffold --host "new-site.com" --type biquge --name "Biquge Mirror"
 
-# Step 3: Refine selectors and push directly to the Android device
+# 3. Push to real device Legado (claims deep_active lock)
 source-cli source push --file temp/new_source.json
 
-# Step 4: Trigger real-device full verification (Search -> Detail -> TOC -> Content)
-# Claim success only when the phone returns "校验成功"
+# 4. Trigger full verification and seal upon live success
 ```
 
-### Scenario 3: Batch Wave Triage
-
+#### 4. Scenario C: Batch Wave Triage
 ```bash
-# Triage failing URLs in parallel and execute wave repair
+# Concurrent multi-worker wave repair
 source-cli wave --urls-file failing_urls.txt --thread-count 8
 ```
 
@@ -170,14 +220,14 @@ source-cli wave --urls-file failing_urls.txt --thread-count 8
 
 ## 🤖 AI Agent Integration
 
-This workspace is designed from the ground up for AI-assisted development (Claude Code, Codex, Cursor, Hermes):
+This workspace is natively tailored for AI pair-programming:
 
-- **Skills**: `skills/legado-book-source` and `skills/legado-book-source-repair`
-- **Setup Guide**: See [`MULTI_AGENT_SETUP.md`](MULTI_AGENT_SETUP.md) for agent configuration details.
+- **Skill Entries**: `skills/legado-book-source` (creation) and `skills/legado-book-source-repair` (repair).
+- **Multi-Agent Setup**: See [`MULTI_AGENT_SETUP.md`](MULTI_AGENT_SETUP.md) for configuration details.
 - **Core Engineering Disciplines**:
   1. **Never claim fixed without device verification**: Local parsing success is not proof that the Legado app can read the source.
-  2. **Strict Unidirectional Diagnostic Chain**: `Search -> Detail -> TOC -> Content`. Do not edit TOC or Content rules before search produces verified book links.
-  3. **Respect Rate Limits**: When encountering `alert("搜索间隔")`, 403 status, or Cloudflare challenges, honor cooldown periods instead of rewriting selectors.
+  2. **Strict Unidirectional Diagnostic Chain**: `Search -> Detail -> TOC -> Content`. Never alter TOC or Content rules before search produces verified book links.
+  3. **Respect Rate Limits**: When encountering `alert("搜索间隔")`, 403 status, or Cloudflare challenges, honor EWMA cooldown periods instead of rewriting selectors.
   4. **Dynamic Webview Rendering**: Append `,{"webView": true}` for JS-rendered pages (for sub-rules like `chapterUrl`, use `##$##,{"webView":true}`).
   5. **Negative Constraints**: The Legado engine does NOT have `ruleContent.prevContentUrl`; never extract `@value` directly from `<select>` (use `select option@value`).
 
@@ -196,6 +246,12 @@ Located in [`skills/legado-book-source/references/`](skills/legado-book-source/r
 7. 🔤 **[Encoding Detection & Mojibake Fixes](skills/legado-book-source/references/encoding-guide.md)** - GBK / UTF-8 detection, query string encoding, and response decoding.
 8. 📡 **[Subscription Source Specifications](skills/legado-book-source/references/subscription-rules.md)** - Subscription feeds, discovery waterfall layouts, and update rules.
 9. 💡 **[Advanced Troubleshooting & Anti-Patterns](skills/legado-book-source/references/advanced-features.md)** - Reversed catalogs, waterfall pagination, dynamic TOC merging, and negative bans.
+
+---
+
+## ⚙️ Configuration Guide
+
+Detailed configuration docs can be found in [`config/README.md`](config/README.md). Device endpoints are maintained in [`config/mcp_defaults.json`](config/mcp_defaults.json), gate skipping rules in [`config/verify_skip_rules.json`](config/verify_skip_rules.json), and JSON contract schemas in [`config/repair_contracts/`](config/repair_contracts/).
 
 ---
 
