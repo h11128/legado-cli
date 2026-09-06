@@ -1,8 +1,8 @@
-# 📚 legadoSkill
+# 📚 legado-cli
 
 <p align="center">
-  <b>A Modern Legado Book-Source Engineering Platform: Rust Engine, MCP Real-Device Automation & Multi-Agent Skills</b><br>
-  <b>现代化 Legado (开源阅读) 书源自动化开发、深度修复引擎与多 Agent 智能体技能标准体系</b>
+  <b>A Modern Legado Book-Source Engineering CLI & Automated Repair Platform: Rust Engine, MCP Automation & Multi-Agent Skills</b><br>
+  <b>现代化 Legado (开源阅读) 书源工程自动化 CLI、深度修复引擎与多 Agent 智能体技能标准体系</b>
 </p>
 
 <p align="center">
@@ -20,11 +20,11 @@
 
 ## 📖 Overview
 
-`legadoSkill` is a modern book-source development toolkit and automated maintenance infrastructure designed for the Android **[Legado (阅读 3.0+)](https://github.com/gedoor/legado)** reading application.
+`legado-cli` is a modern book-source development CLI and automated maintenance infrastructure designed for the Android **[Legado (阅读 3.0+)](https://github.com/gedoor/legado)** reading application.
 
 Legado book source rules are notoriously delicate (spanning CSS/JQuery selectors, XPath, JSONPath, regular expressions, Rhino JS engines, encryption/decryption, login authentication, and anti-scraping challenges). When target websites update their DOM, rotate domains, or introduce bot protection, manual debugging becomes exhausting.
 
-`legadoSkill` transforms book source engineering into an **industrial-grade automated system**:
+`legado-cli` transforms book source engineering into an **industrial-grade automated system**:
 - **Full Rust Rewrite**: Replaces ad-hoc Python scripts with a high-performance, single-binary CLI (`source-cli`).
 - **Real-Device MCP Automation**: Connects directly to the Android Legado app via the **Model Context Protocol (MCP)**, forming a complete closed loop: **Analyze -> Draft -> Push -> Debug -> Real-Device Verify**.
 - **Multi-Agent Skills**: Equips AI coding assistants (Claude Code, Codex, Cursor, Hermes) with 9 standard reference manuals and strict diagnostic heuristics.
@@ -32,11 +32,11 @@ Legado book source rules are notoriously delicate (spanning CSS/JQuery selectors
 
 ---
 
-## ⚡ Comparison with Upstream
+## ⚡ Evolution from Upstream
 
-This repository originated from `rezmdie/legadoSkill` but has undergone a complete architectural rewrite:
+This repository originally forked from `rezmdie/legadoSkill` but has completely evolved into an independent, pure-Rust CLI platform:
 
-| Dimension | Upstream (`rezmdie/legadoSkill`) | This Project (`h11128/legadoSkill`) |
+| Dimension | Upstream (`rezmdie/legadoSkill`) | This Project (`h11128/legado-cli`) |
 |---|---|---|
 | **Underlying Stack** | Python (LangChain / LangGraph) + loose scripts | **Pure Rust 1.75+**, 6 consolidated layer crates, zero Python runtime dependency |
 | **Execution Performance** | Slow cold start, prone to out-of-memory errors during batch processing | Sub-millisecond startup, minimal footprint, concurrent multi-worker scanning & wave scheduling |
@@ -167,35 +167,72 @@ Your AI Agent will automatically invoke skills, run `source-cli` in the backgrou
 
 ---
 
-### 🤖 For AI Agents & CLI Power Users: Underlying Commands
+---
 
-When an Agent works autonomously or a developer needs manual inspection, use `source-cli`:
+### 🤖 For AI Agents & CLI Developers: `source-cli` Command Matrix
 
-#### 1. Build and Install CLI
+`source-cli` is the unified engineering backbone of this project, handling the entire lifecycle of Legado book sources.
+
+#### 1. Complete CLI Command Matrix
+
+| Category | Subcommand | Description & Primary Use Case | Example Command |
+|---|---|---|---|
+| **🔍 Diagnostics & Repair** | `diagnose` | Executes the unidirectional chain (`Search ➔ Detail ➔ TOC ➔ Content`), auto-detecting rate limits & WAFs | `source-cli diagnose --url "https://site.com" --key "fantasy"` |
+| | `repair` | Generates a targeted `PatchPlan`, pushes to device, and performs step verification | `source-cli repair --mode oneshot --url "https://site.com"` |
+| | `dig` | Official end-to-end entrypoint: channel probe ➔ gates ➔ diagnose ➔ oneshot repair | `source-cli dig --url "https://site.com"` |
+| | `gate` | Pre-checks L0~L2 health gates (syntax / DNS / 404 / parked domains / Cloudflare challenge) | `source-cli gate check --url "https://site.com"` |
+| **🌐 Probing & Creation** | `site-probe` | Raw HTML fetch, charset encoding detection, and JS-written form extraction | `source-cli site-probe --url "https://new-site.com"` |
+| | `source scaffold` | Generates a book source draft based on identified site family (Biquge/Jieqi/etc.) | `source-cli source scaffold --host "site.com" --type biquge` |
+| | `source push` | Writes book source rules directly into Legado memory and acquires `deep_active` lock | `source-cli source push --file source.json` |
+| **📱 Device Comms & Channel** | `check channel` | Checks Android Legado MCP connection, guards against deadlocks, supports forced clearing | `source-cli check channel --force-clear` |
+| | `check clear-cookies` | Clears accumulated stale session cookies and bot-detection challenges from the device | `source-cli check clear-cookies` |
+| | `mcp` | Manages remembered real-device MCP endpoints (list, probe, switch, add, remove) | `source-cli mcp list` / `source-cli mcp probe` |
+| **🦅 Domain Hunting & Migration**| `hunt` | High-concurrency discovery of working mirror domains from search engines and seed catalogs | `source-cli hunt --name "Biquge" --origin-host "old.com"` |
+| | `migrate` | Recursively rewrites all absolute URLs, covers, and hostkeys within the book source | `source-cli migrate --file source.json --to-host "new.com"` |
+| **🌊 Batch Triage & Waves** | `wave` | Concurrent multi-worker pre-triage with single-batch real-device verification dispatch | `source-cli wave --urls-file list.txt --thread-count 8` |
+| | `search-wave` | Rapid batch check across entire book collections to spot search disruptions & dead sources | `source-cli search-wave --urls-file list.txt` |
+| | `serial` | Watchdog-guarded single-channel serial queue scheduler with automatic timeouts | `source-cli serial --urls-file list.txt --url-timeout-s 120` |
+| **📊 Ledger & Closeout Gates** | `ledger append` | Records every diagnostic/repair step and live verification result for auditing | `source-cli ledger append --url "..." --step check --result "校验成功"` |
+| | `retro append` | Records novel traps and lessons learned into the durable retrospective store | `source-cli retro append --url "..." --status fixed --trap "..."` |
+| | `closeout` | Verification gatekeeper: halts workflow if the source has not succeeded on live device | `source-cli closeout pending` |
+| **⚙️ Cache & Rule Parsing** | `cache` / `ewma` | Domain rate-limit EWMA cooldown cache manager to prevent spamming blocked endpoints | `source-cli cache view` / `source-cli ewma show` |
+| | `parse` | Offline evaluation of CSS selectors, JS scripts, or regex extraction expressions | `source-cli parse css --html "..." --selector "div#content"` |
+
+#### 2. Local Compilation & Global Installation
+
 ```bash
+# Navigate to the Rust workspace
 cd crates
-cargo build --release -p source_cli
+
+# Compile optimized release binary
+cargo build --release --bin source-cli
+
+# Install globally to your Cargo PATH
 cargo install --path source-cli --force
+
+# View all CLI commands and options
 source-cli --help
 ```
 
-#### 2. Scenario A: Deep Diagnostic & Repair Workflow
+#### 3. Typical Real-World Workflows
+
+##### Scenario 1: Deep Diagnostic & Live Device Repair
 ```bash
 # 1. Verify channel is idle
 source-cli check channel
 
 # 2. Run diagnosis along the strict unidirectional chain
-source-cli diagnose --url "https://target-site.com" --key "我的"
+source-cli diagnose --url "https://target-site.com" --key "fantasy"
 
 # 3. Generate patch, push to real device, and verify
 source-cli repair --mode oneshot --url "https://target-site.com"
 
-# 4. Record ledger entry and lessons learned (mandatory closeout gate)
+# 4. Record ledger entry and lessons learned upon success
 source-cli ledger append --url "https://target-site.com" --step check --result "校验成功"
 source-cli retro append --url "https://target-site.com" --status fixed --trap "Search converted to POST with GBK" --skill-fix 0
 ```
 
-#### 3. Scenario B: Create a Book Source from Scratch
+##### Scenario 2: Create a Book Source from Scratch
 ```bash
 # 1. Probe target site structure, encoding, and search forms
 source-cli site-probe --url "https://new-site.com"
@@ -205,13 +242,11 @@ source-cli source scaffold --host "new-site.com" --type biquge --name "Biquge Mi
 
 # 3. Push to real device Legado (claims deep_active lock)
 source-cli source push --file temp/new_source.json
-
-# 4. Trigger full verification and seal upon live success
 ```
 
-#### 4. Scenario C: Batch Wave Triage
+##### Scenario 3: Batch Wave Triage
 ```bash
-# Concurrent multi-worker wave repair
+# 8 concurrent workers pre-triage, single-batch device verification
 source-cli wave --urls-file failing_urls.txt --thread-count 8
 ```
 

@@ -37,7 +37,7 @@ default-members = ["source-cli"]
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
-authors = ["legadoSkill"]
+authors = ["legado-cli"]
 
 [workspace.dependencies]
 source_core = { path = "source-core" }

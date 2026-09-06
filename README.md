@@ -1,8 +1,8 @@
-# 📚 legadoSkill
+# 📚 legado-cli
 
 <p align="center">
-  <b>现代化 Legado (开源阅读) 书源自动化开发、深度修复引擎与多 Agent 智能体技能标准体系</b><br>
-  <b>A Modern Legado Book-Source Engineering Platform: Rust Engine, MCP Real-Device Automation & Multi-Agent Skills</b>
+  <b>现代化 Legado (开源阅读) 书源工程自动化 CLI、深度修复引擎与多 Agent 智能体技能标准体系</b><br>
+  <b>A Modern Legado Book-Source Engineering CLI & Automated Repair Platform: Rust Engine, MCP Automation & Multi-Agent Skills</b>
 </p>
 
 <p align="center">
@@ -20,7 +20,7 @@
 
 ## 📖 项目定位 (Overview)
 
-`legadoSkill` 是专为 Android **[Legado (开源阅读 3.0+)](https://github.com/gedoor/legado)** 打造的现代化书源工程开发套件与自动化运维基础设施。
+`legado-cli` 是专为 Android **[Legado (开源阅读 3.0+)](https://github.com/gedoor/legado)** 打造的现代化书源工程 CLI 与全自动化运维基础设施。
 
 在 Legado 生态中，书源规则非常脆弱（涵盖 CSS/JQuery 选择器、XPath、JSONPath、正则提取、Rhino JS 引擎、加密解密、登录鉴权、反爬对抗等）。当目标网站改版、域名变更或增加防护盾时，传统的手工抓包与调试极其耗时耗力。
 
@@ -32,11 +32,11 @@
 
 ---
 
-## ⚡ 与上游 (Upstream) 的核心差异
+## ⚡ 与早期原版的演进与差异 (Evolution from Upstream)
 
-本项目派生自 `rezmdie/legadoSkill`，但经过彻底的架构迭代与工程化重构，现已完全脱胎换骨：
+本项目最初派生自 `rezmdie/legadoSkill`，但经过彻底的底层重写与工程化重构，现已完全演进为独立的工业级 Rust CLI 系统：
 
-| 维度 | 上游原版 (`rezmdie/legadoSkill`) | 本项目 (`h11128/legadoSkill`) |
+| 维度 | 原版 (`rezmdie/legadoSkill`) | 本项目 (`h11128/legado-cli`) |
 |---|---|---|
 | **技术栈底层** | Python (LangChain / LangGraph) + 散装脚本 | **全栈 Rust 1.75+**，6 大高内聚分层 Crates，零 Python 运行时依赖 |
 | **执行效率** | 启动慢，高并发批量分析易崩溃 | 毫秒级启动，极低内存开销，支持多线程高并发探针与波次调度 |
@@ -169,52 +169,85 @@ Agent 会自动载入 Skills，在后台调度 `source-cli` 自动完成探针�
 
 ---
 
-### 🤖 针对 AI Agent 与 CLI 高级开发者：底层命令与工作流
+### 🤖 针对 AI Agent 与 CLI 开发者：`source-cli` 全功能矩阵速查
 
-当 Agent 在后台执行任务，或开发者需要手动排查时，使用 `source-cli` 交互：
+`source-cli` 是本项目的统一工程核心，集成了书源全生命周期的所有操作。
 
-#### 1. 编译安装
+#### 1. 全套 CLI 子命令分类速查矩阵 (CLI Matrix)
+
+| 分类分组 | 子命令 (Command) | 功能描述与核心场景 | 典型使用命令示例 |
+|---|---|---|---|
+| **🔍 诊断与单源修复** | `diagnose` | 执行单向诊断链 (`Search ➔ Detail ➔ TOC ➔ Content`)，自动识别频控与反爬盾 | `source-cli diagnose --url "https://site.com" --key "修真"` |
+| | `repair` | 自动生成针对性 PatchPlan 补丁，推送到真机并执行单步验证 | `source-cli repair --mode oneshot --url "https://site.com"` |
+| | `dig` | 官方深度排障合流入口：信道检查 ➔ 门禁 ➔ 诊断 ➔ 一键修复 | `source-cli dig --url "https://site.com"` |
+| | `gate` | 预检 L0~L2 存活门禁（语法 / DNS / 404 / 停放页 / 5秒盾） | `source-cli gate check --url "https://site.com"` |
+| **🌐 探针与新源创作** | `site-probe` | 原生 HTML 抓取、字符集编码嗅探与 JS 动态写入表单探测 | `source-cli site-probe --url "https://new-site.com"` |
+| | `source scaffold` | 基于探测到的站点家族特征（笔趣阁/杰奇等）生成书源 JSON 初稿 | `source-cli source scaffold --host "site.com" --type biquge` |
+| | `source push` | 将书源规则直接写入真机 Legado 内存并加 `deep_active` 状态锁 | `source-cli source push --file source.json` |
+| **📱 真机通信与信道** | `check channel` | 探测手机 Legado MCP 连通性，防止多任务挂死，支持死锁清理 | `source-cli check channel --force-clear` |
+| | `check clear-cookies` | 一键清理手机端 Legado 积累的陈旧 Cookie 与反爬状态 | `source-cli check clear-cookies` |
+| | `mcp` | 管理已记住的真机 MCP 服务节点（列表、测速、切换、探测） | `source-cli mcp list` / `source-cli mcp probe` |
+| **🦅 域名猎取与全量迁移** | `hunt` | 从内置种子库与搜索引擎中高并发挖掘目标站点的有效镜像域名 | `source-cli hunt --name "笔趣阁" --origin-host "old.com"` |
+| | `migrate` | 递归替换书源内所有绝对路径、封面图及 URL 并刷新 HostKey | `source-cli migrate --file source.json --to-host "new.com"` |
+| **🌊 批量巡检与波次调度** | `wave` | 多线程并发批检与针对性补丁分流，单批次打包送入真机验证 | `source-cli wave --urls-file list.txt --thread-count 8` |
+| | `search-wave` | 针对整架书源进行并发搜索能力巡检，自动识别搜索阻断与失效源 | `source-cli search-wave --urls-file list.txt` |
+| | `serial` | 带看门狗守护（Watchdog）的单通道串行队列调度，超时自动切断 | `source-cli serial --urls-file list.txt --url-timeout-s 120` |
+| **📊 台账与闭环门禁** | `ledger append` | 登记每一步的执行与真机校验结果，确保审计留痕 | `source-cli ledger append --url "..." --step check --result "校验成功"` |
+| | `retro append` | 记录排障过程中的新型陷阱与避坑经验，沉淀知识库 | `source-cli retro append --url "..." --status fixed --trap "..."` |
+| | `closeout` | 任务收尾门禁判定，若真机未验证成功则阻断后续流程 | `source-cli closeout pending` |
+| **⚙️ 缓存与规则分析** | `cache` / `ewma` | 域名频控 EWMA 冷却缓存管理，杜绝在频控期重复发起无效请求 | `source-cli cache view` / `source-cli ewma show` |
+| | `parse` | 本地测试 CSS 选择器、JS 脚本执行或正则提取结果 | `source-cli parse css --html "..." --selector "div#content"` |
+
+#### 2. 本地快速编译与全局安装
+
 ```bash
+# 进入工程 Rust 源码工作区
 cd crates
-cargo build --release -p source_cli
+
+# 编译高性能 release 版本
+cargo build --release --bin source-cli
+
+# 安装到本机 Cargo PATH 目录，可在任意路径直接运行 source-cli
 cargo install --path source-cli --force
+
+# 查看所有命令帮助
 source-cli --help
 ```
 
-#### 2. 场景 A：失效书源深度诊断与修复
+#### 3. 典型实战场景工作流示例
+
+##### 场景 1：单源深度排障与真机推验
 ```bash
-# 1. 确保通道空闲（防挂死冲突）
+# 1. 确保手机信道空闲
 source-cli check channel
 
-# 2. 单源诊断：严格按单向诊断链自动嗅探各层问题
+# 2. 启动单向诊断链
 source-cli diagnose --url "https://target-site.com" --key "我的"
 
-# 3. 自动生成补丁、推到真机并执行单步校验
+# 3. 生成补丁并推送到手机上测试
 source-cli repair --mode oneshot --url "https://target-site.com"
 
-# 4. 记录台账与经验沉淀（闭环收工门禁）
+# 4. 校验通过后记录台账与关门
 source-cli ledger append --url "https://target-site.com" --step check --result "校验成功"
 source-cli retro append --url "https://target-site.com" --status fixed --trap "搜索改为POST且需GBK编码" --skill-fix 0
 ```
 
-#### 3. 场景 B：从零创作新站书源
+##### 场景 2：从零制作新站书源并推验
 ```bash
-# 1. 站点结构、编码、搜索表单探针扫描
-source-cli site-probe --url "https://new-site.com"
+# 1. 站点全要素探针嗅探
+source-cli site-probe --url "https://new-novel-site.com"
 
-# 2. 基于探测特征生成书源脚手架
-source-cli source scaffold --host "new-site.com" --type biquge --name "笔趣新站"
+# 2. 生成对应脚手架模板
+source-cli source scaffold --host "new-novel-site.com" --type biquge --name "测试小说站"
 
-# 3. 推送到真机 Legado（自动申明 deep_active 锁）
+# 3. 一键推送到手机
 source-cli source push --file temp/new_source.json
-
-# 4. 真机全链路检验，校验成功后完成关门
 ```
 
-#### 4. 场景 C：批量巡检与波次调度
+##### 场景 3：大批量书架健康巡检波次调度
 ```bash
-# 多线程并发波次修复
-source-cli wave --urls-file failing_urls.txt --thread-count 8
+# 8 线程并发预检，单批次下发手机真机验证
+source-cli wave --urls-file shelf_urls.txt --thread-count 8
 ```
 
 ---
