@@ -273,6 +273,15 @@ Detailed configuration docs can be found in [`config/README.md`](config/README.m
 
 ---
 
+## 🙏 Acknowledgments & Heritage
+
+- This repository was originally forked from [rezmdie/legadoSkill](https://github.com/rezmdie/legadoSkill). We are deeply grateful to the original author for pioneering the concept of using AI to assist Legado book-source generation.
+- With evolving real-world requirements and systematic engineering, this project has since been completely rewritten into a modular, pure-Rust layered architecture with Android real-device MCP verification loops and disciplined diagnostic pipelines. It is now maintained and developed as an independent production codebase.
+- We also pay tribute to the incredible [Legado (开源阅读)](https://github.com/gedoor/legado) mobile reading engine and its open-source community for providing such an extensible and empowering platform.
+
+---
+
 ## 📄 License
 
 This project is licensed under the [MIT License](LICENSE).
+

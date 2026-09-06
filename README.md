@@ -275,6 +275,15 @@ source-cli wave --urls-file failing_urls.txt --thread-count 8
 
 ---
 
+## 🙏 致谢与溯源 (Acknowledgments & Heritage)
+
+- 本项目最早派生（Fork）自 [rezmdie/legadoSkill](https://github.com/rezmdie/legadoSkill)，感谢原作者在早期通过 AI 探索 Legado 书源辅助生成所做的开创性工作与思路启发。
+- 随着工程与业务场景的深入演进，本项目现已完全重写为纯 Rust 分层架构，建立了基于 MCP 的 Android 真机验证闭环与完备的排障规则体系，现作为独立的工程化项目持续维护与迭代。
+- 同时向 [开源阅读 (Legado)](https://github.com/gedoor/legado) 及其开源社区致敬，感谢其提供了如此强大、灵活且自由的移动端阅读引擎。
+
+---
+
 ## 📄 开源许可证 (License)
 
 本项目遵循 [MIT License](LICENSE) 开源协议。
+
