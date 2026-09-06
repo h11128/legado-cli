@@ -147,6 +147,48 @@ sequenceDiagram
 
 ---
 
+## 🌊 Flow Architecture & Dispatch Strategy
+
+When handling book-source tasks, the system coordinates multi-stage actions through **Flows (transactional pipelines)** to ensure device isolation, rate-limit protection, and state-machine consistency.
+
+### 1. When to Invoke a Flow vs. When NOT to Invoke a Flow
+
+| Task / Scenario | Invoke a Flow? | Recommended Dispatch Path | Rationale & Architectural Design |
+|---|---|---|---|
+| **Fixing a broken book source** | **Must Invoke Flow** | **Flow 1: Deep Repair Flow** (`diagnose` -> `repair`) | Enforces `Search -> Detail -> TOC -> Content` diagnostic chain; must pass real-device verify. |
+| **Creating a source for a new site** | **Must Invoke Flow** | **Flow 2: Source Creation Flow** (`site-probe` -> `scaffold` -> `push`) | Fully executes raw HTML probing, encoding detection, scaffold drafting, and live phone verification. |
+| **Domain dead (404/expired/redirected)** | **Must Invoke Flow** | **Flow 3: Domain Hunt & Migration** (`hunt` -> `probe` -> `migrate`) | Do NOT alter selectors; search for mirror domains and recursively migrate all absolute paths. |
+| **Batch health checks on book collection** | **Must Invoke Flow** | **Flow 4: Batch Wave Triage** (`wave` / `search-wave`) | Must acquire exclusive channel lock, run parallel PC triage, and dispatch one batch to phone. |
+| **Querying CSS syntax, JS helpers, or crypto** | ❌ **Do NOT Invoke Flow** | **Directly read Reference Manuals** (`skills/references/`) | Read-only knowledge retrieval; no runtime or device side effects. |
+| **Checking phone MCP connection / idle status** | ❌ **Do NOT Invoke Flow** | **Execute single probe command** (`source-cli check channel`) | Single-flight status check; no multi-step state machine needed. |
+| **Modifying source name, group, or intervals** | ❌ **Do NOT Invoke Flow** | **Directly edit JSON** and push single file | Non-functional metadata tweak; does not require full diagnostic pipeline. |
+| **Explore / Discovery page adjustments** | ❌ **Off by default** | Only when **explicitly requested** by user | Platform discipline: `checkDiscovery=false` by default to conserve phone execution budget. |
+
+> For comprehensive state machine specifications, see: **[Flow Architecture & Dispatch Guide (docs/reference/flow-architecture-and-dispatch.md)](docs/reference/flow-architecture-and-dispatch.md)**.
+
+### 2. 4 Core Flows Topology
+
+```mermaid
+graph LR
+    subgraph Flow1["Flow 1: Deep Repair Flow"]
+        F1_A["Channel Gate"] --> F1_B["L0~L2 Gates"] --> F1_C["Diagnostic Chain"] --> F1_D["Patch & Push to Device"] --> F1_E["Live Verify & Ledger"]
+    end
+
+    subgraph Flow2["Flow 2: Source Creation Flow"]
+        F2_A["Live Site Probe"] --> F2_B["Family Fingerprint"] --> F2_C["Scaffold Generation"] --> F2_D["Push to Legado Memory"] --> F2_E["Full-Chain Live Verify"]
+    end
+
+    subgraph Flow3["Flow 3: Hunt & Migration Flow"]
+        F3_A["Dead Host Alert"] --> F3_B["Load Seeds"] --> F3_C["Hunt Mirror Domains"] --> F3_D["Recursive Path Migration"] --> F3_E["Verify on New Host"]
+    end
+
+    subgraph Flow4["Flow 4: Batch Wave Triage"]
+        F4_A["Exclusive Lock"] --> F4_B["Filter Known Dead"] --> F4_C["Parallel PC Triage"] --> F4_D["Single-Batch Phone Verify"] --> F4_E["Aggregate Report JSON"]
+    end
+```
+
+---
+
 ## 🚀 Quick Start & Onboarding
 
 ### 👤 For Humans: Zero Memorization, Natural Language Only
