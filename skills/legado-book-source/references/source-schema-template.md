@@ -249,7 +249,7 @@
     "lastChapter": "@css:#info p:nth-child(4) a@text"
   },
   "ruleToc": {
-    "chapterList": "id.list@tag.dd@tag.a",
+    "chapterList": "id.list dd",
     "chapterName": "text",
     "chapterUrl": "href"
   },
@@ -401,10 +401,10 @@
 |------|----------|--------|------|
 | bookSourceUrl | ✅ 必填 | 无 | 书源地址，不能为空 |
 | bookSourceName | ✅ 必填 | 无 | 书源名称，不能为空 |
-| searchUrl | ✅ 必填 | 无 | 搜索URL，不能为空 |
+| searchUrl | 常见必填 | 无 | 搜索URL (纯发现源/详情导入源可为空) |
 | ruleSearch.bookList | ✅ 必填 | 无 | 书籍列表选择器 |
 | ruleSearch.name | ✅ 必填 | 无 | 书名提取规则 |
-| ruleSearch.bookUrl | ✅ 必填 | 无 | 书籍URL提取规则 |
+| ruleSearch.bookUrl | 常见必填 | 无 | 书籍URL提取规则 (搜索直达正文/目录源可省略) |
 | ruleToc.chapterList | ✅ 必填 | 无 | 章节列表选择器 |
 | ruleToc.chapterName | ✅ 必填 | 无 | 章节名提取规则 |
 | ruleToc.chapterUrl | ✅ 必填 | 无 | 章节URL提取规则 |
@@ -638,7 +638,7 @@
       "intro": "class.result-game-item-desc@text"
     },
     "ruleToc": {
-      "chapterList": "id.list@tag.dd@tag.a",
+      "chapterList": "id.list dd",
       "chapterName": "text",
       "chapterUrl": "href"
     },
@@ -656,8 +656,8 @@
 ### A. 模板来源
 
 - **来源1**：`assets/核心视图工具.txt` - 第42635-42850行
-- **来源2**：`assets/真实书源模板库.txt` - 5个真实书源模板
-- **来源3**：`assets/真实书源知识库.md` - 134个真实书源分析
+- **来源2**：`archive/legacy-assets/真实书源模板库.txt` - 5个真实书源模板
+- **来源3**：`archive/legacy-assets/真实书源知识库.md` - 134个真实书源分析
 
 ### B. 参考文档
 
