@@ -31,7 +31,8 @@
 - **原则**：只定位容器元素，**严禁添加 `@text` 或 `@元素`**。
 - **示例**：
   - CSS 语法：`ul.book-list > li`、`div.box div.item`
-  - 伪类切片：`ul li:not(:first-child)` 或 `table tr:nth-child(n+2)`
+  - 原生切片（强烈推荐）：`ul li!0`（排除第1项）、`ul li[1:10]`（截取区间）、`ul li.-1`（取最后1项）
+  - 警告：Jsoup 对标准 CSS3 伪类（`:first-child` / `:last-child` / `:not()`）支持较弱且不稳定，优先使用阅读原生下标
 
 ### 2. 字段提取规则（name, author, bookUrl, tocUrl 等）
 - **书名**：`h4.bookname a@text` 或 `h1@text`
@@ -42,6 +43,16 @@
 ### 3. 正则净化（##）
 在任何提取规则末尾可通过 `##匹配正则##替换内容` 净化广告或多余符号：
 - 清理前后缀：`.content@text##本站域名.*|请收藏本站##`
-- 替换多余空行：`.content@text##\s+##
-`
+- 替换多余空行：`.content@text##\s+##\n`
 - 仅保留第一个匹配项：`##OnlyOne形式##...###`
+
+---
+
+## 四、绝对禁止的反模式 (Negative Constraints)
+
+1. **严禁提取 `<select>` 标签的 `@value`**：
+   - HTML 中 `<select>` 元素本身**没有** `value` 属性；
+   - 必须通过子项提取：`select option@value` 或 `select option:not([selected])@value`。
+2. **严禁在容器列表加 `@text` 或叶子标签**：
+   - `chapterList` / `bookList` 必须只停留在条目容器（如 `ul.list li`），严禁写成 `ul.list li@tag.a`。
+

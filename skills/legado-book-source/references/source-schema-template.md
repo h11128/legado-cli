@@ -51,10 +51,15 @@
     "chapterUrl": "必填"          // 章节URL提取规则
   },
   "ruleContent": {                // 正文规则
-    "content": "必填"             // 正文内容提取规则
+    "content": "必填",            // 正文内容提取规则
+    "nextContentUrl": "可选"      // 下一页正文提取规则 (严禁写 prevContentUrl，引擎无此字段)
   }
 }
 ```
+
+### 1.4 严格禁止的非法字段 (Forbidden Fields)
+- ❌ **`ruleContent.prevContentUrl`**：Legado Kotlin 核心引擎完全不存在该字段，正文分页仅识别 `nextContentUrl`。
+- ❌ **直接获取 `<select>` 的 `@value`**：必须通过 `select option@value` 提取。
 
 ### 1.3 输出格式要求
 

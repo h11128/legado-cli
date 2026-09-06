@@ -8,8 +8,9 @@ This workspace provides the engine, CLI, skills, and references for developing a
 2. **Instant Troubleshooting Heuristics**:
    - **Empty search with HTTP 200**: Check HTTP logs for rate-limits (`alert("搜索间隔")`), captcha, or Cloudflare before touching selectors.
    - **Ads in content**: Use `@ownText` to capture pure text and discard child-tag ads.
-   - **Dynamic/JS-rendered content**: Append `,{"webView": true}` to the request URL.
+   - **Dynamic/JS-rendered content**: Append `,{"webView": true}` to the request URL (for sub-rules like `chapterUrl`, use `##$##,{"webView":true}`).
    - **Reversed catalog**: Prefix `-` to the selector (e.g. `-ul.list li`).
+   - **Negative constraints**: Never output `ruleContent.prevContentUrl` (engine lacks this field); never extract `@value` directly from `<select>` (use `select option@value`).
 3. **Pragmatic Simplicity**:
    - Prefer CSS over regex, regex over JS, and built-in `java.*` over custom classes.
    - Use `java.log(result)` to verify runtime values instead of guessing.

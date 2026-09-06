@@ -205,7 +205,7 @@ Use when the user asks to **find sites** or make **出版/公版/古籍** source
 2. **常见症状速查急救箱 (Troubleshooting Heuristics)**：
    - **搜索返回空列表但状态码 200**：首要怀疑站点搜索频控，检查 HTTP 日志是否包含 `alert("搜索间隔")`、`验证码` 或 `Checking your browser`。严禁在此类 HTML 上重写选择器。
    - **正文内嵌广告链接**：优先改用 `@ownText`（仅提取当前标签直接文本，排除子标签内广告与跳转）；
-   - **页面动态加载返回空壳**：在请求 URL 后添加逗号与选项 `,{"webView": true}`；
+   - **页面动态加载返回空壳**：在请求 URL 后添加逗号与选项 `,{"webView": true}`（在二级字段如 `chapterUrl`，必须使用正则末尾追加 `##$##,{"webView":true}`）；
    - **章节列表反序**：在列表选择器最前面加减号 `-`（如 `-ul.chapters li`）进行原生反转；
    - **多域名健康轮询**：若站点经常换域名，在 `@js:` 中通过备选域名数组做探测。
 
@@ -215,9 +215,8 @@ Use when the user asks to **find sites** or make **出版/公版/古籍** source
 
 ### Phase 1 — Gather (do not save)
 
-1. Read `docs/ESSENTIAL_KNOWLEDGE_SUMMARY.md`; skim CSS rules and similar
-   sources under `assets/knowledge_base/book_sources/` or
-   `assets/book_source_database/`.
+1. Read `docs/reference/essential-knowledge-summary.md`; skim CSS rules and similar
+   sources under `fixtures/samples/sources/` or `archive/legacy-assets/`.
 2. Detect site charset (response header / meta / probe fetch).
 3. Fetch **raw HTTP HTML** (not DevTools DOM). Save under
    `legadoSkill/temp/` if useful. Use a browser tool only when the site
@@ -236,7 +235,7 @@ Use when the user asks to **find sites** or make **出版/公版/古籍** source
 6. **PC body empty / m. OK:** keep desktop search+TOC; rewrite chapter fetch to `m.` sibling.
 7. Set `checkKeyWord` to a **rare title fragment** (not 「我的」) for the book you care about.
 8. For JS rules: Rhino; prefer `var`; use `java.*` helpers. See
-   `legadoSkill/assets/方法-JS扩展类.md` when needed.
+   `skills/legado-book-source/references/js-extensions.md` when needed.
 9. When unsure, read official Kotlin under
    `legado/app/src/main/java/io/legado/app/`.
 

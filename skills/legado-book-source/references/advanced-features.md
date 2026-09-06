@@ -126,3 +126,19 @@ foundUrl || (hosts[0] + "/search?q=" + key);
 }
 ```
 2. **输出多行以换行符 `\n` 分隔的纯图片绝对 URL**（阅读 App 亦能原生自动渲染为漫画流）。
+
+---
+
+## 8. 动态加载 (`webView`) 规则注入语法规范
+
+阅读 App 针对动态 JavaScript 渲染提供了 `webView` 支持，但**不同层级的拼接语法截然不同**：
+
+1. **根级 URL 配置 (如 `searchUrl` / `bookInfoUrl`)**：直接在 URL 之后加逗号和 JSON：
+   `https://example.com/search?q={{key}},{"webView": true}`
+
+2. **二级字段规则 (如 `chapterUrl` / `nextTocUrl` / `content`)**：
+   **严禁**直接写为 `tag.a@href,{"webView":true}`（语法错误）。必须采用以下合法形式：
+   - **正则末尾追加**：`tag.a@href##$##,{"webView":true}`
+   - **宏变量包裹**：`{{@@tag.a@href}},{"webView":true}`
+   - **JS 动态追加**：`@js: result + ',{"webView":true}'`
+

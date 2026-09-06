@@ -186,6 +186,7 @@ When designing, auditing, or repairing Legado book sources:
 2. **Instant Heuristics**:
    - Empty search with HTTP 200: Check for frequency limit (`alert("搜索间隔")`), captcha, or Cloudflare challenge before rewriting selectors.
    - Ads inside content: Prefer `@ownText` to automatically discard child-tag ads.
-   - Dynamic/Blank pages: Append `,{"webView": true}` to the request URL.
+   - Dynamic/Blank pages: Append `,{"webView": true}` to the request URL (for sub-rules like `chapterUrl`, use `##$##,{"webView":true}`).
    - Reversed catalog: Prepend `-` to the list selector (e.g. `-ul.chapters li`).
+   - Negative constraints: Never output `ruleContent.prevContentUrl` (engine lacks this field); never extract `@value` directly from `<select>` (use `select option@value`).
 3. **Simplicity First**: Never over-engineer. Prefer CSS over regex, and regex over complex JavaScript. Use `java.log(result)` to trace real execution values rather than guessing.
