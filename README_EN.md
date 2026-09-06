@@ -51,50 +51,41 @@ This repository originated from `rezmdie/legadoSkill` but has undergone a comple
 ## 🏗 System Architecture Diagram
 
 ```mermaid
-graph TD
-    subgraph UserInterface["Interface Layer"]
-        Human["👤 Human Developer (Natural Language)"]
-        Agent["🤖 AI Agent (Cursor / Claude Code / Codex / Hermes)"]
-        CLI["💻 source-cli (Unified Engine CLI)"]
-    end
+flowchart TD
+    %% High-contrast accessible theme (clean in both dark and light modes)
+    classDef human fill:#1e3a8a,stroke:#60a5fa,stroke-width:2px,color:#ffffff;
+    classDef agent fill:#581c87,stroke:#c084fc,stroke-width:2px,color:#ffffff;
+    classDef direct fill:#0f766e,stroke:#2dd4bf,stroke-width:2px,color:#ffffff;
+    classDef flow fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#ffffff;
+    classDef device fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#ffffff;
+    classDef decision fill:#78350f,stroke:#fbbf24,stroke-width:2px,color:#ffffff;
 
-    subgraph FlowLayer["Workflow Layer: source-flow"]
-        Queue["Wave Scheduler (source-queue)"]
-        Patch["Patch Generator (source-patch)"]
-        Migrate["Domain Migration (source-migrate)"]
-        Hunt["Site Hunter (source-hunt)"]
-        Closeout["Closeout Gate (source-closeout)"]
-    end
+    Human["👤 Human Developer<br/>(Express intent in plain text)"]:::human
+    Agent["🤖 AI Agent (Cursor / Claude / Codex)<br/>(Loads Skills & recognizes intent)"]:::agent
+    Human -->|"① Chat interaction"| Agent
 
-    subgraph EngineLayer["Engine Layer: source-engine"]
-        Diagnose["Diagnostic Chain (Search -> Detail -> TOC -> Content)"]
-        Parse["Selector Parser (CSS / JS / Regex)"]
-        Probe["Web & Form Probes (source-probe)"]
-    end
+    Dispatch{"② Dispatcher Decision<br/>(Is a Flow needed?)"}:::decision
+    Agent --> Dispatch
 
-    subgraph CoreStorage["Core & Storage Layer"]
-        Core["Core Entities & Contracts (source-core / contracts)"]
-        Storage["SQLite Database & Cache (source-db / cache)"]
-    end
+    %% Direct / Flow-free paths
+    Dispatch -->|"Query syntax / specs"| Ref["📚 9 Standard Reference Manuals<br/>(Directly reads Markdown docs)"]:::direct
+    Dispatch -->|"Check status / metadata"| DirectTool["⚡ source-cli Direct Tools<br/>(Channel status / offline validation)"]:::direct
 
-    subgraph MCPLayer["Protocol Layer: source-mcp"]
-        MCPClient["MCP Protocol Client"]
-        CheckBridge["Batch Check Bridge"]
-    end
+    %% 4 Dedicated Flow paths
+    Dispatch -->|"Source broken"| F1["🔧 Flow 1: Deep Repair<br/>(Diagnose chain ➔ Patch ➔ Live verify)"]:::flow
+    Dispatch -->|"Create new source"| F2["✍️ Flow 2: Source Creation<br/>(Probe ➔ Scaffold ➔ Push & verify)"]:::flow
+    Dispatch -->|"Dead host / redirected"| F3["🌐 Flow 3: Domain Hunt & Migration<br/>(Hunt mirror ➔ Recursive path replace)"]:::flow
+    Dispatch -->|"Batch shelf triage"| F4["🌊 Flow 4: Batch Wave Triage<br/>(Exclusive lock ➔ PC split ➔ Single batch)"]:::flow
 
-    subgraph Device["Android Real Device / Emulator"]
-        LegadoApp["📱 Legado 3.x App\n(:1236 Web / MCP Service)"]
-    end
+    %% Live phone verification
+    DirectTool -.->|"Single push"| Phone
+    F1 -->|"Live debug & verify"| Phone["📱 Android Real Device Legado<br/>(:1236 MCP / Web service)"]:::device
+    F2 -->|"Full-chain live check"| Phone
+    F3 -->|"Verify on new domain"| Phone
+    F4 -->|"Single-batch verify"| Phone
 
-    Human -->|Natural Language Instructions| Agent
-    Agent -->|Calls Skills to invoke| CLI
-    Human -.->|Direct CLI usage (Optional)| CLI
-    CLI --> FlowLayer
-    FlowLayer --> EngineLayer
-    EngineLayer --> CoreStorage
-    FlowLayer --> MCPLayer
-    MCPLayer -->|HTTP / JSON-RPC| LegadoApp
-    LegadoApp -->|Live Fetching & Verification Results| MCPLayer
+    Phone -->|"③ Returns live network verification result"| Agent
+    Agent -->|"④ Reports final outcome to Human (Verified = Done)"| Human
 ```
 
 ### 6 Layer Crates Breakdown
@@ -109,41 +100,6 @@ The codebase in `crates/` is strictly partitioned:
 | **`source-flow`** | Workflow orchestration | `source-patch` (patch generator), `source-migrate` (domain rewrite), `source-hunt` (domain hunter), `source-queue` (wave scheduler), `source-closeout` (gatekeeper) |
 | **`source-mcp`** | Device communications | `source-adapters` (Legado API bridge), `source-mcp` (MCP protocol client), `source-check` (device check bridge) |
 | **`source-cli`** | User command interface | Unified commands for diagnose, repair, push, site-probe, and batch waves |
-
----
-
-## 🔄 Real-Device Closed-Loop Workflow
-
-Humans simply express intent; AI Agents autonomously orchestrate the diagnostics, pushing, and verification:
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor Human as 👤 Human Developer
-    participant Agent as 🤖 AI Agent (Cursor / Claude)
-    participant CLI as 🦀 source-cli Engine
-    participant Phone as 📱 Android Legado (Real Device)
-
-    Human->>Phone: Enable "Web Service" or built-in MCP (default port: 1236)
-    Human->>Agent: "Fix this broken source / create a source for: https://..."
-    Note over Agent: Agent loads skill: legado-book-source
-    Agent->>CLI: source-cli check channel (verify channel is idle)
-    CLI->>Phone: Query active check jobs
-    Phone-->>CLI: Channel Idle
-    Agent->>CLI: source-cli diagnose / site-probe (run diagnostic chain / site probe)
-    Note over CLI: Strict order: Search -> Detail -> TOC -> Content<br/>Auto-detects rate-limit alert("搜索间隔") & Cloudflare challenge
-    CLI-->>Agent: Returns structured diagnosis and proposed rule JSON
-    Agent->>CLI: source-cli source push --file source.json (push to device)
-    CLI->>Phone: Ingests book source directly into Legado memory
-    Agent->>Phone: Triggers real-device debug_source & check_source
-    Phone-->>Agent: Returns real execution status under live network
-    alt Live Verification Succeeded ("校验成功")
-        Agent->>CLI: source-cli ledger append & retro append (log ledger)
-        Agent-->>Human: ✅ Report success! The source is ready on your phone.
-    else Live Verification Failed
-        Note over Agent: Adjust selectors based on live error, re-push and verify until green.
-    end
-```
 
 ---
 
@@ -164,28 +120,29 @@ When handling book-source tasks, the system coordinates multi-stage actions thro
 | **Modifying source name, group, or intervals** | ❌ **Do NOT Invoke Flow** | **Directly edit JSON** and push single file | Non-functional metadata tweak; does not require full diagnostic pipeline. |
 | **Explore / Discovery page adjustments** | ❌ **Off by default** | Only when **explicitly requested** by user | Platform discipline: `checkDiscovery=false` by default to conserve phone execution budget. |
 
-> For comprehensive state machine specifications, see: **[Flow Architecture & Dispatch Guide (docs/reference/flow-architecture-and-dispatch.md)](docs/reference/flow-architecture-and-dispatch.md)**.
+### 2. 4 Core Flows Compact Pipeline Cards
 
-### 2. 4 Core Flows Topology
+- 🔧 **Flow 1: Deep Repair Flow**
+  > `[Channel Gate]` ➔ `[L0~L2 Gates]` ➔ `[Diagnostic Chain]` ➔ `[Patch Plan]` ➔ `[Push & Live Verify]` ➔ `[Closeout Ledger]`
+  - **Trigger**: Search fails, book detail crashes, TOC is garbled, or chapter body is empty.
+  - **Hard Rule**: Never rewrite TOC/Content selectors before Search succeeds; never claim fixed without phone green verification.
 
-```mermaid
-graph LR
-    subgraph Flow1["Flow 1: Deep Repair Flow"]
-        F1_A["Channel Gate"] --> F1_B["L0~L2 Gates"] --> F1_C["Diagnostic Chain"] --> F1_D["Patch & Push to Device"] --> F1_E["Live Verify & Ledger"]
-    end
+- ✍️ **Flow 2: Source Creation Flow**
+  > `[Live Site Probe]` ➔ `[Family Fingerprint]` ➔ `[Scaffold Generation]` ➔ `[Selector Refinement]` ➔ `[Live Push & Verify]` ➔ `[Source Cataloged]`
+  - **Trigger**: New novel site discovered; needs source developed from scratch.
+  - **Hard Rule**: All 4 stages (Search, Detail, TOC, Content) must pass live phone verification before acceptance.
 
-    subgraph Flow2["Flow 2: Source Creation Flow"]
-        F2_A["Live Site Probe"] --> F2_B["Family Fingerprint"] --> F2_C["Scaffold Generation"] --> F2_D["Push to Legado Memory"] --> F2_E["Full-Chain Live Verify"]
-    end
+- 🌐 **Flow 3: Domain Hunt & Migration Flow**
+  > `[Dead Host Alert]` ➔ `[Seed Search]` ➔ `[Candidate Probe]` ➔ `[Recursive Path Replace]` ➔ `[Verify on New Host]`
+  - **Trigger**: Target host returns 404, park page, or redirects to gambling sites.
+  - **Hard Rule**: Never tamper with selector rules; focus entirely on discovering mirror hosts and replacing absolute domain paths.
 
-    subgraph Flow3["Flow 3: Hunt & Migration Flow"]
-        F3_A["Dead Host Alert"] --> F3_B["Load Seeds"] --> F3_C["Hunt Mirror Domains"] --> F3_D["Recursive Path Migration"] --> F3_E["Verify on New Host"]
-    end
+- 🌊 **Flow 4: Batch Wave Triage Flow**
+  > `[Exclusive Lock]` ➔ `[Dead Host Filter]` ➔ `[Parallel PC Triage]` ➔ `[Single-Batch Phone Verify]` ➔ `[Aggregate Report]`
+  - **Trigger**: Routine health check and batch triage across dozens/hundreds of shelf sources.
+  - **Hard Rule**: Never run concurrent check batches against the same phone; must execute strictly in a single batch.
 
-    subgraph Flow4["Flow 4: Batch Wave Triage"]
-        F4_A["Exclusive Lock"] --> F4_B["Filter Known Dead"] --> F4_C["Parallel PC Triage"] --> F4_D["Single-Batch Phone Verify"] --> F4_E["Aggregate Report JSON"]
-    end
-```
+> 📖 **Deep Dive**: For complete state machine transitions, timeout budgets, and topology diagrams, see: [**Flow Architecture & Dispatch Guide (docs/reference/flow-architecture-and-dispatch.md)**](docs/reference/flow-architecture-and-dispatch.md).
 
 ---
 

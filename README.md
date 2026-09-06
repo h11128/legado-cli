@@ -48,53 +48,46 @@
 
 ---
 
-## 🏗 系统架构图 (System Architecture)
+## 🏗 系统全景架构与调度路由 (Architecture & Dispatcher)
+
+下图展示了**人类、AI Agent、Rust 引擎与 Android 真机之间的闭环协同**。系统根据任务类型智能分流，**纯检索和单步操作完全直连，仅复杂多阶段任务才进入对应独立 Flow**：
 
 ```mermaid
-graph TD
-    subgraph UserInterface["交互层 / Interface Layer"]
-        Human["👤 人类开发者 (自然语言对话)"]
-        Agent["🤖 AI Agent (Cursor / Claude Code / Codex / Hermes)"]
-        CLI["💻 source-cli (统一命令行工具)"]
-    end
+flowchart TD
+    %% 高对比度主题色彩定义（支持深色与浅色模式）
+    classDef human fill:#1e3a8a,stroke:#60a5fa,stroke-width:2px,color:#ffffff;
+    classDef agent fill:#581c87,stroke:#c084fc,stroke-width:2px,color:#ffffff;
+    classDef direct fill:#0f766e,stroke:#2dd4bf,stroke-width:2px,color:#ffffff;
+    classDef flow fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#ffffff;
+    classDef device fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#ffffff;
+    classDef decision fill:#78350f,stroke:#fbbf24,stroke-width:2px,color:#ffffff;
 
-    subgraph FlowLayer["流程编排层 / Workflow Layer: source-flow"]
-        Queue["波次调度 (source-queue)"]
-        Patch["补丁生成 (source-patch)"]
-        Migrate["域名迁移 (source-migrate)"]
-        Hunt["新站猎取 (source-hunt)"]
-        Closeout["收尾门禁 (source-closeout)"]
-    end
+    Human["👤 人类开发者<br/>(自然语言提需求)"]:::human
+    Agent["🤖 AI Agent (Cursor / Claude / Codex)<br/>(加载 Skills 识别意图)"]:::agent
+    Human -->|"① 对话交互"| Agent
 
-    subgraph EngineLayer["引擎与诊断层 / Engine Layer: source-engine"]
-        Diagnose["单向诊断链 (Search -> Detail -> TOC -> Content)"]
-        Parse["规则解析 (CSS / JS / 正则)"]
-        Probe["网络与表单探针 (source-probe)"]
-    end
+    Dispatch{"② 意图分流决策<br/>(是否需要 Flow?)"}:::decision
+    Agent --> Dispatch
 
-    subgraph CoreStorage["核心契约与存储层 / Core & Storage"]
-        Core["核心实体与契约 (source-core / contracts)"]
-        Storage["SQLite 数据库与缓存 (source-db / cache)"]
-    end
+    %% 免 Flow 直连路径
+    Dispatch -->|"查语法 / 规约"| Ref["📚 9 大标准参考库<br/>(直接读取 Markdown)"]:::direct
+    Dispatch -->|"查状态 / 改元数据"| DirectTool["⚡ source-cli 单步工具<br/>(查信道 / 离线校验 / 改配置)"]:::direct
 
-    subgraph MCPLayer["真机通信层 / Protocol Layer: source-mcp"]
-        MCPClient["MCP 协议客户端"]
-        CheckBridge["真机批检桥接器"]
-    end
+    %% 4 大独立 Flow 路径
+    Dispatch -->|"书源失效"| F1["🔧 Flow 1: 单源深度修复<br/>(诊断链 ➔ 补丁 ➔ 真机推验)"]:::flow
+    Dispatch -->|"新站做源"| F2["✍️ Flow 2: 新站创作<br/>(探针 ➔ 脚手架 ➔ 推送验证)"]:::flow
+    Dispatch -->|"死站/跳车"| F3["🌐 Flow 3: 域名猎取迁移<br/>(搜镜像 ➔ 递归替换绝对路径)"]:::flow
+    Dispatch -->|"整架巡检"| F4["🌊 Flow 4: 批量波次巡检<br/>(排他锁 ➔ PC分流 ➔ 单批次验证)"]:::flow
 
-    subgraph Device["Android 手机 / 模拟器 (Real Device)"]
-        LegadoApp["📱 Legado (开源阅读 3.x)\n(:1236 Web / MCP 服务)"]
-    end
+    %% 真机闭环通信
+    DirectTool -.->|"单步推源"| Phone
+    F1 -->|"真机调试校验"| Phone["📱 Android 真机 Legado 客户端<br/>(:1236 MCP / Web 协议)"]:::device
+    F2 -->|"推源全链路校验"| Phone
+    F3 -->|"新域名真机复验"| Phone
+    F4 -->|"单批次打包批检"| Phone
 
-    Human -->|自然语言指令| Agent
-    Agent -->|调用 Skills 驱动后台| CLI
-    Human -.->|高级排查直接使用| CLI
-    CLI --> FlowLayer
-    FlowLayer --> EngineLayer
-    EngineLayer --> CoreStorage
-    FlowLayer --> MCPLayer
-    MCPLayer -->|HTTP / JSON-RPC| LegadoApp
-    LegadoApp -->|真实网络抓取与校验结果| MCPLayer
+    Phone -->|"③ 回传真实网络校验结果"| Agent
+    Agent -->|"④ 向人类汇报最终结果 (校验成功即交付)"| Human
 ```
 
 ### 6 大分层 Crate 职责表
@@ -112,42 +105,7 @@ graph TD
 
 ---
 
-## 🔄 真机协同闭环流程图 (Collaborative Workflow)
-
-人类只需提需求，Agent 在后台自动完成诊断、推送与真机校验：
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor Human as 👤 人类开发者
-    participant Agent as 🤖 AI Agent (Cursor / Claude)
-    participant CLI as 🦀 source-cli 引擎
-    participant Phone as 📱 Android Legado (真机)
-
-    Human->>Phone: 开启「Web服务」或内置 MCP (默认端口 1236)
-    Human->>Agent: "帮我修这个失效书源 / 做这个新站的书源: https://..."
-    Note over Agent: Agent 自动唤起技能 (legado-book-source)
-    Agent->>CLI: source-cli check channel (检查手机通道空闲)
-    CLI->>Phone: 查询通道占用状态
-    Phone-->>CLI: 通道空闲 (Idle)
-    Agent->>CLI: source-cli diagnose / site-probe (单向诊断链 / 站点探测)
-    Note over CLI: 严格执行: 搜索 -> 详情 -> 目录 -> 正文<br/>自动识别频控 alert("搜索间隔") 与 5秒盾
-    CLI-->>Agent: 输出结构化诊断分析与修复规则 JSON
-    Agent->>CLI: source-cli source push --file source.json (推送到手机)
-    CLI->>Phone: 规则直接载入手机端 Legado 内存
-    Agent->>Phone: 触发真机 debug_source 与 check_source
-    Phone-->>Agent: 回传真实网络环境下的各步骤执行状态
-    alt 手机端全流程校验成功 (校验成功)
-        Agent->>CLI: source-cli ledger append & retro append (台账记录)
-        Agent-->>Human: ✅ 报告完成！书源已在手机上可用，并列出关键修复说明
-    else 某环节校验失败
-        Note over Agent: 根据真实报错微调规则，重新推源验证，直至真机变绿
-    end
-```
-
----
-
-## 🌊 核心业务流程与调度决策 (Flow Architecture & Dispatch)
+## 🌊 业务流程全景与调度决策 (Flow Architecture & Dispatch)
 
 在处理书源工程任务时，系统通过 **Flow（多阶段事务性流水线）** 保证真机互斥、频控保护与状态机一致性。
 
@@ -164,28 +122,29 @@ sequenceDiagram
 | **微调书源名称、分组或翻页间隔** | ❌ **不需要 Flow** | **直接修改 JSON 文件** 并单步推送到手机 | 纯静态属性调整，不影响正文抓取链路，无需启动诊断流水线。 |
 | **发现页 (exploreUrl) 规则调整** | ❌ **默认不走 Flow** | 仅在用户**明确要求**时才介入 | 平台纪律：默认 `checkDiscovery=false`，杜绝为信息流浪费真机配额。 |
 
-> 详细规格与流转拓扑请参阅：**[业务流程全景架构与调度决策指南 (docs/reference/flow-architecture-and-dispatch.md)](docs/reference/flow-architecture-and-dispatch.md)**。
+### 2. 4 大核心 Flow 速查管道 (Compact Pipeline Cards)
 
-### 2. 4 大核心 Flow 全景拓扑
+- 🔧 **Flow 1: 单源深度修复流 (Deep Repair Flow)**
+  > `[信道排他门禁]` ➔ `[L0~L2 存活门禁]` ➔ `[单向诊断链]` ➔ `[补丁计划]` ➔ `[推源真机校验]` ➔ `[台账关单]`
+  - **触发时机**：现有书源搜索失效、详情报错、目录乱码或正文为空。
+  - **核心铁律**：搜索未走通前严禁修改目录正文；未在真机校验变绿严禁宣称修复。
 
-```mermaid
-graph LR
-    subgraph Flow1["Flow 1: 单源深度修复流"]
-        F1_A["信道门禁"] --> F1_B["L0~L2 存活门禁"] --> F1_C["严格单向诊断链"] --> F1_D["生成补丁推送到真机"] --> F1_E["真机校验与收尾台账"]
-    end
+- ✍️ **Flow 2: 新书源创作流 (Source Creation Flow)**
+  > `[原生探针扫描]` ➔ `[站群家族识别]` ➔ `[脚手架生成]` ➔ `[选择器增强]` ➔ `[推源全绿走通]` ➔ `[版本入库]`
+  - **触发时机**：发现新的小说网站，需要从零开发书源。
+  - **核心铁律**：必须以手机端真机四环节全绿为交付标准。
 
-    subgraph Flow2["Flow 2: 新书源创作流"]
-        F2_A["站点要素探针"] --> F2_B["识别站群特征"] --> F2_C["生成书源脚手架"] --> F2_D["推送到真机 Legado"] --> F2_E["真机全链路走通校验"]
-    end
+- 🌐 **Flow 3: 域名猎取迁移流 (Domain Hunt & Migration Flow)**
+  > `[死链/挂站告警]` ➔ `[种子库搜镜像]` ➔ `[候选连通性探针]` ➔ `[全源绝对路径替换]` ➔ `[新域真机复验]`
+  - **触发时机**：站点 404、挂马停放或跳转博彩站。
+  - **核心铁律**：严禁乱改选择器规则，核心是域名挖掘与全源绝对路径全局替换。
 
-    subgraph Flow3["Flow 3: 域名猎取迁移流"]
-        F3_A["域名失效告警"] --> F3_B["加载搜书种子库"] --> F3_C["猎取镜像候选站"] --> F3_D["全源路径递归迁移"] --> F3_E["真机在新域名下校验"]
-    end
+- 🌊 **Flow 4: 批量巡检波次流 (Batch Wave Triage Flow)**
+  > `[排他信道锁]` ➔ `[死站门禁过滤]` ➔ `[PC并发多维分流]` ➔ `[单批次下发真机]` ➔ `[聚合巡检报告]`
+  - **触发时机**：书架几十上百个源的日常体检与批量分流修复。
+  - **核心铁律**：严禁在同一台手机上并发多批次，必须单批次执行。
 
-    subgraph Flow4["Flow 4: 批量巡检波次流"]
-        F4_A["排他信道锁"] --> F4_B["死域名门禁过滤"] --> F4_C["多线程 PC 预检分流"] --> F4_D["单批次下发真机校验"] --> F4_E["聚合输出巡检报告"]
-    end
-```
+> 📖 **深入阅读**：四大 Flow 详细状态机、失败重试预算与流转拓扑图请参阅：[**业务流程全景架构与调度决策指南 (docs/reference/flow-architecture-and-dispatch.md)**](docs/reference/flow-architecture-and-dispatch.md)。
 
 ---
 

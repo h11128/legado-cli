@@ -15,7 +15,7 @@
 
 ---
 
-## 二、何时调用 Flow vs 何时不需要 Flow（决策矩阵）
+## 二、何时调用 Flow vs 何时不需要 Flow？（决策矩阵）
 
 在接到人类指令或准备执行动作前，Agent 和开发者应先查阅下表决定是否唤起 Flow：
 
@@ -33,31 +33,81 @@
 
 ---
 
-## 三、4 大核心 Flow 全景图与执行规约
+## 三、统一调度与分流路由全景图
+
+下图清晰展示了**不同任务的不同分流路径**：并非每次都调用 Flow，纯检索和单步操作完全绕开 Flow，各 Flow 之间也互不干扰：
+
+```mermaid
+flowchart TD
+    %% 样式定义：高对比度、清晰配色
+    classDef human fill:#1e3a8a,stroke:#60a5fa,stroke-width:2px,color:#ffffff;
+    classDef agent fill:#581c87,stroke:#c084fc,stroke-width:2px,color:#ffffff;
+    classDef direct fill:#0f766e,stroke:#2dd4bf,stroke-width:2px,color:#ffffff;
+    classDef flow fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#ffffff;
+    classDef device fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#ffffff;
+    classDef decision fill:#78350f,stroke:#fbbf24,stroke-width:2px,color:#ffffff;
+
+    Human["👤 人类开发者<br/>(自然语言提需求)"]:::human
+    Agent["🤖 AI Agent (Cursor / Claude / Codex)<br/>(加载 Skills 识别意图)"]:::agent
+    Human -->|"① 对话交互"| Agent
+
+    Dispatch{"② 意图分流决策<br/>(是否需要 Flow?)"}:::decision
+    Agent --> Dispatch
+
+    %% 免 Flow 路径
+    Dispatch -->|"纯查语法 / 规约"| Ref["📚 9 大标准参考库<br/>(直接读取 Markdown)"]:::direct
+    Dispatch -->|"单步状态 / 轻微改名"| DirectTool["⚡ source-cli 单步工具<br/>(查信道 / 离线校验 / 改元数据)"]:::direct
+
+    %% 4 大 Flow 路径
+    Dispatch -->|"书源失效"| F1["🔧 Flow 1: 单源深度修复<br/>(诊断链 ➔ 补丁 ➔ 真机推验)"]:::flow
+    Dispatch -->|"新站做源"| F2["✍️ Flow 2: 新站创作<br/>(探针 ➔ 脚手架 ➔ 推送验证)"]:::flow
+    Dispatch -->|"死站/跳车"| F3["🌐 Flow 3: 域名猎取迁移<br/>(搜镜像 ➔ 递归替换绝对路径)"]:::flow
+    Dispatch -->|"整架巡检"| F4["🌊 Flow 4: 批量波次巡检<br/>(排他锁 ➔ PC分流 ➔ 单批次验证)"]:::flow
+
+    %% 真机闭环
+    DirectTool -.->|"单步推源"| Phone
+    F1 -->|"真机调试校验"| Phone["📱 Android 真机 Legado 客户端<br/>(:1236 MCP / Web 协议)"]:::device
+    F2 -->|"推源全链路校验"| Phone
+    F3 -->|"新域名真机复验"| Phone
+    F4 -->|"单批次打包批检"| Phone
+
+    Phone -->|"③ 回传实时校验结果 (以手机为唯一真理)"| Agent
+    Agent -->|"④ 向人类汇报最终结果 (校验成功即交付)"| Human
+```
+
+---
+
+## 四、4 大核心 Flow 独立执行规约
 
 ### Flow 1: 单源深度修复流 (Deep Repair Flow)
 
 这是最高频的排障工作流，严格落实“单向诊断链”与“真机验证闭环”：
 
 ```mermaid
-graph TD
-    Start(["发起修复请求"]) --> Lock["1. 信道门禁检查<br/>source-cli check channel<br/>(确保手机未被其他批检占用)"]
-    Lock --> Gate["2. L0~L2 连通性与存活门禁<br/>- L0 语法契约<br/>- L1 域名存活/解析<br/>- L2 反爬墙/停放页检测"]
+flowchart TD
+    classDef startNode fill:#1e3a8a,stroke:#60a5fa,color:#fff;
+    classDef gateNode fill:#78350f,stroke:#fbbf24,color:#fff;
+    classDef coreNode fill:#1e293b,stroke:#38bdf8,color:#fff;
+    classDef successNode fill:#064e3b,stroke:#34d399,color:#fff;
+    classDef failNode fill:#881337,stroke:#f43f5e,color:#fff;
+
+    Start(["发起修复请求"]):::startNode --> Lock["1. 信道门禁检查 (source-cli check channel)"]:::gateNode
+    Lock --> Gate["2. L0~L2 存活门禁 (语法/DNS/停放页/反爬墙)"]:::gateNode
     
-    Gate --"域名已死/跳车"--> DivertHunt["分流至 Flow 3: 域名猎取迁移"]
-    Gate --"视频/音频源"--> DivertMedia["分流至专用音视频路由"]
-    Gate --"正常小说站"--> Diagnose["3. 严格单向诊断链<br/>source-cli diagnose<br/>① Search: 自动嗅探搜索间隔与CF盾<br/>② Detail: 真实详情 vs fake_detail<br/>③ TOC: 目录列表与倒序检测<br/>④ Content: 正文提取与广告清洗"]
+    Gate --"域名已死/跳车"--> DivertHunt["分流至 Flow 3: 域名猎取迁移"]:::failNode
+    Gate --"视频/音频源"--> DivertMedia["分流至专用音视频路由"]:::gateNode
+    Gate --"正常小说站"--> Diagnose["3. 严格单向诊断链 (Search ➔ Detail ➔ TOC ➔ Content)"]:::coreNode
     
-    Diagnose --> Patch["4. 补丁计划生成<br/>匹配站点家族并生成 PatchPlan"]
-    Patch --> Push["5. 推送真机并上锁<br/>source push (自动申明 deep_active 锁)"]
-    Push --> Verify["6. 真机闭环全链路校验<br/>手机端执行 check_source"]
+    Diagnose --> Patch["4. 自动生成补丁计划 (PatchPlan)"]:::coreNode
+    Patch --> Push["5. 推送真机并上锁 (source push)"]:::coreNode
+    Push --> Verify["6. 手机端全链路真实校验 (check_source)"]:::coreNode
     
-    Verify --"校验失败"--> RetroFail{"重试预算<br/>(≤ 2次)"}
+    Verify --"校验失败"--> RetroFail{"重试预算<br/>(≤ 2次)"}:::gateNode
     RetroFail --"有预算"--> Diagnose
-    RetroFail --"超限"--> MarkFail["标记不可修，恢复原始状态"]
+    RetroFail --"超限"--> MarkFail["标记不可修，恢复原始状态"]:::failNode
     
-    Verify --"校验成功 (真机变绿)"--> Closeout["7. 收尾与台账关门<br/>- ledger append (写入事件台账)<br/>- retro append (复盘陷阱沉淀)<br/>- 解除 deep_active 状态锁"]
-    Closeout --> End(["修复完成并汇报用户"])
+    Verify --"校验成功 (真机变绿)"--> Closeout["7. 台账登记与关门 (ledger/retro append)"]:::successNode
+    Closeout --> End(["修复完成并汇报用户"]):::startNode
 ```
 
 ---
@@ -67,46 +117,45 @@ graph TD
 从零发现未知小说站点并生成工业级可用书源：
 
 ```mermaid
-graph TD
-    Start(["发现新小说站点 URL"]) --> Probe["1. 站点全要素探针扫描<br/>source-cli site-probe<br/>- 抓取原生 HTML (非浏览器DOM)<br/>- 探测 JS 动态写入表单<br/>- 嗅探字符集编码 (GBK vs UTF-8)"]
-    
-    Probe --> Identify["2. 站点家族特征识别<br/>- 笔趣阁家族 (SiteFamily::Biquge)<br/>- 杰奇小说系统 (Jieqi)<br/>- 独创架构站点 (Custom)"]
-    
-    Identify --> Scaffold["3. 生成书源脚手架模板<br/>source-cli source scaffold<br/>生成合规的 JSON 初稿"]
-    
-    Scaffold --> Refine["4. 选择器微调与增强<br/>- 动态加载追加 webView 属性<br/>- 正文尾部配置 @ownText 去广告<br/>- 倒序目录追加 - 前缀"]
-    
-    Refine --> Push["5. 一键推送到手机 Legado<br/>source-cli source push --file ..."]
-    
-    Push --> Verify["6. 触发真机真实网络全链路校验<br/>手机端执行完整搜索->正文走通"]
-    
-    Verify --"不通过"--> Refine
-    Verify --"真机显示校验成功"--> Closeout["7. 台账登记与版本归档<br/>- ledger append<br/>- 规则入库"]
-    Closeout --> End(["新书源交付成功"])
+flowchart TD
+    classDef startNode fill:#1e3a8a,stroke:#60a5fa,color:#fff;
+    classDef coreNode fill:#1e293b,stroke:#38bdf8,color:#fff;
+    classDef successNode fill:#064e3b,stroke:#34d399,color:#fff;
+
+    Start(["发现新小说站 URL"]):::startNode --> Probe["1. 原生探针扫描 (HTML结构/动态表单/字符集嗅探)"]:::coreNode
+    Probe --> Identify["2. 站群指纹识别 (笔趣阁家族/杰奇系统/独立架构)"]:::coreNode
+    Identify --> Scaffold["3. 生成脚手架 JSON 模板 (source scaffold)"]:::coreNode
+    Scaffold --> Refine["4. 选择器微调与增强 (webView动态渲染 / @ownText去广告)"]:::coreNode
+    Refine --> Push["5. 一键推送到手机 Legado 内存 (source push)"]:::coreNode
+    Push --> Verify["6. 触发真机全链路走通校验 (check_source)"]:::coreNode
+    Verify --"未全通"--> Refine
+    Verify --"真机全绿"--> Closeout["7. 台账关单与入库 (ledger append)"]:::successNode
+    Closeout --> End(["新书源即刻可用"]):::startNode
 ```
 
 ---
 
 ### Flow 3: 域名猎取与全量迁移流 (Domain Hunt & Migration Flow)
 
-当目标站点由于不可抗力更换域名、原域名解析失败或跳转博彩站时触发：
+当目标站点更换域名、原域名解析失败或跳转博彩站时触发：
 
 ```mermaid
-graph TD
-    Start(["书源域名失效 (404/挂站/跳转)"]) --> Seeds["1. 加载搜书与镜像种子库<br/>config/domain_hunt_seeds.json"]
+flowchart TD
+    classDef startNode fill:#1e3a8a,stroke:#60a5fa,color:#fff;
+    classDef gateNode fill:#78350f,stroke:#fbbf24,color:#fff;
+    classDef coreNode fill:#1e293b,stroke:#38bdf8,color:#fff;
+    classDef failNode fill:#881337,stroke:#f43f5e,color:#fff;
+    classDef successNode fill:#064e3b,stroke:#34d399,color:#fff;
+
+    Start(["书源域名失效 (404/挂站/跳转)"]):::startNode --> Seeds["1. 加载搜书与同源种子库 (domain_hunt_seeds.json)"]:::gateNode
+    Seeds --> Hunt["2. 并发挖掘候选镜像站 (source-cli hunt)"]:::coreNode
+    Hunt --> CandidateProbe["3. 候选站连通性与内容一致性探针"]:::coreNode
     
-    Seeds --> Hunt["2. 并发猎取候选域名<br/>source-cli hunt<br/>在搜索引擎与同源镜像中挖掘替代 host"]
-    
-    Hunt --> CandidateProbe["3. 候选域名连通性探针<br/>source-cli probe<br/>验证候选站内容是否与原站一致"]
-    
-    CandidateProbe --"无有效镜像"--> MarkDead["标记域名彻底死亡<br/>写入 verify_skip_rules.json<br/>停用该书源"]
-    
-    CandidateProbe --"找到有效新域名"--> Migrate["4. 全源路径递归替换迁移<br/>source-cli migrate<br/>- 替换 bookSourceUrl<br/>- 替换封面/详情/搜索绝对路径<br/>- 刷新 hostKey"]
-    
-    Migrate --> PushVerify["5. 推送真机并全链路验证<br/>在新域名下完整跑通校验"]
-    
-    PushVerify --"通过"--> Closeout["6. 沉淀域名迁移日志<br/>ledger append (action: migrate)"]
-    Closeout --> End(["域名迁移完成"])
+    CandidateProbe --"无有效镜像"--> MarkDead["标记域名彻底死亡，停用该书源"]:::failNode
+    CandidateProbe --"找到有效新域名"--> Migrate["4. 全源绝对路径递归替换 (source-cli migrate)"]:::coreNode
+    Migrate --> PushVerify["5. 推送真机并在新域名下全链路校验"]:::coreNode
+    PushVerify --"通过"--> Closeout["6. 沉淀迁移台账 (ledger append)"]:::successNode
+    Closeout --> End(["域名迁移完成"]):::startNode
 ```
 
 ---
@@ -116,26 +165,25 @@ graph TD
 针对几十到上百个书源的高并发、大批量体检与快速分流：
 
 ```mermaid
-graph TD
-    Start(["传入书源清单 URLs File"]) --> Lock["1. 申请全局排他信道锁<br/>source-cli check channel"]
-    
-    Lock --> SkipFilter["2. 本地快速门禁过滤<br/>比对 config/verify_skip_rules.json<br/>直接跳过已知死站与豁免站"]
-    
-    SkipFilter --> Triage["3. 多线程 PC 预检分流 (Triage)<br/>- 搜索正常但目录失败 -> toc 队列<br/>- 搜索失败且 404 -> dead 队列<br/>- 搜索返回 alert 提示 -> 频控等待队列<br/>- 媒体类 -> 视频音频分流队列"]
-    
-    Triage --> BatchPatch["4. 批量生成针对性补丁<br/>针对各分流队列应用轻量针对性修复"]
-    
-    BatchPatch --> SingleBatchVerify["5. 单批次手机端真机校验<br/>一次性打包下发给手机 Legado<br/>(严禁在同一设备上并发多任务)"]
-    
-    SingleBatchVerify --> Aggregate["6. 汇总生成校验报告<br/>输出 REPORT_JSON 与失败清单"]
-    
-    Aggregate --> Unlock["7. 释放全局信道锁"]
-    Unlock --> End(["波次巡检收工"])
+flowchart TD
+    classDef startNode fill:#1e3a8a,stroke:#60a5fa,color:#fff;
+    classDef gateNode fill:#78350f,stroke:#fbbf24,color:#fff;
+    classDef coreNode fill:#1e293b,stroke:#38bdf8,color:#fff;
+    classDef successNode fill:#064e3b,stroke:#34d399,color:#fff;
+
+    Start(["传入书源清单 URLs File"]):::startNode --> Lock["1. 申请全局排他信道锁 (source-cli check channel)"]:::gateNode
+    Lock --> SkipFilter["2. 门禁快速过滤 (比对 verify_skip_rules.json 跳过死站)"]:::gateNode
+    SkipFilter --> Triage["3. PC端多线程预检分流 (按搜索/目录/正文/频控/媒体归入队列)"]:::coreNode
+    Triage --> BatchPatch["4. 批量生成针对性轻量补丁"]:::coreNode
+    BatchPatch --> SingleBatchVerify["5. 单批次打包下发手机真机批检 (严禁并发多批次)"]:::coreNode
+    SingleBatchVerify --> Aggregate["6. 汇总生成 REPORT_JSON 报告"]:::successNode
+    Aggregate --> Unlock["7. 释放全局信道锁"]:::gateNode
+    Unlock --> End(["波次巡检收工"]):::startNode
 ```
 
 ---
 
-## 四、核心防护与避坑纪律 (Hard Rules)
+## 五、核心防护与避坑纪律 (Hard Rules)
 
 1. **信道互斥（One Device, One Flight）**：
    - 手机端 Legado 是单体进程，无法同时处理两个批检或高频并发调试任务。
