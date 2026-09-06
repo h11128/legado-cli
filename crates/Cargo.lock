@@ -1375,6 +1375,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "source_core"
+version = "0.1.0"
+dependencies = [
+ "serde_json",
+ "source_contracts",
+ "source_ports",
+ "source_types",
+]
+
+[[package]]
 name = "source_db"
 version = "0.1.0"
 dependencies = [
@@ -1397,6 +1407,31 @@ dependencies = [
  "serde_json",
  "source_ports",
  "source_types",
+]
+
+[[package]]
+name = "source_engine"
+version = "0.1.0"
+dependencies = [
+ "source_adapters",
+ "source_diagnose",
+ "source_identify",
+ "source_parse",
+ "source_patch",
+ "source_pattern",
+]
+
+[[package]]
+name = "source_flow"
+version = "0.1.0"
+dependencies = [
+ "source_closeout",
+ "source_gate",
+ "source_hunt",
+ "source_migrate",
+ "source_probe",
+ "source_spine",
+ "source_video",
 ]
 
 [[package]]
@@ -1545,6 +1580,16 @@ dependencies = [
  "source_ports",
  "source_types",
  "thiserror",
+]
+
+[[package]]
+name = "source_storage"
+version = "0.1.0"
+dependencies = [
+ "source_cache",
+ "source_db",
+ "source_queue",
+ "tempfile",
 ]
 
 [[package]]

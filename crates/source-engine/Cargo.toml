@@ -1,0 +1,14 @@
+[package]
+name = "source_engine"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Consolidated rule heuristics, parsing, diagnosis, patching, patterns, and adapters"
+
+[dependencies]
+source_parse = { workspace = true }
+source_diagnose = { workspace = true }
+source_patch = { workspace = true }
+source_pattern = { workspace = true }
+source_identify = { workspace = true }
+source_adapters = { workspace = true }

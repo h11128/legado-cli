@@ -1,0 +1,14 @@
+[package]
+name = "source_storage"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Consolidated persistence, caching, and failure queue management"
+
+[dependencies]
+source_db = { workspace = true }
+source_cache = { workspace = true }
+source_queue = { workspace = true }
+
+[dev-dependencies]
+tempfile = "3"

@@ -1,0 +1,15 @@
+[package]
+name = "source_flow"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Consolidated pipeline flows: gate, probe, hunt, migrate, video, spine, and closeout"
+
+[dependencies]
+source_gate = { workspace = true }
+source_probe = { workspace = true }
+source_hunt = { workspace = true }
+source_migrate = { workspace = true }
+source_video = { workspace = true }
+source_spine = { workspace = true }
+source_closeout = { workspace = true }

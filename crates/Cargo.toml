@@ -1,6 +1,15 @@
 [workspace]
 resolver = "2"
 members = [
+  # Consolidated Layer Crates
+  "source-core",
+  "source-storage",
+  "source-engine",
+  "source-flow",
+  "source-mcp",
+  "source-cli",
+
+  # Sub-crates (modular components)
   "source-types",
   "source-ports",
   "source-contracts",
@@ -13,8 +22,6 @@ members = [
   "source-hunt",
   "source-diagnose",
   "source-spine",
-  "source-cli",
-  "source-mcp",
   "source-identify",
   "source-pattern",
   "source-adapters",
@@ -33,6 +40,10 @@ license = "MIT"
 authors = ["legadoSkill"]
 
 [workspace.dependencies]
+source_core = { path = "source-core" }
+source_storage = { path = "source-storage" }
+source_engine = { path = "source-engine" }
+source_flow = { path = "source-flow" }
 source_types = { path = "source-types" }
 source_ports = { path = "source-ports" }
 source_contracts = { path = "source-contracts" }
