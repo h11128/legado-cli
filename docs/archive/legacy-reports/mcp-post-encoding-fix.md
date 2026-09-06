@@ -94,7 +94,7 @@ smart_fetch_html(
 
 ## 📚 完整书源配置
 
-书源已创建在 [`bqg5.com_书源_最终版.json`](bqg5.com_书源最终版.json:1)，可以直接导入阅读APP使用！
+书源已创建在 `bqg5.com_书源_最终版.json`，可以直接导入阅读APP使用！
 
 ### 关键配置
 
@@ -136,7 +136,7 @@ smart_fetch_html(
 
 1. **立即可用**：使用 `java.encodeURI(key,'GBK')` 方案，无需重启MCP服务器
 2. **长期方案**：重启MCP服务器后，可以使用 `url_charset` 参数
-3. **书源导入**：将 [`bqg5.com_书源_最终版.json`](bqg5.com_书源最终版.json:1) 导入阅读APP
+3. **书源导入**：将生成的 `bqg5.com` 书源 JSON 导入阅读APP
 
 ## 📝 技术细节
 

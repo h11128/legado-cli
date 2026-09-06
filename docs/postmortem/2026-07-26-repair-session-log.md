@@ -1,6 +1,6 @@
 # Source Repair Session Log — 2026-07-26
 
-Parent chat: [`f14f2834-eeb7-45bb-b325-9ba29e01c2db`](file:///C:/Users/h1112/.cursor/projects/e-Projects-legado/agent-transcripts/f14f2834-eeb7-45bb-b325-9ba29e01c2db/f14f2834-eeb7-45bb-b325-9ba29e01c2db.jsonl)
+Parent chat ID: `f14f2834-eeb7-45bb-b325-9ba29e01c2db`
 
 Device MCP (late session): `http://10.0.0.139:1236/mcp` (token `1234`). Early session often used `10.0.0.43`.
 
@@ -33,12 +33,12 @@ This file is the **canonical local record** of book-source repair work in this t
 
 | Agent id | Role | Outcome (as of session end) | Local log / notes |
 |----------|------|-----------------------------|-------------------|
-| [Validate user groups](e9f65a57-b7f6-4a40-8122-0c547455449d) | debug_source PASS/PARTIAL/FAIL on enabled tagged sources | Incomplete (~52/55); PASS21 / PARTIAL2 / FAIL29 | `temp/source_validate_*` |
-| [Fix batch A](172eea06-bb58-47cd-8efc-1f6ddb188809) | Fix up to 6 + skip rest | Claimed 6 fixed + many skips → `fix_log.jsonl` | **No verify gate**; ijjj/pow later false; bengben/zxcs/aiqu still **unverified** |
-| [Fix batch B](7f7191cd-e283-4312-aacd-ebff25beebb9) | Fix ≤6, no start_check (channel reserved) | Claimed ijjj/book18/pow fixed → `fix_log_b.jsonl` | Retest later: only book18 true |
-| [Unfixed audit](ef09fe43-37c4-464d-9c6f-0e6058f20bd3) | Read-only plan for remaining fails | **Done** — 32-source table + deep steps for bengben/aiqu/zxcs | `unfixed_repair_plan.md` |
-| [Fix powanjuan TOC](bfb9ff72-ffb3-4cf7-af2d-2d822e44b84e) | Single-URL fix + verify | **Pass** (~2.3s); clear `tocUrl` | `fix_pow.json` |
-| [Fix ijjjxsw TOC](17dbd633-91a1-4d3e-a17d-2b7ee3468cdd) | Single-URL fix + verify | **Pass** (~3.25s); narrow tocUrl; name `\|\|`/`##` split; 20s search gap | `fix_ijjj.json` |
+| `Validate user groups` (`e9f65a57`) | debug_source PASS/PARTIAL/FAIL on enabled tagged sources | Incomplete (~52/55); PASS21 / PARTIAL2 / FAIL29 | `temp/source_validate_*` |
+| `Fix batch A` (`172eea06`) | Fix up to 6 + skip rest | Claimed 6 fixed + many skips → `fix_log.jsonl` | **No verify gate**; ijjj/pow later false; bengben/zxcs/aiqu still **unverified** |
+| `Fix batch B` (`7f7191cd`) | Fix ≤6, no start_check (channel reserved) | Claimed ijjj/book18/pow fixed → `fix_log_b.jsonl` | Retest later: only book18 true |
+| `Unfixed audit` (`ef09fe43`) | Read-only plan for remaining fails | **Done** — 32-source table + deep steps for bengben/aiqu/zxcs | `unfixed_repair_plan.md` |
+| `Fix powanjuan TOC` (`bfb9ff72`) | Single-URL fix + verify | **Pass** (~2.3s); clear `tocUrl` | `fix_pow.json` |
+| `Fix ijjjxsw TOC` (`17dbd633`) | Single-URL fix + verify | **Pass** (~3.25s); narrow tocUrl; name `\|\|`/`##` split; 20s search gap | `fix_ijjj.json` |
 
 Non-repair subagents in same parent (checkalgo / APK / review) listed in `repair_session_index.json` for completeness only.
 
@@ -50,7 +50,7 @@ Non-repair subagents in same parent (checkalgo / APK / review) listed in `repair
 
 | Step | Actor | Result |
 |------|-------|--------|
-| fix_b save | [Fix batch B](7f7191cd-…) | searchUrl `page={{page}}`; name `tag.a@text` |
+| fix_b save | Fix batch B (`7f7191cd`) | searchUrl `page={{page}}`; name `tag.a@text` |
 | Device retest | Parent | **校验成功** (`verify_fixed.json`) |
 | Status | | **FIXED (verified)** |
 
@@ -61,7 +61,7 @@ Non-repair subagents in same parent (checkalgo / APK / review) listed in `repair
 | Early debug | Parent / validate | Search/explore issues |
 | fix_b save | Fix batch B | explore/checkKeyWord/toc tweaks; still tagged 搜索目录失效 |
 | Device retest | Parent | **仍失败** 搜索目录失效 |
-| Root cause | [Fix powanjuan TOC](bfb9ff72-…) | `tocUrl=span.read a@href` → content page `/…/1.html`, no `.catalog` |
+| Root cause | Fix powanjuan TOC (`bfb9ff72`) | `tocUrl=span.read a@href` → content page `/…/1.html`, no `.catalog` |
 | Fix | same | clear `tocUrl`; concurrentRate 1000; clean group |
 | Verify | same | attempt1 search fail (post-debug); attempt2 **pass** 157 chapters, 2313ms |
 | Status | | **FIXED (verified)** → `fix_pow.json` |
@@ -72,16 +72,16 @@ Non-repair subagents in same parent (checkalgo / APK / review) listed in `repair
 |------|-------|--------|
 | fix_b save | Fix batch B | claimed redesign selectors; group still had 目录失效 tags |
 | Device retest | Parent | **仍失败** 搜索目录失效, 发现目录失效 |
-| Root cause | [Fix ijjjxsw TOC](17dbd633-…) | (1) `tocUrl=a@href##…##` → homepage `/`; (2) name `\|\|`+`##` char-insert; (3) 20s search rate limit |
+| Root cause | Fix ijjjxsw TOC (`17dbd633`) | (1) `tocUrl=a@href##…##` → homepage `/`; (2) name `\|\|`+`##` char-insert; (3) 20s search rate limit |
 | Fix | same | narrow tocUrl; `h3:first@text##《|》`; author `.kv a@text`; concurrentRate 1000 |
 | Verify | same | attempt1 搜索失效 (20s gap); attempt2 **pass** 108 chapters, 3250ms |
 | Status | | **FIXED (verified)** → `fix_ijjj.json` |
 
 ### 3.4 Unverified batch-A “fixed” (do not trust yet)
 
-From [Fix batch A](172eea06-bb58-47cd-8efc-1f6ddb188809) `fix_log.jsonl`, still **without** `repair_source.py verify`:
+From Fix batch A (`172eea06`) `fix_log.jsonl`, still **without** `repair_source.py verify`:
 
-| URL | Claim | Audit ([Unfixed audit](ef09fe43-37c4-464d-9c6f-0e6058f20bd3)) |
+| URL | Claim | Audit (Unfixed audit `ef09fe43`) |
 |-----|-------|------|
 | `https://www.bengben.com#🎃` | i7uu→bengben rewrite | Still top repair queue; detailed 6-step plan |
 | `http://www.zxcs.info/` | → zxcs.click rewrite | Prefer 网盘/webview; not auto-download |

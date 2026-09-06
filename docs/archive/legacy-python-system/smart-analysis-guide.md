@@ -485,11 +485,11 @@ Agent操作：
 
 ---
 
-## 📚 相关文档
+## 📚 相关文档（历史归档）
 
-- [工具重复调用问题修复](./TOOL_REPEAT_CALL_FIX.md)
-- [书源规则：从入门到入土](../assets/书源规则：从入门到入土.md)
-- [Legado知识库](../assets/legado_knowledge_base.md)
+- [工具重复调用问题修复](../legacy-reports/tool-repeat-call-fix.md)
+- 书源规则：从入门到入土（见 `archive/legacy-assets/`）
+- Legado知识库（见 `archive/legacy-assets/`）
 
 ---
 

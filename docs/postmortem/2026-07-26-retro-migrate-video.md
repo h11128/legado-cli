@@ -1,6 +1,6 @@
 # Retro: Domain migrate + video/file repair (2026-07-26 evening)
 
-Parent: [`f14f2834…`](file:///C:/Users/h1112/.cursor/projects/e-Projects-legado/agent-transcripts/f14f2834-eeb7-45bb-b325-9ba29e01c2db/f14f2834-eeb7-45bb-b325-9ba29e01c2db.jsonl)  
+Parent transcript ID: `f14f2834-eeb7-45bb-b325-9ba29e01c2db`  
 Companion docs: `source-repair-retrospective.md`, `domain-migrate-apply-2026-07-26.md`,  
 `source-repair-session-phase-migrate-video-2026-07-26.md`
 
