@@ -110,6 +110,24 @@ Create and repair share the same close-out / improve gate — do not wait for th
 23. **Honest verify ledger only:** after migrate/verify/create-check, write `校验成功` **iff** `verify_ok:true`;
     else `fail:…` / `skip:…`. Never copy shell `tee` into a fake success line.
 
+## Core Troubleshooting & Repair Heuristics (心法与排错直觉)
+
+1. **单向诊断链 (Strict Layer Order)**：
+   排查与修复必须单向进行：`搜索 -> 详情 -> 目录 -> 正文`。
+   - 搜索未出结果前，**严禁**盲调目录规则；
+   - 目录抓取为空时，必须先验证是否为“假详情”（即搜索页被误当成了书籍详情）；
+   - 正文空白前，必须先验证章节链接是否拼接正确。
+
+2. **高频排错急救三板斧 (Instant Heuristics)**：
+   - **搜索结果=0 但 HTTP 200**：90% 为频控或盾，先检查返回文本是否包含 `alert("搜索间隔")`、`验证码` 或 Cloudflare 提示，**严禁盲改选择器**。
+   - **正文杂质与广告乱飞**：优先使用 `@ownText`（仅提取自身节点文本，自动剥离所有子标签广告超链接），杜绝写几十行复杂正则。
+   - **动态渲染与空白骨架屏**：网页返回占位符或 JS 加密渲染时，在 URL 选项添加 `{"webView": true}`，交给内置 WebView 渲染。
+   - **目录倒序或乱序**：列表选择器最前面加 `-` 即可直接反转；复杂排序优先读取 `source.getVariable()`。
+
+3. **极简主义与实用主义 (Pragmatic Simplicity)**：
+   - 能用 CSS 解决的不写正则，能用正则解决的不写 JavaScript，能用内置函数（`java.*`）的不写 JavaImporter。
+   - 禁止在未复现的情况下过度封装巨型算法。卡点时主动使用 `java.log()` 查看真实运行值，严禁凭空盲猜。
+
 ## Types (do not confuse)
 
 | bookSourceType | Meaning |

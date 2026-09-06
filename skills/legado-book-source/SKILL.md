@@ -195,6 +195,24 @@ Use when the user asks to **find sites** or make **出版/公版/古籍** source
 **Kind → keyword tips:** Gutenberg `Alice`; ctext `论语`; mixed `红楼`.  
 **Traps:** ctext TOC must be absolute `https://ctext.org/...`; Gutenberg often one 全文 HTML chapter; never rewrite selectors on CF challenge HTML; MCP `save_source` may ignore `customOrder` unless `preserveOrderWeight=false`.
 
+### Core Agent Heuristics & Directives (智能体排错心法与行为引导)
+
+1. **单向诊断单链 (Strict Diagnostic Chain)**：
+   书源排查与修复必须单向进行：`搜索 -> 详情 -> 目录 -> 正文`。
+   - 搜索未通不查详情，详情未通不调目录，目录未通不碰正文；
+   - 目录为空时，优先排查是否“搜索直接跳转但被降级”或“命中空假详情”，严禁未查搜索直接盲修目录。
+
+2. **常见症状速查急救箱 (Troubleshooting Heuristics)**：
+   - **搜索返回空列表但状态码 200**：首要怀疑站点搜索频控，检查 HTTP 日志是否包含 `alert("搜索间隔")`、`验证码` 或 `Checking your browser`。严禁在此类 HTML 上重写选择器。
+   - **正文内嵌广告链接**：优先改用 `@ownText`（仅提取当前标签直接文本，排除子标签内广告与跳转）；
+   - **页面动态加载返回空壳**：在请求 URL 后添加逗号与选项 `,{"webView": true}`；
+   - **章节列表反序**：在列表选择器最前面加减号 `-`（如 `-ul.chapters li`）进行原生反转；
+   - **多域名健康轮询**：若站点经常换域名，在 `@js:` 中通过备选域名数组做探测。
+
+3. **极简主义与实用准则 (Pragmatic Engineering)**：
+   - 遵循“能抓到内容的方法就是好方法”：CSS 能解不写正则，正则能解不套 JS；
+   - 遇到卡点直接注入 `java.log(result)` 打印中间状态，以真实日志为准，严禁主观凭空猜测。
+
 ### Phase 1 — Gather (do not save)
 
 1. Read `docs/ESSENTIAL_KNOWLEDGE_SUMMARY.md`; skim CSS rules and similar

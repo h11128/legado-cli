@@ -178,3 +178,14 @@ User rule messages:
 - `user_rule:update_memory_forbidden`: 使用了 update_memory（user_rules）
 
 <!-- agent-memory:codex:end -->
+
+## Legado Book-Source Engineering & Repair Heuristics
+
+When designing, auditing, or repairing Legado book sources:
+1. **Diagnosis Chain**: Always diagnose in strict order: `Search -> Detail -> TOC -> Content`. Never jump to fixing TOC or Content before verifying search responses.
+2. **Instant Heuristics**:
+   - Empty search with HTTP 200: Check for frequency limit (`alert("搜索间隔")`), captcha, or Cloudflare challenge before rewriting selectors.
+   - Ads inside content: Prefer `@ownText` to automatically discard child-tag ads.
+   - Dynamic/Blank pages: Append `,{"webView": true}` to the request URL.
+   - Reversed catalog: Prepend `-` to the list selector (e.g. `-ul.chapters li`).
+3. **Simplicity First**: Never over-engineer. Prefer CSS over regex, and regex over complex JavaScript. Use `java.log(result)` to trace real execution values rather than guessing.
