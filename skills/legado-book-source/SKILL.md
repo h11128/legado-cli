@@ -49,7 +49,13 @@ surface named `legado` (server may appear as `legado` / `user-legado`).
 ## Device MCP (`legado`)
 
 - **SOT:** `E:/Projects/legadoSkill/config/mcp_defaults.json` — **never hard-code phone IPs in skills/prompts**
-- Read URL/token from that file. On DHCP change or connect failure:
+- **Multi-MCP memory:** `config/mcp_defaults.json` preserves multiple known devices/IPs under `endpoints: [...]`. When the active endpoint is unreachable, `source-cli` automatically probes all remembered endpoints before falling back to full subnet discovery.
+  - View remembered endpoints: `source-cli mcp list --probe`
+  - Add/remember new endpoint: `source-cli mcp add --url http://10.0.0.X:1236/mcp [--switch]`
+  - Switch active endpoint: `source-cli mcp switch --url http://10.0.0.X:1236/mcp`
+  - Auto-probe and select alive endpoint: `source-cli mcp probe`
+  - Remove endpoint: `source-cli mcp remove --url http://10.0.0.X:1236/mcp`
+- Read URL/token from `mcp_defaults.json`. On DHCP change or connect failure:
   ```
   source-cli discover --write --sync-cursor
   ```

@@ -399,7 +399,34 @@ pub fn ensure_reachable(path: Option<&Path>, timeout_s: f64) -> Result<McpEndpoi
     let current = McpEndpoint::load_path(&path).ok();
     if let Some(ep) = &current {
         if probe_mcp(&ep.mcp_url, &ep.token, timeout_s) {
+            // Ensure current active endpoint is in endpoints list
+            let _ = McpEndpoint::add_or_update_endpoint(
+                &path,
+                crate::endpoint::McpEndpointRecord {
+                    mcp_url: ep.mcp_url.clone(),
+                    token: ep.token.clone(),
+                    web_api: None,
+                    last_seen: Some(chrono::Utc::now().format("%Y-%m-%d").to_string()),
+                    note: None,
+                },
+                false,
+            );
             return Ok(ep.clone());
+        }
+    }
+    // Probe remembered endpoints before full network scan
+    let endpoints = McpEndpoint::load_endpoints(&path);
+    for cand in &endpoints {
+        if let Some(cur) = &current {
+            if cand.mcp_url == cur.mcp_url {
+                continue;
+            }
+        }
+        if probe_mcp(&cand.mcp_url, &cand.token, timeout_s.min(3.0)) {
+            if let Ok(switched) = McpEndpoint::switch_active(&path, &cand.mcp_url) {
+                let _ = sync_cursor_mcp_json(&switched.mcp_url, &switched.token);
+                return Ok(switched);
+            }
         }
     }
     let discovered = apply_discovery(true, timeout_s.max(4.0), &path)?;
@@ -428,13 +455,41 @@ pub fn write_defaults(discovery: &Value, path: &Path) -> Result<(), PortError> {
         .unwrap_or("http://127.0.0.1:1122");
     // Keep timeout knobs across discover rewrites (SOT: mcp_defaults.json).
     let timeouts = crate::timeouts::timeouts_from_existing_defaults(path);
+    let now = chrono::Utc::now().format("%Y-%m-%d").to_string();
+
+    // Preserve and update endpoints list
+    let mut endpoints = McpEndpoint::load_endpoints(path);
+    let mut found = false;
+    for ep in &mut endpoints {
+        if ep.mcp_url == mcp_url {
+            ep.token = token.to_string();
+            ep.web_api = Some(web_api.to_string());
+            ep.last_seen = Some(now.clone());
+            found = true;
+            break;
+        }
+    }
+    if !found {
+        endpoints.insert(
+            0,
+            crate::endpoint::McpEndpointRecord {
+                mcp_url: mcp_url.to_string(),
+                token: token.to_string(),
+                web_api: Some(web_api.to_string()),
+                last_seen: Some(now.clone()),
+                note: discovery.get("via").and_then(|v| v.as_str()).map(|s| s.to_string()),
+            },
+        );
+    }
+
     let mut payload = json!({
         "mcp_url": mcp_url,
         "token": token,
         "web_api": web_api,
-        "updated": chrono::Utc::now().format("%Y-%m-%d").to_string(),
+        "updated": now,
         "note": "Single SOT for phone LAN endpoint + MCP timeouts. Updated by source-cli discover.",
         "discovered_via": discovery.get("via").cloned().unwrap_or(json!("probe")),
+        "endpoints": endpoints,
     });
     payload = crate::timeouts::McpTimeouts::merge_into_defaults_json(&payload, &timeouts);
     if let Some(parent) = path.parent() {

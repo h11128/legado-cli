@@ -1,7 +1,7 @@
 //! Clap CLI definition (kept out of main.rs for the 300-line limit).
 
 use crate::cli_subs::{
-    ClaimSub, CloseoutSub, LedgerSub, ParseSub, PatternSub, ProgressSub, RetroSub, SourceSub,
+    ClaimSub, CloseoutSub, LedgerSub, McpSub, ParseSub, PatternSub, ProgressSub, RetroSub, SourceSub,
 };
 use crate::ops_subs::{CacheSub, CheckSub, DbSub, KnowledgeSub, QueueSub};
 use clap::{Parser, Subcommand};
@@ -414,6 +414,11 @@ pub enum Cmd {
         #[arg(long, default_value_t = true)]
         #[arg(long = "no-force", action = clap::ArgAction::SetFalse)]
         force: bool,
+    },
+    /// Manage remembered MCP endpoints (list, add, switch, probe, remove).
+    Mcp {
+        #[command(subcommand)]
+        cmd: McpSub,
     },
     Version,
 }

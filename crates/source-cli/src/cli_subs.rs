@@ -288,3 +288,38 @@ pub enum ParseSub {
         url: String,
     },
 }
+
+#[derive(Subcommand)]
+pub enum McpSub {
+    /// List all remembered MCP endpoints with active marker and status
+    List {
+        #[arg(long, default_value_t = false)]
+        probe: bool,
+    },
+    /// Add or update a remembered MCP endpoint
+    Add {
+        #[arg(long)]
+        url: String,
+        #[arg(long, default_value = "1234")]
+        token: String,
+        #[arg(long)]
+        note: Option<String>,
+        #[arg(long, default_value_t = false)]
+        switch: bool,
+    },
+    /// Switch active MCP endpoint to the specified URL
+    Switch {
+        #[arg(long)]
+        url: String,
+    },
+    /// Remove an MCP endpoint from remembered list
+    Remove {
+        #[arg(long)]
+        url: String,
+    },
+    /// Probe all remembered endpoints and switch to the first alive one
+    Probe {
+        #[arg(long, default_value_t = 3.0)]
+        timeout: f64,
+    },
+}

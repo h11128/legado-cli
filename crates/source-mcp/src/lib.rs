@@ -26,7 +26,7 @@ pub use discover::{
     apply_discovery, discover, ensure_reachable, probe_mcp, sync_cursor_mcp_json,
     write_defaults as write_discover_defaults,
 };
-pub use endpoint::McpEndpoint;
+pub use endpoint::{DefaultsConfig, McpEndpoint, McpEndpointRecord};
 pub use fakes::{
     MemChannelGuard, MemChannelPort, MemClock, MemLedgerPort, MemSourceRepository, MemVerifyPort,
 };

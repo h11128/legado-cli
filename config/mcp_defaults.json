@@ -1,12 +1,21 @@
 {
-  "debug_timeout_s": 90.0,
-  "discovered_via": "manual-curl-probe",
-  "http_timeout_s": 90.0,
   "mcp_url": "http://10.0.0.44:1236/mcp",
-  "note": "Single SOT for phone LAN endpoint + MCP timeouts. Updated by source-cli discover.",
   "token": "1234",
-  "updated": "2026-08-29",
-  "verify_max_wait_s": 120.0,
+  "web_api": "http://10.0.0.44:1122",
+  "endpoints": [
+    {
+      "mcp_url": "http://10.0.0.44:1236/mcp",
+      "token": "1234",
+      "web_api": "http://10.0.0.44:1122",
+      "last_seen": "2026-09-06",
+      "note": "LAN device"
+    }
+  ],
+  "http_timeout_s": 90.0,
+  "debug_timeout_s": 90.0,
   "verify_timeout_ms": 90000,
-  "web_api": "http://10.0.0.44:1122"
+  "verify_max_wait_s": 120.0,
+  "note": "Single SOT for phone LAN endpoint + MCP timeouts. Updated by source-cli discover.",
+  "updated": "2026-08-29",
+  "discovered_via": "manual-curl-probe"
 }

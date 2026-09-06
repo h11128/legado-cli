@@ -220,6 +220,7 @@ source-cli progress next   # 先跑 closeout pending
 | 空探针仍设备校验 | notes 空 + 搜索失效（浪费 ~10s×N） | serial `require_patch`；无补丁 → `no_patch_skip` |
 | 过期 tagged_fails | missing「未找到书源」 | `repair_refresh_phone_index` + 队列只取 on_phone |
 | **bookUrl class-space (po18f)** | search 有书名但详情链接=search.php；`class.X a@href` | → `class.X@tag.a@href`；去掉 `\|\|@js:baseUrl`；章节在详情页则清空 tocUrl |
+| **fake_detail_empty_search** | 搜索无结果时列表空，但未配置 `bookUrlPattern` 触发阅读「按详情页解析」；且详情书名规则过宽（如 `h1@text` 或 title 正则）将无结果提示抓为假书名并报 TocEmptyException | 配置精准 `bookUrlPattern`；限定 `ruleBookInfo.name` 选择器范围（如 `div.info h1@text`），彻底删除 title 兜底正则 |
 | **登录壳首页 (96biquge)** | 首页仅 `#loginform`+密码框、无小说搜索 | L2 `wall:login_shell_not_novel` → **skip** |
 | **charset 误标 (52dmshu)** | searchUrl `,{"charset":"gbk"}` 但站点已 UTF-8 → 列表空 | 去掉 gbk / 改 utf-8；重抓结果 DOM（常为 `#sitembox dl`，bookUrl=`dt a@href`） |
 | **probe 未解压 gzip** | Accept-Encoding 有 gzip 但 body 不解压 → forms=[] | `fetch_text`/`_post_fetch` 必须 gzip 解压后再 parse |

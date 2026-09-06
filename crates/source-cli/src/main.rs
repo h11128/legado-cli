@@ -619,6 +619,7 @@ fn main() -> ExitCode {
             no_ledger,
         }),
         Cmd::Install { force } => run_install(force),
+        Cmd::Mcp { cmd } => run_mcp(cmd),
         Cmd::Version => run_version(),
     }
 }
