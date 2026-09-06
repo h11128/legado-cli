@@ -1,7 +1,5 @@
-# Code Quality Standards — Python quality configuration (ruff + pyright)
-# See: docs/code-quality-standards.md §4.3
-#
-# Usage: merge into your project's pyproject.toml.
+# Python quality configuration (ruff + pyright) for legadoSkill
+
 
 [tool.ruff]
 target-version = "py311"

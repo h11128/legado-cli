@@ -1,5 +1,5 @@
-# Code Quality Standards — ShellCheck configuration
-# See: docs/code-quality-standards.md §9.2
+# ShellCheck configuration for legadoSkill
+
 
 shell=bash
 disable=SC1091

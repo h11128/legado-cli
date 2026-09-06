@@ -7,19 +7,42 @@ venv/
 # Local dumps / device artifacts (do not commit)
 temp/
 backups/
+.local-scripts/
+scripts/
 *.log
+*.bak
 
 # IDE noise (keep rules/skills that are intentional)
 .cursor/hooks.json
 .cursor/skills/
 .cursor/agents/
-.cursor/*.bak
-.cursor/rules/*.bak
+
+# Shared rules projections (do not commit)
+!.cursor/rules/
+.cursor/rules/coding-patterns.mdc
+.cursor/rules/communication-style.mdc
+.cursor/rules/dev-tool-tips.mdc
+.cursor/rules/docs-organization.mdc
+.cursor/rules/feedback-refuse-judgment.mdc
+.cursor/rules/host-resource-budget.mdc
+.cursor/rules/implement-review-commit.mdc
+.cursor/rules/jason-dev-practices.mdc
+.cursor/rules/localhost-port-owners.mdc
+.cursor/rules/long-task-no-busy-wait.mdc
+.cursor/rules/memory-rules.mdc
+.cursor/rules/no-substitute-oracle.mdc
+.cursor/rules/pe-lifecycle.mdc
+.cursor/rules/pe-task-official-channel.mdc
+.cursor/rules/pe-task-status-honesty.mdc
+.cursor/rules/prefer-reusable-scripts.mdc
+.cursor/rules/same-worktree-coordinate.mdc
+.cursor/rules/youdao-note-listing-size.mdc
 
 # OS
 Thumbs.db
 Desktop.ini
 .DS_Store
+
 # Rust
 /crates/target/
 /target/
@@ -29,4 +52,5 @@ Desktop.ini
 
 .agents/
 .codex/
+
 

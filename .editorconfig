@@ -1,7 +1,5 @@
-# Code Quality Standards — EditorConfig
-# See: docs/code-quality-standards.md §11
-#
-# Copy to project root as `.editorconfig`
+# EditorConfig for legadoSkill
+
 
 root = true
 
