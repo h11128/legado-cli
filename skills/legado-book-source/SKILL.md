@@ -44,7 +44,9 @@ surface named `legado` (server may appear as `legado` / `user-legado`).
 | JS Extensions | `skills/legado-book-source/references/js-extensions.md` |
 | Crypto methods | `skills/legado-book-source/references/crypto-methods.md` |
 | Source template | `skills/legado-book-source/references/source-schema-template.md` |
-| Example sources | `fixtures/samples/book_source_database/` |
+| Bypass verification | `skills/legado-book-source/references/bypass-verification.md` |
+| Login and auth | `skills/legado-book-source/references/login-and-auth.md` |
+| Example sources | `fixtures/samples/sources/` |
 
 ## Device MCP (`legado`)
 
