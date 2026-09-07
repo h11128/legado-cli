@@ -3,7 +3,7 @@
 Scope: **not only repair** — create, optimize, merge, pattern-extract, gate/check, migrate/hunt, video/file, and infra.  
 Device MCP verify remains source of truth for “works on phone.”
 
-Related: `docs/repair-pipeline-design.md` (layer branching), `assets/真实书源模板库.txt` (static samples).
+Related: `docs/reference/repair-pipeline-design.md` (layer branching), `assets/真实书源模板库.txt` (static samples).
 Spec anchors in this doc: **§3 types**, **§8 contracts**, **§9 database**, **§10 algorithms**, **§12 acceptance**.
 
 ---

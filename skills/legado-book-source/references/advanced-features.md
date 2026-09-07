@@ -110,7 +110,7 @@ foundUrl || (hosts[0] + "/search?q=" + key);
 ### 方式 2：JavaScript 动态生成全量目录 URL 数组
 当目录总页数已知时，可在 `nextTocUrl` 中直接返回所有分页 URL 的 JSON 数组，阅读客户端会并发自动拉取拼合：
 ```javascript
-"nextTocUrl": "<js>\nvar list = [];\nvar totalPages = parseInt(result.match(/共 (\d+) 页/)[1]);\nfor (var i = 2; i <= totalPages; i++) {\n    list.push(baseUrl.replace(/page_1/, \"page_\" + i));\n}\nJSON.stringify(list);\n</js>"
+"nextTocUrl": "<js>\nvar list = [];\nvar totalPages = parseInt(result.match(/共 (\\d+) 页/)[1]);\nfor (var i = 2; i <= totalPages; i++) {\n    list.push(baseUrl.replace(/page_1/, \"page_\" + i));\n}\nJSON.stringify(list);\n</js>"
 ```
 
 ---

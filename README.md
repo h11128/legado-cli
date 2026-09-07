@@ -194,6 +194,22 @@ Agent 会自动载入 Skills，在后台调度 `source-cli` 自动完成探针�
 | **⚙️ 缓存与规则分析** | `cache` / `ewma` | 域名频控 EWMA 冷却缓存管理，杜绝在频控期重复发起无效请求 | `source-cli cache cooldown --url "https://site.com"` / `source-cli ewma` |
 | | `parse` | 离线测试书源规则解析与目标 URL 选择器提取 | `source-cli parse rule --rule "@css:div#content@text"` |
 
+#### 2. 本地快速编译与全局安装
+
+```bash
+# 进入工程 Rust 源码工作区
+cd crates
+
+# 编译高性能 release 版本
+cargo build --release --bin source-cli
+
+# 安装到本机 Cargo PATH 目录，可在任意终端路径直接运行 source-cli
+cargo install --path source-cli --force
+
+# 查看所有子命令帮助
+source-cli --help
+```
+
 ---
 
 ## 🚀 典型工作流场景 (Common Scenarios)

@@ -262,85 +262,67 @@ print(f"script标签数量: {len(scripts)}")
 
 ---
 
-## 🛠️ 工具使用指南
-
-### 1. 使用 `smart_fetch_html` 获取真实HTML
-
-```python
-# 获取真实HTML
-html = smart_fetch_html(
-    url="https://example.com/book/123",
-    method="GET",
-    headers={"User-Agent": "Mozilla/5.0"}
-)
-
-# 保存到assets目录
-with open('assets/book_info.html', 'w', encoding='utf-8') as f:
-    f.write(html)
+## 🛠️ CLI 工具使用指南
+ 
+### 1. 使用 `source-cli site-probe` 获取真实 HTML 与表单特征
+ 
+```bash
+# 探测站点并获取真实 HTTP HTML 与编码特征
+source-cli site-probe --url "https://example.com" --preset publish
 ```
-
-### 2. 使用 `analyze_complete_book_source` 分析真实HTML
-
-```python
-# 基于真实HTML分析
-analysis = analyze_complete_book_source(
-    search_html=search_html,
-    book_info_html=book_info_html,
-    toc_html=toc_html,
-    content_html=content_html
-)
+ 
+### 2. 使用 `source-cli diagnose` 执行单向诊断
+ 
+```bash
+# 基于真实 HTTP 响应自动排障（检测频控、假详情与选择器状态）
+source-cli diagnose --url "https://example.com" --key "修真"
 ```
-
-### 3. 使用 `debug_book_source` 验证规则
-
-```python
-# 使用真实HTML验证规则
-result = debug_book_source(
-    book_source_json=book_source,
-    test_type="all",
-    real_html=book_info_html
-)
+ 
+### 3. 使用 `source-cli parse` 离线测试规则
+ 
+```bash
+# 使用真实 HTML 测试选择器提取结果
+source-cli parse rule --rule "@css:div.info h1@text"
 ```
-
+ 
 ---
-
+ 
 ## 🎯 核心原则总结
-
+ 
 ### 🚨 永远遵守的规则
-
-1. **使用HTTP请求获取HTML，而不是浏览器**
-2. **保存完整的HTML源代码**
-3. **检查HTML是否包含注释、隐藏元素**
-4. **基于真实的HTML结构编写规则**
-5. **使用调试工具验证规则**
-
+ 
+1. **使用 HTTP 请求获取真实 HTML，而不是依赖浏览器渲染后的 DOM**
+2. **保存完整的 HTML 源代码到缓存**
+3. **检查 HTML 是否包含注释、隐藏元素或动态表单**
+4. **基于真实的 HTML 结构编写规则**
+5. **使用 `source-cli` 工具与真机校验验证规则**
+ 
 ### ✅ 正确的流程
-
+ 
 ```
-1. smart_fetch_html() → 获取真实HTTP响应HTML
-2. 保存HTML到assets目录
-3. 分析真实HTML结构
-4. 基于真实HTML编写规则
-5. debug_book_source() → 验证规则
+1. source-cli site-probe → 获取真实 HTTP 响应 HTML 与编码
+2. 缓存 HTML 到 temp/full_fix/cache/
+3. 分析真实 HTML 结构
+4. 基于真实 HTML 编写选择器规则
+5. source-cli repair / check → 真机校验
 ```
-
+ 
 ### ❌ 错误的流程
-
+ 
 ```
 1. 查看浏览器开发者工具
-2. 复制粘贴HTML代码
-3. 基于美化后的HTML编写规则
-4. 规则无法正常工作
+2. 复制粘贴美化后的 DOM
+3. 基于美化后的 HTML 编写规则
+4. 真实 HTTP 请求时规则无法正常工作
 ```
-
+ 
 ---
-
+ 
 ## 📖 相关文档
-
-- **智能体自我认知.md** - 必须基于真实HTML章节
-- **SELECT_DROPDOWN_PAGINATION.md** - select下拉菜单分页
-- **TOC_PAGINATION_RULES.md** - 目录页分页规则
-- **ESSENTIAL_KNOWLEDGE_SUMMARY.md** - 精华知识汇总
+ 
+- [`docs/guides/select-dropdown-pagination.md`](select-dropdown-pagination.md) - select 下拉菜单分页
+- [`docs/guides/toc-pagination-rules.md`](toc-pagination-rules.md) - 目录页分页规则
+- [`docs/reference/essential-knowledge-summary.md`](../reference/essential-knowledge-summary.md) - 精华知识汇总
 
 ---
 

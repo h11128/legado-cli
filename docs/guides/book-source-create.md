@@ -59,7 +59,7 @@ Same gate as repair (discipline §14 / §14b). After success **or** skip/fail:
 2. `source-cli retro append --url … --status fixed|skip|fail --trap '…' --skill-fix 0|1 --script-fix '…'`
 3. If **novel** trap: update `legado-book-source` and/or `legado-book-source-repair` **and**
    harness (`diagnose_tips` / `source_patch` / sniff…) or `script_fix=no_auto:<理由>`
-4. Append a short note to `docs/source-repair-retrospective.md` when useful
+4. Append a short note to `docs/postmortem/source-repair-retrospective.md` when useful
 5. `git commit` skill/docs/rust before the next site
 
 Do **not** start the next host until close-out finishes. User should not have to remind.

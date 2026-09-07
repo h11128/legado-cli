@@ -15,51 +15,11 @@
 
 ---
 
-## 🚨 最高优先级原则 ⭐⭐⭐⭐⭐
+## 🚨 核心准则：必须基于真实 HTTP HTML 编写规则
 
-### 必须使用最真实的HTML！
+编写书源规则前必须抓取未经浏览器美化渲染的原始 HTTP 响应，杜绝因 DevTools 动态修正或 JS 渲染造成规则实机失效。
 
-**核心原则**: 编辑书源的时候一定要用最真实的HTML！
-
-#### 为什么？
-
-1. **浏览器开发者工具不等于真实HTML**
-   - 开发者工具显示的是渲染后的DOM
-   - 真实HTML是HTTP响应的原始内容
-   - 两者可能存在巨大差异
-
-2. **真实HTML包含更多信息**
-   - 注释节点 `<!-- -->`
-   - 隐藏元素 `display:none`
-   - 动态class和ID
-   - 原始格式（可能压缩）
-
-3. **JavaScript动态注入的内容**
-   - 开发者工具显示JS执行后的结果
-   - 真实HTML只包含初始状态
-   - 可能需要启用webView或查找API
-
-#### 如何确保？
-
-✅ **正确做法**:
-```
-1. 使用HTTP请求获取HTML（requests/curl）
-2. 保存完整的HTML源代码
-3. 基于真实HTML分析结构
-4. 编写符合实际情况的规则
-```
-
-❌ **错误做法**:
-```
-1. 查看浏览器开发者工具
-2. 复制粘贴HTML代码
-3. 基于美化后的HTML编写规则
-4. 规则无法正常工作
-```
-
-#### 详细指南
-
-详见: `docs/HTML_AUTHENTICITY_CHECKLIST.md`
+详细核对清单与操作流程参见专用指南：[`docs/guides/html-authenticity-checklist.md`](../guides/html-authenticity-checklist.md)。
 
 ---
 
@@ -463,51 +423,21 @@ html带标签，属性加@不能忘。
 
 ---
 
-## 🆕 Select下拉菜单分页（最新发现）⭐⭐⭐⭐⭐
-
-### 问题发现
-
-**HTML结构**:
-```html
-<select name="pageselect" onchange="self.location.href=options[selectedIndex].value">
-  <option value="/biquge_317279/1/#all" selected="selected">1 - 30章</option>
-  <option value="/biquge_317279/2/#all">31 - 60章</option>
-  <option value="/biquge_317279/3/#all">61 - 90章</option>
-</select>
-```
-
-### 核心要点
-
-✅ **正确写法**:
-```json
-"nextTocUrl": "select[name='pageselect'] option:not([selected])@value"
-```
-
-❌ **错误写法**:
-```json
-"nextTocUrl": "select@value"  // ❌ select没有value属性
-```
-
-### 选择器说明
-
-- `select[name='pageselect']` - 定位下拉菜单
-- `option:not([selected])` - 排除已选中选项
-- `@value` - 提取option的value属性
-
-### 最佳实践
-
-1. **精确定位**: 使用name或ID
-2. **排除已选中**: 使用`:not([selected])`
-3. **避免循环**: 防止重复加载当前页
-
+## 📄 下拉菜单分页与动态加载 (Select Pagination)
+ 
+针对 `<select name="pageselect">` 下拉列表目录分页，切忌直接对 `select` 抽取 `@value`。
+ 
+- 正确写法：`"nextTocUrl": "select[name='pageselect'] option:not([selected])@value"`
+- 详细案例与边界陷阱参见：[`docs/guides/select-dropdown-pagination.md`](../guides/select-dropdown-pagination.md)
+ 
 ---
-
-## 📖 参考文档
-
-- **legado知识库.md** - 官方数据结构详解
-- **活力宝的书源日记231224.txt** - 实战技巧
-- **阅读教程AI提取精华** - 通俗教程
-- **天天的鸟蛋蛋的书源日记.md** - HTML基础
+ 
+## 📖 核心参考文档体系
+ 
+- 架构与流程：[`docs/reference/repair-adapter-architecture.md`](repair-adapter-architecture.md)
+- 核心参考库：[`skills/legado-book-source/references/`](../../skills/legado-book-source/references/)
+- 目录分页规则：[`docs/guides/toc-pagination-rules.md`](../guides/toc-pagination-rules.md)
+- 排障陷阱速查：[`skills/legado-book-source-repair/references/trap-catalog.md`](../../skills/legado-book-source-repair/references/trap-catalog.md)
 
 ---
 

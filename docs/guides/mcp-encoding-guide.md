@@ -4,11 +4,13 @@
 
 对于使用非UTF-8编码的网站（如GBK编码的中文网站），在发送搜索请求时，必须确保URL参数和POST数据的编码与网站一致，否则搜索功能无法正常工作。
 
-## 解决方案
+## 解决方案与处理方式
 
-MCP工具 `fetch_html` 提供了 `url_charset` 参数，用于指定URL参数和POST数据的编码。
+在自动化探针与书源开发中，字符集处理遵循以下分工：
+1. **自动化探针工具**：使用 `source-cli site-probe --url <URL>` 时，底层会自动分析 HTTP Response Header（`Content-Type`）与 HTML `<meta charset>`，嗅探 GBK / UTF-8 等字符编码并输出参数建议。
+2. **书源规则配置**：在书源 JSON 的 `bookSourceComment`、`searchUrl`、`header` 中，按需声明 URL 参数编码或通过 Rhino `@js:` 执行转码。
 
-### 使用方法
+### 书源请求参数编码配置示范
 
 #### 1. POST请求（表单提交）
 

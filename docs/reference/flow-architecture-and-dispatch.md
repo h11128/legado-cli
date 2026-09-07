@@ -181,6 +181,10 @@ flowchart TD
     Unlock --> End(["波次巡检收工"]):::startNode
 ```
 
+> **看门狗守护与防卡死熔断 (Watchdog & Hang Guard)**：
+> 在执行大批量巡检调度（`source-cli serial`）时，系统启用默认 120 秒看门狗子进程守护（`--url-timeout-s 120`）并写入心跳文件 `temp/full_fix/serial_heartbeat.json`。
+> 若手机端因死锁或大页面阻塞导致心跳停滞超过超时上限，看门狗将直接终止卡死子进程，自动触发 `source-cli check channel --force-clear` 释放信道，并将当前源标记为 `skip:url_timeout` 记录台账后自动推进下一任务，杜绝 Agent 挂死阻塞整轮作业。
+
 ---
 
 ## 五、核心防护与避坑纪律 (Hard Rules)

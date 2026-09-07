@@ -33,14 +33,14 @@
    (+ form probe)   (real detail)   (chapter HTML)
 ```
 
-### Script roles
+### Component roles
 
-| Role | Script | Must not |
-|------|--------|----------|
-| Triage | `repair_wave.py` | Claim rate-only fixed |
-| Diagnose | `repair_diagnose.py` | Skip fake_detail reclassify |
-| Form probe | `repair_search_probe.py` | Ignore JS-injected forms |
-| Parse | `repair_debug_parse.py` | Treat fake detail as toc |
+| Role | Rust Crate / CLI | Must not |
+|------|------------------|----------|
+| Triage | `source-cli wave` (`source_queue`) | Claim rate-only fixed |
+| Diagnose | `source-cli diagnose` (`source_diagnose`) | Skip fake_detail reclassify |
+| Form probe | `source-cli probe` (`source_probe`) | Ignore JS-injected forms |
+| Parse | `source-cli parse` (`source_parse`) | Treat fake detail as toc |
 
 ### Skill rules
 

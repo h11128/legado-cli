@@ -106,4 +106,4 @@ Preset file: [`config/site_candidates_publish.json`](../../config/site_candidate
 - Create skill: `legado-book-source` (Phases 1–3 + this doc link)
 - Repair skill: `legado-book-source-repair`
 - MCP SOT: `config/mcp_defaults.json`
-- Session note: `docs/source-repair-retrospective.md` §129 / §131
+- Session note: `docs/postmortem/source-repair-retrospective.md` §129 / §131
