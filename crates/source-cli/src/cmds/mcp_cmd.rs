@@ -1,8 +1,8 @@
 //! MCP multi-endpoint CLI command implementation.
 
-use std::process::ExitCode;
 use crate::cli_subs::McpSub;
 use source_mcp::{probe_mcp, repo_root, sync_cursor_mcp_json, McpEndpoint, McpEndpointRecord};
+use std::process::ExitCode;
 
 pub fn run_mcp(cmd: McpSub) -> ExitCode {
     let root = match repo_root() {
@@ -24,7 +24,10 @@ pub fn run_mcp(cmd: McpSub) -> ExitCode {
                 }
             };
             println!("Active MCP: {}", cfg.mcp_url);
-            println!("{:<2} {:<35} {:<8} {:<12} {:<10} {:<15}", "  ", "MCP URL", "TOKEN", "STATUS", "LAST SEEN", "NOTE");
+            println!(
+                "{:<2} {:<35} {:<8} {:<12} {:<10} {:<15}",
+                "  ", "MCP URL", "TOKEN", "STATUS", "LAST SEEN", "NOTE"
+            );
             println!("{}", "-".repeat(85));
             for ep in &cfg.endpoints {
                 let is_active = ep.mcp_url == cfg.mcp_url;
@@ -42,11 +45,19 @@ pub fn run_mcp(cmd: McpSub) -> ExitCode {
                 };
                 let last_seen = ep.last_seen.as_deref().unwrap_or("-");
                 let note = ep.note.as_deref().unwrap_or("");
-                println!("{:<2} {:<35} {:<8} {:<12} {:<10} {:<15}", marker, ep.mcp_url, ep.token, status, last_seen, note);
+                println!(
+                    "{:<2} {:<35} {:<8} {:<12} {:<10} {:<15}",
+                    marker, ep.mcp_url, ep.token, status, last_seen, note
+                );
             }
             ExitCode::SUCCESS
         }
-        McpSub::Add { url, token, note, switch } => {
+        McpSub::Add {
+            url,
+            token,
+            note,
+            switch,
+        } => {
             let host = url
                 .trim_start_matches("http://")
                 .trim_start_matches("https://")
@@ -73,35 +84,31 @@ pub fn run_mcp(cmd: McpSub) -> ExitCode {
             }
             ExitCode::SUCCESS
         }
-        McpSub::Switch { url } => {
-            match McpEndpoint::switch_active(&path, &url) {
-                Ok(ep) => {
-                    let _ = sync_cursor_mcp_json(&ep.mcp_url, &ep.token);
-                    println!("Switched active MCP to: {}", ep.mcp_url);
-                    ExitCode::SUCCESS
-                }
-                Err(e) => {
-                    eprintln!("failed to switch endpoint: {e}");
-                    ExitCode::from(1)
-                }
+        McpSub::Switch { url } => match McpEndpoint::switch_active(&path, &url) {
+            Ok(ep) => {
+                let _ = sync_cursor_mcp_json(&ep.mcp_url, &ep.token);
+                println!("Switched active MCP to: {}", ep.mcp_url);
+                ExitCode::SUCCESS
             }
-        }
-        McpSub::Remove { url } => {
-            match McpEndpoint::remove_endpoint(&path, &url) {
-                Ok(true) => {
-                    println!("Removed MCP endpoint: {url}");
-                    ExitCode::SUCCESS
-                }
-                Ok(false) => {
-                    println!("Endpoint not found in list: {url}");
-                    ExitCode::SUCCESS
-                }
-                Err(e) => {
-                    eprintln!("failed to remove endpoint: {e}");
-                    ExitCode::from(1)
-                }
+            Err(e) => {
+                eprintln!("failed to switch endpoint: {e}");
+                ExitCode::from(1)
             }
-        }
+        },
+        McpSub::Remove { url } => match McpEndpoint::remove_endpoint(&path, &url) {
+            Ok(true) => {
+                println!("Removed MCP endpoint: {url}");
+                ExitCode::SUCCESS
+            }
+            Ok(false) => {
+                println!("Endpoint not found in list: {url}");
+                ExitCode::SUCCESS
+            }
+            Err(e) => {
+                eprintln!("failed to remove endpoint: {e}");
+                ExitCode::from(1)
+            }
+        },
         McpSub::Probe { timeout } => {
             let endpoints = McpEndpoint::load_endpoints(&path);
             if endpoints.is_empty() {
