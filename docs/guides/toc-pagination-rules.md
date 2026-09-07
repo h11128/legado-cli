@@ -629,20 +629,12 @@ debug_book_source(book_source_json, test_type="toc")
 
 ## 参考资料
 
-- **知识库文档**:
-  - `assets/书源规则：从入门到入土.md`
-  - `assets/legado知识库.md`
-  - `assets/真实书源模板库.txt`
+- **核心技能与参考库**:
+  - `skills/legado-book-source/references/css-rules.md`
+  - `skills/legado-book-source/references/js-extensions.md`
+  - `skills/legado-book-source/references/source-schema-template.md`
 
-- **真实书源示例**:
-  - 八叉书库（CSS选择器）
-  - 同人小说网（JS脚本）
-  - 完本小说网（URL数组）
-
-- **调试工具**:
-  - `tools/legado_debugger.py`
-  - `tools/book_source_debugger.py`
-
----
-
-> **更新**: 本文档已同步到 `assets/智能体自我认知.md`，智能体将在生成书源时自动应用这些规则。
+- **调试与验证工具**:
+  - `source-cli diagnose` (单源单向链路诊断)
+  - `source-cli probe` (网页与搜索表单探测)
+  - `source-cli check` (真机 MCP 校验)

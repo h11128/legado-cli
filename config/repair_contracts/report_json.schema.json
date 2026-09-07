@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://legadoSkill.local/repair_contracts/report_json.schema.json",
+  "$id": "https://legado-cli.local/repair_contracts/report_json.schema.json",
   "title": "ReportJson",
   "description": "Streaming REPORT_JSON line payload (architecture §8.2).",
   "type": "object",

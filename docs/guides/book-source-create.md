@@ -7,17 +7,17 @@ Agent entry: skill `legado-book-source`. Repair of existing URLs stays in `legad
 Prefer installing onto PATH once:
 
 ```bash
-cd E:/Projects/legadoSkill/crates && cargo build -p source_cli
+cd crates && cargo build -p source_cli
 # from repo root (or crates/):
 source-cli install          # cargo install --path … --force → ~/.cargo/bin
 # new shell:
 source-cli --help
 ```
 
-If `source-cli` is still missing, use the absolute debug binary:
+If `source-cli` is still missing, use the local debug binary:
 
 ```bash
-E:/Projects/legadoSkill/crates/target/debug/source-cli.exe --help
+./crates/target/debug/source-cli.exe --help
 ```
 
 Never invent a second `--target-dir`. MCP URL/token: `config/mcp_defaults.json`.

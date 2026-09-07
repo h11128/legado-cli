@@ -124,7 +124,7 @@ pub fn run_mcp_raw(cmd: McpRawCmd) -> ExitCode {
         }
         McpRawCmd::Delete { urls } => {
             let repo = McpSourceRepository::new(client);
-            let keys: Vec<SourceKey> = urls.iter().map(|u| SourceKey::new(u)).collect();
+            let keys: Vec<SourceKey> = urls.iter().map(SourceKey::new).collect();
             match repo.delete(&keys) {
                 Ok(()) => {
                     println!("deleted {} source(s)", urls.len());

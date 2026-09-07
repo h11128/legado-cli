@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://legadoSkill.local/repair_contracts/gate_result.schema.json",
+  "$id": "https://legado-cli.local/repair_contracts/gate_result.schema.json",
   "title": "GateResult",
   "description": "L0/L1/L2 gate decision (architecture §3.3 / §8.1).",
   "type": "object",

@@ -96,11 +96,11 @@ flowchart TD
 
 | Crate 模块 | 层级职责 | 核心模块包含 |
 |---|---|---|
-| **`source-core`** | 业务契约与基础类型 | `source-types` (实体), `source-contracts` (Schema), `source-identify` (站点指纹), `source-pattern` (特征聚类), `source-video` (视音频流) |
-| **`source-storage`** | 状态持久化与缓存 | `source-db` (嵌入式 SQLite), `source-cache` (EWMA 频控冷却与域名状态) |
-| **`source-engine`** | 规则解析与探测 | `source-parse` (选择器/解析), `source-diagnose` (单向排障链), `source-probe` (网络与表单探针) |
-| **`source-flow`** | 编排与工作流 | `source-patch` (补丁生成), `source-migrate` (域名替换), `source-hunt` (新站搜寻), `source-queue` (波次调度), `source-closeout` (收尾门禁) |
-| **`source-mcp`** | 真机接口与通信 | `source-adapters` (Legado 接口映射), `source-mcp` (MCP 协议), `source-check` (真机批检桥接) |
+| **`source-core`** | 业务契约与基础类型 | `source-types` (核心实体), `source-ports` (接口定义), `source-contracts` (Schema 约束) |
+| **`source-storage`** | 状态持久化与队列缓存 | `source-db` (嵌入式 SQLite), `source-cache` (频控/冷却缓存), `source-queue` (波次调度与重试队列) |
+| **`source-engine`** | 规则解析、诊断与补丁 | `source-parse` (规则解析), `source-diagnose` (单向诊断链), `source-patch` (补丁生成), `source-pattern` (特征聚类), `source-identify` (站点指纹), `source-adapters` (书源适配) |
+| **`source-flow`** | 编排与多阶段工作流 | `source-gate` (存活门禁), `source-probe` (表单探测), `source-hunt` (新站搜寻), `source-migrate` (域名迁移), `source-video` (视频路由), `source-spine` (编排中枢), `source-closeout` (收尾门禁) |
+| **`source-mcp`** | 真机接口与通信 | `source-mcp` (真机 SSE 协议与设备连接池), `source-check` (真机校验调度与分片) |
 | **`source-cli`** | 统一操作终端 | 诊断、修复、推源、探针、巡检、波次修复全部子命令 |
 
 ---
@@ -169,13 +169,9 @@ Agent 会自动载入 Skills，在后台调度 `source-cli` 自动完成探针�
 
 ---
 
-### 🤖 针对 AI Agent 与 CLI 开发者：`source-cli` 全功能矩阵速查
+## 🛠️ CLI 常用子命令矩阵与参数速查 (CLI Cheat Sheet)
 
-`source-cli` 是本项目的统一工程核心，集成了书源全生命周期的所有操作。
-
-#### 1. 全套 CLI 子命令分类速查矩阵 (CLI Matrix)
-
-| 分类分组 | 子命令 (Command) | 功能描述与核心场景 | 典型使用命令示例 |
+| 核心领域 | 子命令 | 功能描述 | 典型命令示例 |
 |---|---|---|---|
 | **🔍 诊断与单源修复** | `diagnose` | 执行单向诊断链 (`Search ➔ Detail ➔ TOC ➔ Content`)，自动识别频控与反爬盾 | `source-cli diagnose --url "https://site.com" --key "修真"` |
 | | `repair` | 自动生成针对性 PatchPlan 补丁，推送到真机并执行单步验证 | `source-cli repair --mode oneshot --url "https://site.com"` |
@@ -185,7 +181,7 @@ Agent 会自动载入 Skills，在后台调度 `source-cli` 自动完成探针�
 | | `source scaffold` | 基于探测到的站点特征生成书源 JSON 脚手架初稿 | `source-cli source scaffold --url "http://www.site.com" --name "新站"` |
 | | `source push` | 将书源规则直接写入真机 Legado 内存并加 `deep_active` 状态锁 | `source-cli source push --file source.json` |
 | **📱 真机通信与信道** | `check channel` | 探测手机 Legado MCP 连通性，防止多任务挂死，支持死锁清理 | `source-cli check channel --force-clear` |
-| | `check clear-cookies` | 一键清理手机端 Legado 积累的陈旧 Cookie 与反爬状态 | `source-cli check clear-cookies` |
+| | `check clear-cookies` | 一键清理手机端 Legado 积累的陈旧 Cookie 与反爬状态 | `source-cli check clear-cookies --url "https://site.com"` |
 | | `mcp` | 管理已记住的真机 MCP 服务节点（列表、测速、切换、探测） | `source-cli mcp list` / `source-cli mcp probe` |
 | **🦅 域名猎取与全量迁移** | `hunt` | 从内置种子库与搜索引擎中高并发挖掘目标站点的有效镜像域名 | `source-cli hunt --url "https://site.com"` |
 | | `migrate` | 递归替换书源内所有绝对路径、封面图及 URL 并刷新 HostKey | `source-cli migrate --from-url "http://old.com" --to-url "http://new.com"` |
@@ -198,30 +194,16 @@ Agent 会自动载入 Skills，在后台调度 `source-cli` 自动完成探针�
 | **⚙️ 缓存与规则分析** | `cache` / `ewma` | 域名频控 EWMA 冷却缓存管理，杜绝在频控期重复发起无效请求 | `source-cli cache cooldown --url "https://site.com"` / `source-cli ewma` |
 | | `parse` | 离线测试书源规则解析与目标 URL 选择器提取 | `source-cli parse rule --rule "@css:div#content@text"` |
 
-#### 2. 本地快速编译与全局安装
+---
 
+## 🚀 典型工作流场景 (Common Scenarios)
+
+##### 场景 1：单个失效书源排障与闭环修复
 ```bash
-# 进入工程 Rust 源码工作区
-cd crates
-
-# 编译高性能 release 版本
-cargo build --release --bin source-cli
-
-# 安装到本机 Cargo PATH 目录，可在任意路径直接运行 source-cli
-cargo install --path source-cli --force
-
-# 查看所有命令帮助
-source-cli --help
-```
-
-#### 3. 典型实战场景工作流示例
-
-##### 场景 1：单源深度排障与真机推验
-```bash
-# 1. 确保手机信道空闲
+# 1. 确保排他锁空闲
 source-cli check channel
 
-# 2. 启动单向诊断链
+# 2. 单向诊断（自动嗅探频控与各层级选择器匹配状态）
 source-cli diagnose --url "https://target-site.com" --key "我的"
 
 # 3. 生成补丁并推送到手机上测试
@@ -229,7 +211,7 @@ source-cli repair --mode oneshot --url "https://target-site.com"
 
 # 4. 校验通过后记录台账与关门
 source-cli ledger append --url "https://target-site.com" --step check --result "校验成功"
-source-cli retro append --url "https://target-site.com" --status fixed --trap "搜索改为POST且需GBK编码" --skill-fix 0
+source-cli retro append --url "https://target-site.com" --status fixed --trap "搜索改为POST且需GBK编码"
 ```
 
 ##### 场景 2：从零制作新站书源并推验

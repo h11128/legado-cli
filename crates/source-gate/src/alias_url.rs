@@ -60,7 +60,7 @@ fn parse_ip(host: &str) -> bool {
 }
 
 fn looks_like_app_alias(host: &str) -> bool {
-    if host.chars().any(|c| !c.is_ascii()) {
+    if !host.is_ascii() {
         return true;
     }
     if host.chars().any(|c| c.is_ascii_uppercase()) {

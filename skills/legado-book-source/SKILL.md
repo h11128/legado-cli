@@ -61,7 +61,6 @@ surface named `legado` (server may appear as `legado` / `user-legado`).
   ```
   source-cli discover --write --sync-cursor
   ```
-  (Python `scripts/mcp_discover.py` is legacy until fully removed.)
 - Phone MCP also auto-starts after boot / APK update when the in-app MCP switch was left on.
 - Web UI: same host `:1122`
 - **Create new sources / 找站:** `docs/guides/book-source-discovery.md` + `source-cli site-probe`
@@ -71,12 +70,12 @@ Config locations:
 
 | Agent | Config |
 |-------|--------|
-| Cursor | `~/.cursor/mcp.json` → `mcpServers.legado` (kept in sync by `mcp_discover.py`) |
+| Cursor | `~/.cursor/mcp.json` → `mcpServers.legado` (kept in sync by `source-cli discover --sync-cursor`) |
 | Codex | `~/.codex/config.toml` → `[mcp_servers.legado]` |
 | Claude Code | `~/.claude.json` → `mcpServers.legado` (`type: http`) |
 | Hermes | `%LOCALAPPDATA%/hermes/config.yaml` → `mcp_servers.legado` |
 
-If **Cursor IDE** MCP tools still fail after discover wrote a new URL: reload MCP / restart the agent once (IDE HTTP client does not live inside `mcp_client.py`). Do **not** ask the user to hand-edit the IP.
+If **Cursor IDE** MCP tools still fail after discover wrote a new URL: reload MCP / restart the agent once. Do **not** ask the user to hand-edit the IP.
 
 ### Tools
 
@@ -101,11 +100,11 @@ Prefer device MCP over local Python sim.
 ```
 # once per machine (puts source-cli on ~/.cargo/bin):
 source-cli install   # or: cargo run -p source_cli -- install
-# fallback absolute binary:
-E:/Projects/legadoSkill/crates/target/debug/source-cli.exe check channel
-E:/Projects/legadoSkill/crates/target/debug/source-cli.exe source scaffold --url http://www.example.com
-E:/Projects/legadoSkill/crates/target/debug/source-cli.exe source push --file temp/full_fix/cache/new_sources/foo.json
-E:/Projects/legadoSkill/crates/target/debug/source-cli.exe check clear-cookies --url http://www.example.com
+# fallback local binary:
+./crates/target/debug/source-cli.exe check channel
+./crates/target/debug/source-cli.exe source scaffold --url http://www.example.com
+./crates/target/debug/source-cli.exe source push --file temp/full_fix/cache/new_sources/foo.json
+./crates/target/debug/source-cli.exe check clear-cookies --url http://www.example.com
 ```
 Create checklist: `docs/guides/book-source-create.md`.
 **Clear cookies:** always CLI (`check clear-cookies`). Do not wait for Cursor MCP to list `clear_cookies`.
@@ -137,10 +136,10 @@ Phone heap is limited; PC should filter and page:
    ```
 4. Batch authoritative App check (50–100 URLs per call, wait until idle):
    ```bash
-   source-cli check batch --precheck-json temp/precheck.json --batch-size 80 --thread-count 64 \
-     --keyword 我的 --out temp/batch_check_report.json
+   source-cli check full --urls-file urls.txt --precheck-json temp/precheck.json \
+     --batch-size 80 --thread-count 64 --keyword 我的 --report temp/batch_check_report.json
    ```
-   (Configuration reads from `config/mcp_defaults.json` automatically.)
+   (Or run lightweight batch directly: `source-cli check batch --urls-file urls.txt --report temp/batch_check_report.json`)
 5. Multi-phone: shard URLs across devices with `source-cli check shard`.
 6. Or drive the same flow via agent MCP tools (`start_check_sources` / `get_check_progress`).
 
@@ -301,8 +300,7 @@ via Web `:1122` or the app UI.
 
 - **Create checklist:** `docs/guides/book-source-create.md`
 - **Discovery guide:** `docs/guides/book-source-discovery.md`
-- Upstream Trae skill (long, custom tools): `skills/SKILLV0.7.md`
-- Architecture: `docs/PROJECT_ARCHITECTURE.md`
-- Charset / POST encoding: `docs/MCP编码使用指南.md`
-- Local debugger: `docs/LEGADO_DEBUGGER.md`
-- Install notes: `E:/Projects/legadoSkill/MULTI_AGENT_SETUP.md`
+- Upstream Trae skill archive: `skills/archive/SKILLV0.7.md`
+- Architecture: `docs/reference/repair-adapter-architecture.md`
+- Charset guide: `skills/legado-book-source/references/encoding-guide.md`
+- Install notes: `MULTI_AGENT_SETUP.md`

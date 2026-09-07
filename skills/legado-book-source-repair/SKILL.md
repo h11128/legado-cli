@@ -25,10 +25,10 @@ Track: `source-cli progress status`.
 
 | Doc | Path |
 |-----|------|
-| MCP defaults (SOT) | `E:/Projects/legadoSkill/config/mcp_defaults.json` |
+| MCP defaults (SOT) | `config/mcp_defaults.json` |
 | MCP discover | `source-cli discover --write` |
-| Platform (Rust) | `docs/repair-adapter-architecture.md` — **full Rust cutover 2026-07-28** |
-| Anti-stall matrix | `docs/deep-diagnose-anti-stall.md` |
+| Platform (Rust) | `docs/reference/repair-adapter-architecture.md` — **full Rust cutover 2026-07-28** |
+| Anti-stall matrix | `docs/reference/deep-diagnose-anti-stall.md` |
 
 **Entry:** **`source-cli` only** — no Python shims. Build: `(cd crates && cargo build -p source_cli)`.
 
@@ -172,8 +172,8 @@ source-cli progress next   # 先跑 closeout pending
 | 验证码搜索 | getcode / yzm / actyzm | **skip** |
 | 域名停车/过期 | L2 GET 正文含 for sale/出售/域名到期 / Redirecting shell | **disable/skip**（勿当搜索规则坏；**不** hunt） |
 | **dead_skip_without_hunt** | batch/agent 对 `l1_unreachable`/`l2_http_dead` 直接 disable | **禁止** — 先 `hunt --probe` / oneshot 自动 hunt；无后继再 disable。Harness：`classify.rs`→`Hunt`；`oneshot_live` resolve；wave 不把 hunt ledger 成 final skip |
-| **gate_hunt_deferred_unprobed** | 分流把 `gate_action=hunt` / DNS `Unable to resolve host` 丢进「maybe later / 像 skip」却**不跑** `hunt --probe`（tongrenquan：www 无 A，种子已有 `m.`） | **禁止** — triage 时 hunt 必须当场 probe；有 migrate/verify 候选 → **立刻升优先**深挖，勿口头缓修。Harness：`scripts/shelf-stale-tag-triage.py`；`no_auto:triage_must_hunt_probe` |
-| **hunt_osint_skipped** | 只跑 `hunt --probe` empty 就结案；不做 Google / crt.sh / 限流 Wayback /（有 key 时）付费 DNS 档案；或对 archive.org 连发触发 429 | **禁止** — deep dig 迁域嫌疑必须跑 `scripts/domain-successor-hunt.py` + 浏览器 Google（书名+站名）。Wayback 只走 `scripts/lib/wayback_cdx.py`。Harness：`no_auto:osint_then_disable` |
+| **gate_hunt_deferred_unprobed** | 分流把 `gate_action=hunt` / DNS `Unable to resolve host` 丢进「maybe later / 像 skip」却**不跑** `hunt --probe`（tongrenquan：www 无 A，种子已有 `m.`） | **禁止** — triage 时 hunt 必须当场 probe；有 migrate/verify 候选 → **立刻升优先**深挖，勿口头缓修。Harness：`source-cli hunt --probe`；`no_auto:triage_must_hunt_probe` |
+| **hunt_osint_skipped** | 只跑 `hunt --probe` empty 就结案；不做 Google / crt.sh / 限流 Wayback /（有 key 时）付费 DNS 档案；或对 archive.org 连发触发 429 | **禁止** — deep dig 迁域嫌疑必须跑 `source-cli hunt --url … --probe` + 浏览器 Google（书名+站名）。Wayback 查询需加并发限制。Harness：`no_auto:osint_then_disable` |
 | **serial_await_idle** | Agent 对整批 `serial`/`batch` 长 AwaitShell（数小时） | **禁止** — 最多短轮询 60–90s；看 `serial_heartbeat.json` / `serial_last.json` mtime；心跳停滞 > `url-timeout-s+30` → kill 父进程、`check channel --force-clear`、续跑。Harness：`serial_cmd`/`serial_spawn` |
 | **agent_turn_stall** | 后台 diagnose 后收工；或 login/AES/广告源反复抠 >2min；或 MCP `10060` 堵死整环 | **禁止** — 回合结束前必须 close-out 当前 URL 或写明下一动作；auth/广告证据够就 seal；diagnose 传输失败 → PC probe + 直连 MCP debug/check，或 `skip:mcp_transient` 下一源。**Harness：** `deep_active.json` claim；`closeout pending`/`progress next` 未 seal 则拒；`closeout release`；Discipline §21–23 |
 | **hedged_ledger_success** | ledger `校验成功或见上` / `见上` / 假成功（migrate verify_ok=false 仍记成功） | **禁止** — `ledger append` 硬拒；pending 拒；goal 不计。只写精确 `校验成功` / `skip:…` / `fail:…`。Harness：`ledger_gate.rs` |

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://legadoSkill.local/repair_contracts/identify_result.schema.json",
+  "$id": "https://legado-cli.local/repair_contracts/identify_result.schema.json",
   "title": "IdentifyResult",
   "description": "Site-family identify outcome (architecture §3.4 / §8.1).",
   "type": "object",

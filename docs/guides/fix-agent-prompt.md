@@ -5,7 +5,7 @@
 - wave/harvest/serial: `source-cli wave|harvest|serial --urls-file …`
 
 ```text
-1. cd E:/Projects/legadoSkill && source-cli check channel   # must idle
+1. source-cli check channel   # must idle (or cd crates && cargo run -p source_cli -- check channel)
 2. source-cli progress next                                 # closeout pending auto
 3. source-cli diagnose --url URL --key 我的
 4. source-cli repair --mode oneshot --url URL

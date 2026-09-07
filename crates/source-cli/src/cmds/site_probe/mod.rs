@@ -112,10 +112,10 @@ fn probe_batch(
     }
     let rules =
         load_rules(&rules_path).map_err(|e| format!("load rules {}: {e}", rules_path.display()))?;
-    let conc = concurrency.max(1).min(32).min(to_probe.len());
+    let conc = concurrency.clamp(1, 32).min(to_probe.len());
     let (tx, rx) = mpsc::channel();
     let mut handles = Vec::new();
-    let chunk = (to_probe.len() + conc - 1) / conc;
+    let chunk = to_probe.len().div_ceil(conc);
     for part in to_probe.chunks(chunk.max(1)) {
         let part = part.to_vec();
         let rules = rules.clone();
@@ -224,7 +224,7 @@ pub fn run_site_probe(args: SiteProbeArgs) -> ExitCode {
     let report = json!({
         "schema_version": 1,
         "elapsed_ms": t0.elapsed().as_millis() as u64,
-        "concurrency": args.concurrency.max(1).min(32),
+        "concurrency": args.concurrency.clamp(1, 32),
         "total": rows.len(),
         "probed": probed_n,
         "make_candidate": make_n,

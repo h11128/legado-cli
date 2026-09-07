@@ -90,15 +90,13 @@ flowchart TD
 
 ### 6 Layer Crates Breakdown
 
-The codebase in `crates/` is strictly partitioned:
-
 | Crate | Layer Role | Included Components |
 |---|---|---|
-| **`source-core`** | Domain contracts & types | `source-types` (entities), `source-contracts` (schemas), `source-identify` (fingerprints), `source-pattern` (clustering), `source-video` (media rules) |
-| **`source-storage`** | Persistence & caching | `source-db` (embedded SQLite), `source-cache` (EWMA cooldown & domain statuses) |
-| **`source-engine`** | Rule evaluation & diagnosis | `source-parse` (CSS/JS/regex parser), `source-diagnose` (diagnostic chain), `source-probe` (web & form probes) |
-| **`source-flow`** | Workflow orchestration | `source-patch` (patch generator), `source-migrate` (domain rewrite), `source-hunt` (domain hunter), `source-queue` (wave scheduler), `source-closeout` (gatekeeper) |
-| **`source-mcp`** | Device communications | `source-adapters` (Legado API bridge), `source-mcp` (MCP protocol client), `source-check` (device check bridge) |
+| **`source-core`** | Domain contracts & types | `source-types` (core entities), `source-ports` (trait interfaces), `source-contracts` (schema contracts) |
+| **`source-storage`** | Persistence & queue cache | `source-db` (embedded SQLite), `source-cache` (rate-limit / EWMA cache), `source-queue` (wave scheduling & retry queue) |
+| **`source-engine`** | Rule evaluation & diagnosis | `source-parse` (selector/rule parser), `source-diagnose` (diagnostic chain), `source-patch` (patch generator), `source-pattern` (clustering), `source-identify` (fingerprints), `source-adapters` (source adapters) |
+| **`source-flow`** | Workflow orchestration | `source-gate` (health gates), `source-probe` (form probes), `source-hunt` (domain hunter), `source-migrate` (domain rewrite), `source-video` (video routes), `source-spine` (orchestration spine), `source-closeout` (gatekeeper) |
+| **`source-mcp`** | Device communications | `source-mcp` (real-device SSE client & connection pool), `source-check` (device check bridge & URL sharding) |
 | **`source-cli`** | User command interface | Unified commands for diagnose, repair, push, site-probe, and batch waves |
 
 ---
@@ -113,36 +111,34 @@ When handling book-source tasks, the system coordinates multi-stage actions thro
 |---|---|---|---|
 | **Fixing a broken book source** | **Must Invoke Flow** | **Flow 1: Deep Repair Flow** (`diagnose` -> `repair`) | Enforces `Search -> Detail -> TOC -> Content` diagnostic chain; must pass real-device verify. |
 | **Creating a source for a new site** | **Must Invoke Flow** | **Flow 2: Source Creation Flow** (`site-probe` -> `scaffold` -> `push`) | Fully executes raw HTML probing, encoding detection, scaffold drafting, and live phone verification. |
-| **Domain dead (404/expired/redirected)** | **Must Invoke Flow** | **Flow 3: Domain Hunt & Migration** (`hunt` -> `probe` -> `migrate`) | Do NOT alter selectors; search for mirror domains and recursively migrate all absolute paths. |
-| **Batch health checks on book collection** | **Must Invoke Flow** | **Flow 4: Batch Wave Triage** (`wave` / `search-wave`) | Must acquire exclusive channel lock, run parallel PC triage, and dispatch one batch to phone. |
-| **Querying CSS syntax, JS helpers, or crypto** | ❌ **Do NOT Invoke Flow** | **Directly read Reference Manuals** (`skills/references/`) | Read-only knowledge retrieval; no runtime or device side effects. |
-| **Checking phone MCP connection / idle status** | ❌ **Do NOT Invoke Flow** | **Execute single probe command** (`source-cli check channel`) | Single-flight status check; no multi-step state machine needed. |
-| **Modifying source name, group, or intervals** | ❌ **Do NOT Invoke Flow** | **Directly edit JSON** and push single file | Non-functional metadata tweak; does not require full diagnostic pipeline. |
-| **Explore / Discovery page adjustments** | ❌ **Off by default** | Only when **explicitly requested** by user | Platform discipline: `checkDiscovery=false` by default to conserve phone execution budget. |
+| **Target domain is dead / redirected** | **Must Invoke Flow** | **Flow 3: Domain Hunting Flow** (`hunt` -> `probe` -> `migrate`) | Never blindly rewrite selectors; find active mirrors via seed DB and rewrite all absolute URLs. |
+| **Auditing / checking entire source list** | **Must Invoke Flow** | **Flow 4: Batch Wave Flow** (`wave` / `search-wave`) | Must acquire exclusive channel lock; multi-worker PC precheck followed by single-batch device verify. |
+| **Looking up CSS syntax, JS methods, or crypto** | ❌ **No Flow Needed** | **Read standard reference library** (`skills/references/`) | Pure read-only knowledge retrieval; no runtime or device access required. |
+| **Checking if Android MCP is alive & idle** | ❌ **No Flow Needed** | **Run single status check** (`source-cli check channel`) | Pure read-only ping; no pipeline dependency. |
+| **Tweaking book source name, group, or intervals** | ❌ **No Flow Needed** | **Edit JSON directly** and push to device | Pure metadata tweak without impacting parsing logic; skips diagnostic pipeline. |
+| **Adjusting Explore (exploreUrl) rules** | ❌ **No Flow by default** | Intervene only if explicitly requested by user | Platform discipline: default `checkDiscovery=false` to avoid wasting device quotas. |
 
-### 2. 4 Core Flows Compact Pipeline Cards
+### 2. 4 Core Pipeline Cards
 
 - 🔧 **Flow 1: Deep Repair Flow**
-  > `[Channel Gate]` ➔ `[L0~L2 Gates]` ➔ `[Diagnostic Chain]` ➔ `[Patch Plan]` ➔ `[Push & Live Verify]` ➔ `[Closeout Ledger]`
-  - **Trigger**: Search fails, book detail crashes, TOC is garbled, or chapter body is empty.
-  - **Hard Rule**: Never rewrite TOC/Content selectors before Search succeeds; never claim fixed without phone green verification.
+  > `[Channel Lock Gate]` ➔ `[L0~L2 Health Gate]` ➔ `[Unidirectional Diagnostics]` ➔ `[Patch Planning]` ➔ `[Push & Device Verify]` ➔ `[Ledger Closeout]`
+  - **Trigger**: Search fails, detail error, TOC mangled, or content empty.
+  - **Golden Rule**: Never modify TOC/Content before Search succeeds; never claim fixed without real-device green verify.
 
 - ✍️ **Flow 2: Source Creation Flow**
-  > `[Live Site Probe]` ➔ `[Family Fingerprint]` ➔ `[Scaffold Generation]` ➔ `[Selector Refinement]` ➔ `[Live Push & Verify]` ➔ `[Source Cataloged]`
-  - **Trigger**: New novel site discovered; needs source developed from scratch.
-  - **Hard Rule**: All 4 stages (Search, Detail, TOC, Content) must pass live phone verification before acceptance.
+  > `[Raw HTML Probe]` ➔ `[Site Family ID]` ➔ `[Scaffold Generation]` ➔ `[Selector Enhancement]` ➔ `[Push & All-Green Verify]` ➔ `[Commit to Repo]`
+  - **Trigger**: New novel site discovered, building book source from scratch.
+  - **Golden Rule**: Real-device all-green pass across all 4 stages is the sole acceptance criteria.
 
-- 🌐 **Flow 3: Domain Hunt & Migration Flow**
-  > `[Dead Host Alert]` ➔ `[Seed Search]` ➔ `[Candidate Probe]` ➔ `[Recursive Path Replace]` ➔ `[Verify on New Host]`
-  - **Trigger**: Target host returns 404, park page, or redirects to gambling sites.
-  - **Hard Rule**: Never tamper with selector rules; focus entirely on discovering mirror hosts and replacing absolute domain paths.
+- 🌐 **Flow 3: Domain Hunting & Migration Flow**
+  > `[404/Parked Alert]` ➔ `[Seed Search for Mirrors]` ➔ `[Candidate Connectivity Probe]` ➔ `[Global URL Rewrite]` ➔ `[Re-verify on Device]`
+  - **Trigger**: Site 404, parked, ad-hijacked, or redirected.
+  - **Golden Rule**: Never rewrite selector rules on dead sites; hunt active mirrors and rewrite absolute URLs globally.
 
 - 🌊 **Flow 4: Batch Wave Triage Flow**
-  > `[Exclusive Lock]` ➔ `[Dead Host Filter]` ➔ `[Parallel PC Triage]` ➔ `[Single-Batch Phone Verify]` ➔ `[Aggregate Report]`
-  - **Trigger**: Routine health check and batch triage across dozens/hundreds of shelf sources.
-  - **Hard Rule**: Never run concurrent check batches against the same phone; must execute strictly in a single batch.
-
-> 📖 **Deep Dive**: For complete state machine transitions, timeout budgets, and topology diagrams, see: [**Flow Architecture & Dispatch Guide (docs/reference/flow-architecture-and-dispatch.md)**](docs/reference/flow-architecture-and-dispatch.md).
+  > `[Exclusive Channel Lock]` ➔ `[Dead Gate Filter]` ➔ `[PC Multi-Worker Triage]` ➔ `[Single Batch to Device]` ➔ `[Aggregated Report]`
+  - **Trigger**: Routine health check and batched triage across dozens of sources.
+  - **Golden Rule**: Never run concurrent check batches against the same phone; single-batch execution is mandatory.
 
 ---
 
@@ -167,8 +163,6 @@ Your AI Agent will automatically invoke skills, run `source-cli` in the backgrou
 
 ---
 
----
-
 ### 🤖 For AI Agents & CLI Developers: `source-cli` Command Matrix
 
 `source-cli` is the unified engineering backbone of this project, handling the entire lifecycle of Legado book sources.
@@ -185,7 +179,7 @@ Your AI Agent will automatically invoke skills, run `source-cli` in the backgrou
 | | `source scaffold` | Generates a book source draft based on identified site patterns | `source-cli source scaffold --url "http://www.site.com" --name "NewSite"` |
 | | `source push` | Writes book source rules directly into Legado memory and acquires `deep_active` lock | `source-cli source push --file source.json` |
 | **📱 Device Comms & Channel** | `check channel` | Checks Android Legado MCP connection, guards against deadlocks, supports forced clearing | `source-cli check channel --force-clear` |
-| | `check clear-cookies` | Clears accumulated stale session cookies and bot-detection challenges from the device | `source-cli check clear-cookies` |
+| | `check clear-cookies` | Clears accumulated stale session cookies and bot-detection challenges from the device | `source-cli check clear-cookies --url "https://site.com"` |
 | | `mcp` | Manages remembered real-device MCP endpoints (list, probe, switch, add, remove) | `source-cli mcp list` / `source-cli mcp probe` |
 | **🦅 Domain Hunting & Migration**| `hunt` | High-concurrency discovery of working mirror domains from search engines and seed catalogs | `source-cli hunt --url "https://site.com"` |
 | | `migrate` | Recursively rewrites all absolute URLs, covers, and hostkeys within the book source | `source-cli migrate --from-url "http://old.com" --to-url "http://new.com"` |
@@ -229,7 +223,7 @@ source-cli repair --mode oneshot --url "https://target-site.com"
 
 # 4. Record ledger entry and lessons learned upon success
 source-cli ledger append --url "https://target-site.com" --step check --result "校验成功"
-source-cli retro append --url "https://target-site.com" --status fixed --trap "Search converted to POST with GBK" --skill-fix 0
+source-cli retro append --url "https://target-site.com" --status fixed --trap "Search converted to POST with GBK"
 ```
 
 ##### Scenario 2: Create a Book Source from Scratch

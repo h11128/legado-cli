@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://legadoSkill.local/repair_contracts/optimize_plan.schema.json",
+  "$id": "https://legado-cli.local/repair_contracts/optimize_plan.schema.json",
   "title": "OptimizePlan",
   "description": "Before/after optimize plan (architecture §3.5 / §8.1).",
   "type": "object",

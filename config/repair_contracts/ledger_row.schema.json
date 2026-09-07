@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://legadoSkill.local/repair_contracts/ledger_row.schema.json",
+  "$id": "https://legado-cli.local/repair_contracts/ledger_row.schema.json",
   "title": "LedgerRow",
   "description": "Append-only repair session ledger row (architecture §3.5 / §8.1).",
   "type": "object",
