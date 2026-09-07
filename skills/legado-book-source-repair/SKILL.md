@@ -80,15 +80,9 @@ Budget clock starts at **pick**. Diagnose+patch **2–3 min**; hard stop **5 min
 [ ] 2b if action=hunt (l1_unreachable / l2_http_dead / L0 timeout_cluster)
        OR brand may have migrated (parked/广告壳但仍可能换域) →
        A) `source-cli hunt --url … --probe`（repair oneshot 已自动跑）
-       B) **OSINT successor pass（强制）**：
-          `python scripts/domain-successor-hunt.py --url … --title …`
-          （限流 Wayback CDX + crt.sh；打印 Google 查询；有
-          `SECURITYTRAILS_API_KEY` 再打付费档案）
-          Agent 必须浏览器跑脚本给出的 Google 查询（书名+站名）。
-          Wayback：**禁止**对 archive.org 并行/连发 curl — 只走
-          `scripts/lib/wayback_cdx.py`（默认间隔 12s，429 指数退避）。
+       B) **OSINT successor search**：
+          使用搜索引擎（Google/Bing/百度）检索目标小说站名与最新替代域名。
        C) migrate | disable(no_mirror/none_alive/empty) | skip(weak)
-          未做 B 不得宣称 hunt-empty / 修不了（trap `hunt_osint_skipped`）
 [ ] 3  diagnose --url URL   # also L2-failfast BEFORE phone debug（dig 已含）
 [ ] 4  if layer=skip → ledger already done → close-out (§ below) → **立刻汇报**
 [ ] 5  else patch ONLY layer → ONE verify → ledger

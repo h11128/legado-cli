@@ -180,23 +180,23 @@ Agent 会自动载入 Skills，在后台调度 `source-cli` 自动完成探针�
 | **🔍 诊断与单源修复** | `diagnose` | 执行单向诊断链 (`Search ➔ Detail ➔ TOC ➔ Content`)，自动识别频控与反爬盾 | `source-cli diagnose --url "https://site.com" --key "修真"` |
 | | `repair` | 自动生成针对性 PatchPlan 补丁，推送到真机并执行单步验证 | `source-cli repair --mode oneshot --url "https://site.com"` |
 | | `dig` | 官方深度排障合流入口：信道检查 ➔ 门禁 ➔ 诊断 ➔ 一键修复 | `source-cli dig --url "https://site.com"` |
-| | `gate` | 预检 L0~L2 存活门禁（语法 / DNS / 404 / 停放页 / 5秒盾） | `source-cli gate check --url "https://site.com"` |
+| | `gate` | 预检 L0~L2 存活门禁（语法 / DNS / 404 / 停放页 / 5秒盾） | `source-cli gate --url "https://site.com"` |
 | **🌐 探针与新源创作** | `site-probe` | 原生 HTML 抓取、字符集编码嗅探与 JS 动态写入表单探测 | `source-cli site-probe --url "https://new-site.com"` |
-| | `source scaffold` | 基于探测到的站点家族特征（笔趣阁/杰奇等）生成书源 JSON 初稿 | `source-cli source scaffold --host "site.com" --type biquge` |
+| | `source scaffold` | 基于探测到的站点特征生成书源 JSON 脚手架初稿 | `source-cli source scaffold --url "http://www.site.com" --name "新站"` |
 | | `source push` | 将书源规则直接写入真机 Legado 内存并加 `deep_active` 状态锁 | `source-cli source push --file source.json` |
 | **📱 真机通信与信道** | `check channel` | 探测手机 Legado MCP 连通性，防止多任务挂死，支持死锁清理 | `source-cli check channel --force-clear` |
 | | `check clear-cookies` | 一键清理手机端 Legado 积累的陈旧 Cookie 与反爬状态 | `source-cli check clear-cookies` |
 | | `mcp` | 管理已记住的真机 MCP 服务节点（列表、测速、切换、探测） | `source-cli mcp list` / `source-cli mcp probe` |
-| **🦅 域名猎取与全量迁移** | `hunt` | 从内置种子库与搜索引擎中高并发挖掘目标站点的有效镜像域名 | `source-cli hunt --name "笔趣阁" --origin-host "old.com"` |
-| | `migrate` | 递归替换书源内所有绝对路径、封面图及 URL 并刷新 HostKey | `source-cli migrate --file source.json --to-host "new.com"` |
+| **🦅 域名猎取与全量迁移** | `hunt` | 从内置种子库与搜索引擎中高并发挖掘目标站点的有效镜像域名 | `source-cli hunt --url "https://site.com"` |
+| | `migrate` | 递归替换书源内所有绝对路径、封面图及 URL 并刷新 HostKey | `source-cli migrate --from-url "http://old.com" --to-url "http://new.com"` |
 | **🌊 批量巡检与波次调度** | `wave` | 多线程并发批检与针对性补丁分流，单批次打包送入真机验证 | `source-cli wave --urls-file list.txt --thread-count 8` |
 | | `search-wave` | 针对整架书源进行并发搜索能力巡检，自动识别搜索阻断与失效源 | `source-cli search-wave --urls-file list.txt` |
 | | `serial` | 带看门狗守护（Watchdog）的单通道串行队列调度，超时自动切断 | `source-cli serial --urls-file list.txt --url-timeout-s 120` |
 | **📊 台账与闭环门禁** | `ledger append` | 登记每一步的执行与真机校验结果，确保审计留痕 | `source-cli ledger append --url "..." --step check --result "校验成功"` |
 | | `retro append` | 记录排障过程中的新型陷阱与避坑经验，沉淀知识库 | `source-cli retro append --url "..." --status fixed --trap "..."` |
 | | `closeout` | 任务收尾门禁判定，若真机未验证成功则阻断后续流程 | `source-cli closeout pending` |
-| **⚙️ 缓存与规则分析** | `cache` / `ewma` | 域名频控 EWMA 冷却缓存管理，杜绝在频控期重复发起无效请求 | `source-cli cache view` / `source-cli ewma show` |
-| | `parse` | 本地测试 CSS 选择器、JS 脚本执行或正则提取结果 | `source-cli parse css --html "..." --selector "div#content"` |
+| **⚙️ 缓存与规则分析** | `cache` / `ewma` | 域名频控 EWMA 冷却缓存管理，杜绝在频控期重复发起无效请求 | `source-cli cache cooldown --url "https://site.com"` / `source-cli ewma` |
+| | `parse` | 离线测试书源规则解析与目标 URL 选择器提取 | `source-cli parse rule --rule "@css:div#content@text"` |
 
 #### 2. 本地快速编译与全局安装
 
@@ -238,7 +238,7 @@ source-cli retro append --url "https://target-site.com" --status fixed --trap "�
 source-cli site-probe --url "https://new-novel-site.com"
 
 # 2. 生成对应脚手架模板
-source-cli source scaffold --host "new-novel-site.com" --type biquge --name "测试小说站"
+source-cli source scaffold --url "https://new-novel-site.com" --name "测试小说站"
 
 # 3. 一键推送到手机
 source-cli source push --file temp/new_source.json

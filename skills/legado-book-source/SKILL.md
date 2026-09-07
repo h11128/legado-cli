@@ -36,9 +36,9 @@ surface named `legado` (server may appear as `legado` / `user-legado`).
 
 | Role | Path |
 |------|------|
-| Knowledge repo | `E:/Projects/legadoSkill` |
-| Official app source | `E:/Projects/legado` (junction: `legadoSkill/legado`) |
-| Upstream Trae mega-skill | `legadoSkill/skills/SKILLV0.7.md` |
+| Knowledge repo | `.` (project root) |
+| Official app source | `../legado` (junction: `legado/`) |
+| Upstream Trae mega-skill archive | `skills/archive/SKILLV0.7.md` |
 | Essential knowledge | `docs/reference/essential-knowledge-summary.md` |
 | CSS rules | `skills/legado-book-source/references/css-rules.md` |
 | JS Extensions | `skills/legado-book-source/references/js-extensions.md` |
@@ -50,7 +50,7 @@ surface named `legado` (server may appear as `legado` / `user-legado`).
 
 ## Device MCP (`legado`)
 
-- **SOT:** `E:/Projects/legadoSkill/config/mcp_defaults.json` — **never hard-code phone IPs in skills/prompts**
+- **SOT:** `config/mcp_defaults.json` — **never hard-code phone IPs in skills/prompts**
 - **Multi-MCP memory:** `config/mcp_defaults.json` preserves multiple known devices/IPs under `endpoints: [...]`. When the active endpoint is unreachable, `source-cli` automatically probes all remembered endpoints before falling back to full subnet discovery.
   - View remembered endpoints: `source-cli mcp list --probe`
   - Add/remember new endpoint: `source-cli mcp add --url http://10.0.0.X:1236/mcp [--switch]`
@@ -128,34 +128,27 @@ Phone heap is limited; PC should filter and page:
 
 1. Export / list `bookSourceUrl`s (`list_sources` pages, or local URL file).
 2. DNS precheck on PC:
-   ```
-   E:/Projects/legadoSkill/.venv/Scripts/python.exe scripts/precheck_sources.py \
-     --urls-file urls.txt --concurrency 200 --out temp/precheck.json
+   ```bash
+   source-cli check precheck --urls-file urls.txt --concurrency 200 --out temp/precheck.json
    ```
 3. Optionally disable/tag dead hosts on device:
-   ```
-   E:/Projects/legadoSkill/.venv/Scripts/python.exe scripts/disable_dead_sources.py \
-     --precheck-json temp/precheck.json --disable --tag
+   ```bash
+   source-cli check disable-dead --precheck-json temp/precheck.json --disable --tag
    ```
 4. Batch authoritative App check (50–100 URLs per call, wait until idle):
+   ```bash
+   source-cli check batch --precheck-json temp/precheck.json --batch-size 80 --thread-count 64 \
+     --keyword 我的 --out temp/batch_check_report.json
    ```
-   E:/Projects/legadoSkill/.venv/Scripts/python.exe scripts/batch_check_mcp.py \
-     --precheck-json temp/precheck.json --batch-size 80 --thread-count 64 \
-     --keyword 我的 --out temp/batch_check_report.json \
-     --materials-dir temp/check_materials
-   ```
-   (Omit `--mcp`; script should read `config/mcp_defaults.json`. If a flag is required, pass the URL from that file — never a remembered DHCP IP.)
-   Report includes `by_failure_tag`; failed items are dumped under `temp/check_materials/<tag>/`.
-5. Multi-phone: shard URLs first with `scripts/shard_urls.py`, then run batch check per device.
-6. Or drive the same flow via agent MCP tools (`start_check_sources` /
-   `get_check_progress`) if the script’s HTTP transport does not match.
+   (Configuration reads from `config/mcp_defaults.json` automatically.)
+5. Multi-phone: shard URLs across devices with `source-cli check shard`.
+6. Or drive the same flow via agent MCP tools (`start_check_sources` / `get_check_progress`).
 
 Device-side check uses AIMD concurrency, host token buckets, work-stealing,
 priority by respondTime, Bloom dedup, EWMA skip, hedged domain probe, TOC sampling,
 skip-discovery-when-search-ok, batched DB writes, body caps, and DNS circuit-breaking.
 
-Research (why not extract JVM engine): `docs/PC_CHECK_ENGINE_RESEARCH.md`
-and `E:/Projects/legado/docs/pc-check-engine-research.md`.
+Research (why not extract JVM engine): `docs/research/pc-check-engine.md`.
 
 ### Agent call notes
 

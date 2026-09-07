@@ -54,7 +54,7 @@ Create and repair share the same close-out / improve gate — do not wait for th
  (bookUrl → infoHtml trap).
 14. **After every source attempt (repair OR create: fixed/created / skip / fail), mandatory close-out**
     — do not pick the next URL / site until these finish:
-    1. **Document**: short note in `docs/source-repair-retrospective.md` (or dated retro)
+    1. **Document**: short note in `docs/postmortem/source-repair-retrospective.md` (or dated retro)
        + `source-cli ledger append` / `source-cli retro append`.
     2. **Reflect**: `source-cli retro append` with `trap` / `harness` / `script_fix` /
        `skill_fix` filled honestly (what burned time, what the agent missed).
@@ -106,7 +106,7 @@ Create and repair share the same close-out / improve gate — do not wait for th
     - Goal counter ignores hedged 「校验成功*」 rows.
     - HookRules `legado_hedged_ledger_success` / `legado_l0_only_live_repair` (deny) and
       `legado_serial_long_await` (ask) live in `.cursor/audit-hooks/custom_rules.json`.
-    - Full matrix + how to verify a rule actually fires: `docs/deep-diagnose-anti-stall.md`.
+    - Full matrix + how to verify a rule actually fires: `docs/reference/deep-diagnose-anti-stall.md`.
 23. **Honest verify ledger only:** after migrate/verify/create-check, write `校验成功` **iff** `verify_ok:true`;
     else `fail:…` / `skip:…`. Never copy shell `tee` into a fake success line.
 
@@ -166,5 +166,5 @@ Create SOT: `docs/guides/book-source-create.md` + skill `legado-book-source`.
 
 Cache: `temp/full_fix/cache/`. MCP: `config/mcp_defaults.json`. 
 Ledger: `temp/full_fix/repair_session_ledger.jsonl`.  
-Retros: `docs/source-repair-retrospective.md`, `docs/source-repair-retro-migrate-video-2026-07-26.md`,
+Retros: `docs/postmortem/source-repair-retrospective.md`, `docs/postmortem/source-repair-retro-migrate-video-2026-07-26.md`,
 `temp/full_fix/repair_serial_retro.jsonl`.

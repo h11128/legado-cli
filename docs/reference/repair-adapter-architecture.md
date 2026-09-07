@@ -8,16 +8,16 @@ Spec anchors in this doc: **§3 types**, **§8 contracts**, **§9 database**, **
 
 ---
 
-## 0. Operational rule (thorough parity in progress)
+## 0. Architecture Status: 100% Rust Cutover Complete (2026-07-28)
 
-**Do not claim §12 functional green** unless `docs/parity/THOROUGH_ACCEPTANCE.md` hard gates pass (including **search-layer live E2E** + `search-parity` suite). Soft CLI/shim inventory alone is **not** enough.
-
-| Prefer now | Still OK (orchestration) | Blocked claim |
-|------------|--------------------------|---------------|
-| `source-cli diagnose` → `repair` (live probe for search) | `mcp_discover`, `parity_*`, harvest/wave | “§12 functional complete” without thorough gate |
-| Gap tracker: `docs/parity/SEARCH_LAYER_GAPS.md` | Python `REPAIR_USE_PYTHON=1` emergency | §12.6 perf cutover |
-
-See `docs/parity/ACCEPTANCE_LOG.md` for current honest status.
+> [!NOTE]
+> **全栈 Rust 已经全面落地**：本项目已于 2026-07-28 彻底完成全栈 Rust 重构并实现 100% 功能 Parity。
+> 原 Python 应急选项（`REPAIR_USE_PYTHON=1`）及过渡脚本已全部退役，工作流全面由单个 Rust 二进制 `source-cli`（`crates/source-cli`）接管。
+> 历史功能 Parity 验收报告已完整归档在 `docs/archive/parity/`：
+> - 终态验收清单：[`docs/archive/parity/THOROUGH_ACCEPTANCE.md`](file:///e:/Projects/legadoSkill/docs/archive/parity/THOROUGH_ACCEPTANCE.md)
+> - 验收日志：[`docs/archive/parity/ACCEPTANCE_LOG.md`](file:///e:/Projects/legadoSkill/docs/archive/parity/ACCEPTANCE_LOG.md)
+> - 脚本替代矩阵：[`docs/archive/parity/PYTHON_CUTOVER_MATRIX.md`](file:///e:/Projects/legadoSkill/docs/archive/parity/PYTHON_CUTOVER_MATRIX.md)
+> - 搜索层对齐记录：[`docs/archive/parity/SEARCH_LAYER_GAPS.md`](file:///e:/Projects/legadoSkill/docs/archive/parity/SEARCH_LAYER_GAPS.md)
 
 ---
 

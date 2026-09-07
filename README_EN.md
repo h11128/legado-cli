@@ -180,23 +180,23 @@ Your AI Agent will automatically invoke skills, run `source-cli` in the backgrou
 | **🔍 Diagnostics & Repair** | `diagnose` | Executes the unidirectional chain (`Search ➔ Detail ➔ TOC ➔ Content`), auto-detecting rate limits & WAFs | `source-cli diagnose --url "https://site.com" --key "fantasy"` |
 | | `repair` | Generates a targeted `PatchPlan`, pushes to device, and performs step verification | `source-cli repair --mode oneshot --url "https://site.com"` |
 | | `dig` | Official end-to-end entrypoint: channel probe ➔ gates ➔ diagnose ➔ oneshot repair | `source-cli dig --url "https://site.com"` |
-| | `gate` | Pre-checks L0~L2 health gates (syntax / DNS / 404 / parked domains / Cloudflare challenge) | `source-cli gate check --url "https://site.com"` |
+| | `gate` | Pre-checks L0~L2 health gates (syntax / DNS / 404 / parked domains / Cloudflare challenge) | `source-cli gate --url "https://site.com"` |
 | **🌐 Probing & Creation** | `site-probe` | Raw HTML fetch, charset encoding detection, and JS-written form extraction | `source-cli site-probe --url "https://new-site.com"` |
-| | `source scaffold` | Generates a book source draft based on identified site family (Biquge/Jieqi/etc.) | `source-cli source scaffold --host "site.com" --type biquge` |
+| | `source scaffold` | Generates a book source draft based on identified site patterns | `source-cli source scaffold --url "http://www.site.com" --name "NewSite"` |
 | | `source push` | Writes book source rules directly into Legado memory and acquires `deep_active` lock | `source-cli source push --file source.json` |
 | **📱 Device Comms & Channel** | `check channel` | Checks Android Legado MCP connection, guards against deadlocks, supports forced clearing | `source-cli check channel --force-clear` |
 | | `check clear-cookies` | Clears accumulated stale session cookies and bot-detection challenges from the device | `source-cli check clear-cookies` |
 | | `mcp` | Manages remembered real-device MCP endpoints (list, probe, switch, add, remove) | `source-cli mcp list` / `source-cli mcp probe` |
-| **🦅 Domain Hunting & Migration**| `hunt` | High-concurrency discovery of working mirror domains from search engines and seed catalogs | `source-cli hunt --name "Biquge" --origin-host "old.com"` |
-| | `migrate` | Recursively rewrites all absolute URLs, covers, and hostkeys within the book source | `source-cli migrate --file source.json --to-host "new.com"` |
+| **🦅 Domain Hunting & Migration**| `hunt` | High-concurrency discovery of working mirror domains from search engines and seed catalogs | `source-cli hunt --url "https://site.com"` |
+| | `migrate` | Recursively rewrites all absolute URLs, covers, and hostkeys within the book source | `source-cli migrate --from-url "http://old.com" --to-url "http://new.com"` |
 | **🌊 Batch Triage & Waves** | `wave` | Concurrent multi-worker pre-triage with single-batch real-device verification dispatch | `source-cli wave --urls-file list.txt --thread-count 8` |
 | | `search-wave` | Rapid batch check across entire book collections to spot search disruptions & dead sources | `source-cli search-wave --urls-file list.txt` |
 | | `serial` | Watchdog-guarded single-channel serial queue scheduler with automatic timeouts | `source-cli serial --urls-file list.txt --url-timeout-s 120` |
 | **📊 Ledger & Closeout Gates** | `ledger append` | Records every diagnostic/repair step and live verification result for auditing | `source-cli ledger append --url "..." --step check --result "校验成功"` |
 | | `retro append` | Records novel traps and lessons learned into the durable retrospective store | `source-cli retro append --url "..." --status fixed --trap "..."` |
 | | `closeout` | Verification gatekeeper: halts workflow if the source has not succeeded on live device | `source-cli closeout pending` |
-| **⚙️ Cache & Rule Parsing** | `cache` / `ewma` | Domain rate-limit EWMA cooldown cache manager to prevent spamming blocked endpoints | `source-cli cache view` / `source-cli ewma show` |
-| | `parse` | Offline evaluation of CSS selectors, JS scripts, or regex extraction expressions | `source-cli parse css --html "..." --selector "div#content"` |
+| **⚙️ Cache & Rule Parsing** | `cache` / `ewma` | Domain rate-limit EWMA cooldown cache manager to prevent spamming blocked endpoints | `source-cli cache cooldown --url "https://site.com"` / `source-cli ewma` |
+| | `parse` | Offline evaluation of CSS selectors, JS scripts, or regex extraction expressions | `source-cli parse rule --rule "@css:div#content@text"` |
 
 #### 2. Local Compilation & Global Installation
 
@@ -238,7 +238,7 @@ source-cli retro append --url "https://target-site.com" --status fixed --trap "S
 source-cli site-probe --url "https://new-site.com"
 
 # 2. Generate scaffold based on recognized patterns
-source-cli source scaffold --host "new-site.com" --type biquge --name "Biquge Mirror"
+source-cli source scaffold --url "https://new-site.com" --name "Biquge Mirror"
 
 # 3. Push to real device Legado (claims deep_active lock)
 source-cli source push --file temp/new_source.json
