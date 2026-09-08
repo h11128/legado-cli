@@ -250,7 +250,7 @@ source-cli wave --urls-file failing_urls.txt --thread-count 8
 
 This workspace is natively tailored for AI pair-programming:
 
-- **Skill Entries**: `skills/legado-book-source` (creation) and `skills/legado-book-source-repair` (repair).
+- **Skill Entries**: `skills/legado-book-source` (creation), `skills/legado-book-source-repair` (repair), and `skills/legado-video-source-repair` (video/audio-type source repair, distinct from the novel search chain).
 - **Multi-Agent Setup**: See [`MULTI_AGENT_SETUP.md`](MULTI_AGENT_SETUP.md) for configuration details.
 - **Core Engineering Disciplines**:
   1. **Never claim fixed without device verification**: Local parsing success is not proof that the Legado app can read the source.

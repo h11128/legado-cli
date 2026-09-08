@@ -254,7 +254,7 @@ source-cli wave --urls-file shelf_urls.txt --thread-count 8
 
 本项目专为 AI 辅助编程深度优化，支持主流 AI 编程助手：
 
-- **技能核心入口**：`skills/legado-book-source`（书源创作）与 `skills/legado-book-source-repair`（书源修复）。
+- **技能核心入口**：`skills/legado-book-source`（书源创作）、`skills/legado-book-source-repair`（书源修复）与 `skills/legado-video-source-repair`（影视/听书类视频源修复，区别于小说搜索链路）。
 - **多端同步配置**：参考详细指南 [`MULTI_AGENT_SETUP.md`](MULTI_AGENT_SETUP.md)。
 - **排障心法与硬纪律**：
   1. **真机未验过绝不宣称修复成功**：严禁凭“本地脚本跑通”就向人类汇报完成，以手机返回为准。
