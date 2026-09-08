@@ -4,6 +4,7 @@
 Covers: save_source, debug_source, start_check_sources.
 Prefer `source-cli source push` / `diagnose` / Python LegadoMcp (also claims).
 """
+
 from __future__ import annotations
 
 import json
@@ -12,7 +13,6 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-
 
 CLAIM_TOOLS = (
     "save_source",
@@ -25,8 +25,7 @@ def _roots(payload: dict) -> list[Path]:
     out: list[Path] = []
     if payload.get("cwd"):
         out.append(Path(payload["cwd"]))
-    for r in payload.get("workspace_roots") or []:
-        out.append(Path(r))
+    out.extend(Path(r) for r in payload.get("workspace_roots") or [])
     env = (os.environ.get("LEGADO_SKILL_ROOT") or "").strip()
     if env:
         out.append(Path(env))
@@ -38,10 +37,13 @@ def _find_repo(payload: dict) -> Path | None:
     for r in _roots(payload):
         if (r / "crates" / "source-cli").is_dir():
             return r
-        if (r / "temp" / "full_fix").is_dir() and (r / "config" / "mcp_defaults.json").is_file():
-            # Prefer skill root when both legado and legadoSkill match markers
-            if (r / "skills" / "legado-book-source-repair").is_dir():
-                return r
+        # Prefer skill root when both legado and legadoSkill match markers
+        if (
+            (r / "temp" / "full_fix").is_dir()
+            and (r / "config" / "mcp_defaults.json").is_file()
+            and (r / "skills" / "legado-book-source-repair").is_dir()
+        ):
+            return r
     for r in _roots(payload):
         if (r / "temp" / "full_fix").is_dir() and (r / "config" / "mcp_defaults.json").is_file():
             return r
@@ -68,7 +70,7 @@ def _tool_input(payload: dict):
     return payload.get("tool_input") or payload.get("arguments")
 
 
-def _extract_url(tool_input, tool_name: str) -> str | None:
+def _extract_url(tool_input, _tool_name: str) -> str | None:  # noqa: PLR0911 - flat parse-and-return chain
     if tool_input is None:
         return None
     if isinstance(tool_input, str):
@@ -164,7 +166,7 @@ def main() -> int:
     if repo is not None:
         cli = _source_cli(repo)
         try:
-            r = subprocess.run(
+            r = subprocess.run(  # noqa: S603 - fixed argv, cli resolved from local repo path
                 [
                     str(cli),
                     "closeout",
@@ -179,6 +181,7 @@ def main() -> int:
                 text=True,
                 timeout=30,
                 env={**os.environ, "LEGADO_SKILL_ROOT": str(repo)},
+                check=False,
             )
             claim_ok = r.returncode == 0
             if not claim_ok:
@@ -190,8 +193,8 @@ def main() -> int:
         f"MCP {tool} for {url}. "
         f"deep_active claim={'ok' if claim_ok else 'FAILED: ' + claim_err}. "
         "Before next site: ledger append → retro append (trap/skill_fix/script_fix) → "
-        "novel trap → skill+harness or no_auto:<reason> → docs/source-repair-retrospective.md "
-        "→ git commit."
+        "novel trap → skill+harness or no_auto:<reason> → "
+        "docs/postmortem/2026-07-28-source-repair-retrospective.md → git commit."
     )
     print(json.dumps({"additional_context": ctx}, ensure_ascii=False))
     return 0

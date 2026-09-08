@@ -5,7 +5,7 @@ Parent chat ID: `f14f2834-eeb7-45bb-b325-9ba29e01c2db`
 Device MCP (late session): `http://10.0.0.139:1236/mcp` (token `1234`). Early session often used `10.0.0.43`.
 
 This file is the **canonical local record** of book-source repair work in this thread + related subagents. Pair with:
-- `docs/source-repair-retrospective.md` (why slow / infra gaps)
+- `docs/postmortem/2026-07-28-source-repair-retrospective.md` (why slow / infra gaps)
 - `temp/full_fix/repair_session_index.json` (machine index)
 
 ---
@@ -133,4 +133,4 @@ triage → fetch (headers) → minimal save → verify (--cooldown) → log
 
 Scripts: `scripts/repair_source.py` + `mcp_client.py` + `repair_helpers.py`  
 Skill: `E:/shared-skills/legado-book-source-repair/SKILL.md`  
-Before deep CSS work: skim `docs/ESSENTIAL_KNOWLEDGE_SUMMARY.md`, `docs/TOC_PAGINATION_RULES.md`, `assets/css选择器规则.txt`. Optional local dry-run: `debugger/test_universal.py` (not a substitute for device verify).
+Before deep CSS work: skim `docs/reference/essential-knowledge-summary.md`, `docs/guides/toc-pagination-rules.md`, `assets/css选择器规则.txt`. Optional local dry-run: `debugger/test_universal.py` (not a substitute for device verify).

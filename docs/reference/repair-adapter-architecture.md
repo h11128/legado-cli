@@ -548,7 +548,7 @@ fixtures/expected/               # golden JSON for parity
 config/repair_contracts/
 config/repair_config.json
 temp/full_fix/repair_state.sqlite
-docs/repair-adapter-architecture.md
+docs/reference/repair-adapter-architecture.md
 ```
 
 Legacy `repair_*.py` become shims calling `source-cli` after the matching Rust module reaches golden parity (no new business logic in scripts).
@@ -960,7 +960,7 @@ Every algorithm change that can affect wall time must update or waive §12.6 (`P
 
 **Work**
 
-1. Freeze script inventory (this doc §6 + §12.2). Add `docs/parity/SCRIPT_INVENTORY.json` generated from `scripts/*.py` (name, has `__main__`, key public funcs).
+1. Freeze script inventory (this doc §6 + §12.2). Add `docs/archive/parity/SCRIPT_INVENTORY.json` generated from `scripts/*.py` (name, has `__main__`, key public funcs).
 2. Add JSON Schema under `config/repair_contracts/` for every row in §8.1
    (report / gate / diagnose / patch / optimize / merge / verify / ledger /
    pattern_cluster / identify_result).
@@ -1223,7 +1223,7 @@ Functional parity (§12.1–12.3) alone is **not** enough to switch Skill/work-c
 
 Procedure:
 
-1. Record baselines with `repair_bench10.py` and/or timed oneshot on a fixed URL set → `docs/parity/PERF_BASELINE.json` (git sha + machine note).
+1. Record baselines with `repair_bench10.py` and/or timed oneshot on a fixed URL set → `docs/archive/parity/PERF_BASELINE.json` (git sha + machine note).
 2. Re-run same set on new entrypoints → `docs/parity/PERF_CANDIDATE.json`.
 3. `parity_selftest.py --suite perf` fails if any row exceeds the ratios above without an approved waiver in `ACCEPTANCE_LOG.md`.
 

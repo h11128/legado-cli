@@ -6,7 +6,7 @@
 「15 分钟」只是硬停上限，被误当成合理工期。壁钟时间主要被 **过程浪费** 吃掉，不是选择器本身难。
 
 破万卷 / 爱久久有效改动都很小；设备单源校验各约 **2–3 秒**。详见会话全记录：
-`docs/source-repair-session-log-2026-07-26.md` + `temp/full_fix/repair_session_index.json`。
+`docs/postmortem/2026-07-26-repair-session-log.md` + `temp/full_fix/repair_session_index.json`。
 
 ---
 
@@ -60,19 +60,19 @@ Earlier retro listed symptoms but under-specified:
 
 | Infra | Path | Used in repair waves? | Should have |
 |-------|------|------------------------|-------------|
-| Essential knowledge | `docs/ESSENTIAL_KNOWLEDGE_SUMMARY.md` | Barely | First read for HTML authenticity / rule pitfalls |
+| Essential knowledge | `docs/reference/essential-knowledge-summary.md` | Barely | First read for HTML authenticity / rule pitfalls |
 | CSS selector notes | `assets/css选择器规则.txt` | No | Before rewriting selectors |
-| TOC pagination rules | `docs/TOC_PAGINATION_RULES.md` | No | Any 目录失效 |
-| HTML authenticity checklist | `docs/HTML_AUTHENTICITY_CHECKLIST.md` | Partial (raw dumps yes, checklist no) | Always |
+| TOC pagination rules | `docs/guides/toc-pagination-rules.md` | No | Any 目录失效 |
+| HTML authenticity checklist | `docs/guides/html-authenticity-checklist.md` | Partial (raw dumps yes, checklist no) | Always |
 | Local debugger | `debugger/test_universal.py`, `legado_checker.py` | No | Quick PC sanity after HTML theory |
 | Example sources KB | `assets/knowledge_base/book_sources/` | No | Pattern match similar sites |
-| Upstream mega-skill | `skills/SKILLV0.7.md` | Only at install | Repair skill supersedes for fix loops |
+| Upstream mega-skill | `skills/archive/SKILLV0.7.md` | Only at install | Repair skill supersedes for fix loops |
 | Precheck / batch check | `scripts/precheck_*.py`, `batch_check_mcp.py` | Yes (bulk) | Keep for bulk only; pause before fix |
 | Disable dead | `scripts/disable_dead_sources.py` | Partial | After skip=dead |
 | Full check runner | `scripts/full_check_runner.py` | Yes — **also collided** | Lockfile + exclusive with fix |
 | Repair CLI (new) | `scripts/repair_source.py` | After the fact | **Default path now** |
 | Throwaway probes | `legado/.local-scripts/inspect_*.py` | **Heavy** | Prefer `repair_source.py fetch` |
-| Past fix writeups | `docs/歌书网书源错误分析与修复.md` etc. | No | Search docs before inventing |
+| Past fix writeups | `docs/archive/legacy-reports/geshu-source-repair-case.md` etc. | No | Search docs before inventing |
 
 **Conclusion:** We treated legadoSkill as a **temp dump + MCP scratchpad**, not as the repair toolchain. That forced every subagent to re-derive session glue, HTML fetch, and rule folklore — the real reason wall time exploded.
 
@@ -134,7 +134,7 @@ triage → fetch → 1–2 field edit → cooldown verify → log
 | `scripts/mcp_channel.py` | Exclusive bulk↔repair lock |
 | `scripts/repair_claim.py` | Anti fake-fixed + index append |
 | `config/mcp_defaults.json` | MCP URL/token SOT |
-| `docs/FIX_AGENT_PROMPT.md` | Subagent paste template |
+| `docs/guides/fix-agent-prompt.md` | Subagent paste template |
 
 Skill SOT: `E:/shared-skills/legado-book-source-repair/SKILL.md`
 
@@ -181,7 +181,7 @@ Default command: `python scripts/repair_one.py --url … --fail-msg …`
 
 ## Follow-up retro (migrate/video evening)
 
-See `docs/source-repair-retro-migrate-video-2026-07-26.md` and phase log `docs/source-repair-session-phase-migrate-video-2026-07-26.md`.
+See `docs/postmortem/2026-07-26-retro-migrate-video.md` and phase log `docs/postmortem/2026-07-26-session-phase-migrate-video.md`.
 
 ---
 
@@ -240,7 +240,7 @@ User preference locked into discipline + skill: **after every URL** → document
 |--------|-------|----------|
 | POST/m 搜索恒 0 条；浏览/详情仍正常 | 服务端搜索索引空 | **disable**（用户偏好） |
 | 曾用 JS 拉 home/top/sort + contains(key) | 假搜索，覆盖面差、脏链 | **撤回** — 不算正经修法 |
-| Bing/Google `site:host key` | KB 有先例：顶点 `ddxsmf` → `cn.bing.com/search?q=site:…` | **延期**：见 `docs/engine-site-search-deferred.md`（Brave MCP / Serper 等）；有价值再做 |
+| Bing/Google `site:host key` | KB 有先例：顶点 `ddxsmf` → `cn.bing.com/search?q=site:…` | **延期**：见 `docs/research/engine-site-search-deferred.md`（Brave MCP / Serper 等）；有价值再做 |
 
 Proof of prior engine-search pattern: `assets/knowledge_base/book_sources/6875_顶点小说ddxsmf_书源_20260218_103244.md`.
 
@@ -679,7 +679,7 @@ Proof: device verify `校验成功` ~3.5s（`checkDiscovery=false`）.
 |-------|---------|
 | Rust | `deep_active` claim；pending/progress deny unsealed；`ledger_gate` 拒假成功；goal 不计 hedged |
 | Hook | `legado_hedged_ledger_success` / `legado_l0_only_live_repair` deny；`legado_serial_long_await` ask |
-| Docs | `docs/deep-diagnose-anti-stall.md`；discipline §21–23；SKILL traps |
+| Docs | `docs/reference/deep-diagnose-anti-stall.md`；discipline §21–23；SKILL traps |
 
 ### 74b. Harness 复核发现（同日，跑 `harness verify-change` 才看到）
 

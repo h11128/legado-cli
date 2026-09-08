@@ -1,8 +1,8 @@
 # Retro: Domain migrate + video/file repair (2026-07-26 evening)
 
 Parent transcript ID: `f14f2834-eeb7-45bb-b325-9ba29e01c2db`  
-Companion docs: `source-repair-retrospective.md`, `domain-migrate-apply-2026-07-26.md`,  
-`source-repair-session-phase-migrate-video-2026-07-26.md`
+Companion docs: `2026-07-28-source-repair-retrospective.md`, `2026-07-26-domain-migrate-apply.md`,  
+`2026-07-26-session-phase-migrate-video.md`
 
 ## Conclusion
 

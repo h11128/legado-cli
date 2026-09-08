@@ -13,11 +13,10 @@ const MAX_SNIPPET: usize = 220;
 
 fn preferred_rank(name: &str) -> i32 {
     match name {
-        "ESSENTIAL_KNOWLEDGE_SUMMARY.md" => 0,
-        "TOC_PAGINATION_RULES.md" => 1,
-        "HTML_AUTHENTICITY_CHECKLIST.md" => 2,
-        "source-repair-retrospective.md" => 3,
-        "css选择器规则.txt" => 4,
+        "essential-knowledge-summary.md" => 0,
+        "toc-pagination-rules.md" => 1,
+        "html-authenticity-checklist.md" => 2,
+        "2026-07-28-source-repair-retrospective.md" => 3,
         _ => 50,
     }
 }

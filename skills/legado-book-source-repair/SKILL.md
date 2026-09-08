@@ -58,7 +58,7 @@ while fixed_n < 100:
 **Anti-pattern (banned):** classify/probe 20–50 tagged fails to “find a good one”.
 That burned minutes and violated the 2–3 min budget. Pick → diagnose → patch → verify.
 **Also banned:** batch/oneshot 对 `l2_http_dead` / timeout **直接 disable** 而不跑 hunt（见 trap `dead_skip_without_hunt`）。
-**Also banned:** 仅凭 gate/serial/hunt-empty/「搜索失效」标签口头「修不了」收工（见 trap `shallow_unfixable_claim`）；批次 deep dig 结束必须写 `docs/postmortem/source-repair-retrospective.md` 总教训，不只 per-URL retro。
+**Also banned:** 仅凭 gate/serial/hunt-empty/「搜索失效」标签口头「修不了」收工（见 trap `shallow_unfixable_claim`）；批次 deep dig 结束必须写 `docs/postmortem/2026-07-28-source-repair-retrospective.md` 总教训，不只 per-URL retro。
 
 ## Report modes (both supported)
 
@@ -95,7 +95,7 @@ steps 0/0b–6 — **same** path, not MCP-first.
 
 User standing preference (this repo): **every** oneshot (fixed / skip / fail) must:
 
-1. **Document** — append ledger; short note in `docs/postmortem/source-repair-retrospective.md`.
+1. **Document** — append ledger; short note in `docs/postmortem/2026-07-28-source-repair-retrospective.md`.
 2. **Reflect** — `source-cli retro append --url … --status … --trap … --script-fix …`
 3. **Improve** — decision tree below (gate enforces it).
 
@@ -149,7 +149,7 @@ source-cli progress next   # 先跑 closeout pending
 | **name_similar_video_not_novel_twin** | 原站超时；同名 `.com` 等可开但是影视/视频壳（标题含影院/电影）；hunt 无小说候选 | **勿**迁到影视站。`skip`+disable；靠自动换源。Harness：`no_auto:title_sniff_video` |
 | **search_empty_shell_open_ok** | `search.html` 200 但无结果节点（`#sitembox`/`dl` 空）；混淆字段（如 `369koolearn`）POST 仍空壳；详情 `#list`+`#content` 可读 | **勿**浅判整源死。修/保留打开路径；验证用 `checkSearch=false`+`checkDiscovery=true`（有 explore）或 `debug_source(bookUrl)`；**禁止** search+discovery 双关（见下条）；有活 `m.` 孪生则优先；假搜索勿用热门按钮当 bookList。Harness：`no_auto:open_path_verify` |
 | **check_search_discovery_both_off_vacuous** | MCP `start_check_sources` 同时 `checkSearch=false`+`checkDiscovery=false`（且 `checkDomain=false`）→ `durationMs`≈1–10 仍报「校验成功」 | **假成功**：`BookSourceCheckRunner.doCheckSource` 未拉书。无搜索时必须开发现，或只用 `debug_source` 打开路径当证据。Harness：runner 拒「校验项为空」；`legado_mcp` 强制 `checkDiscovery=true` |
-| **shallow_unfixable_claim** | Agent 仅凭 `gate`/`serial`/`hunt empty`/「搜索失效」标签口头判「修不了」；或把 `action=hunt` 缓修说成 skip；用户再深挖又能迁域/修打开路径 | **禁止**浅层终局。收工前至少：PC 首页+搜索+一本 TOC/正文，或手机 `debug_source`+`get_http_logs`；hunt 桶必须先 probe。搜索死仍要看打开路径；批次结束写 `docs/postmortem/source-repair-retrospective.md` 总教训。Harness：`no_auto:agent_must_html_or_phone_debug` |
+| **shallow_unfixable_claim** | Agent 仅凭 `gate`/`serial`/`hunt empty`/「搜索失效」标签口头判「修不了」；或把 `action=hunt` 缓修说成 skip；用户再深挖又能迁域/修打开路径 | **禁止**浅层终局。收工前至少：PC 首页+搜索+一本 TOC/正文，或手机 `debug_source`+`get_http_logs`；hunt 桶必须先 probe。搜索死仍要看打开路径；批次结束写 `docs/postmortem/2026-07-28-source-repair-retrospective.md` 总教训。Harness：`no_auto:agent_must_html_or_phone_debug` |
 | **content_qsbs_bb_base64** | 正文章节 HTML 含 `qsbs.bb('…base64…')`；`##…##@js:base64Decode` 易截断触发 Hutool AIOOBE | `ruleContent.content` 用 `@js`：`indexOf("qsbs.bb('")`→`substring`→`java.base64Decode`；搜索若 meta refresh 回首页则 `checkSearch=false` 或 disable §16。Harness：`no_auto:按正文脚本改` |
 | **toc_href_slash_twin_unreachable** | 详情 TOC 几乎全是 `href="/"`（仅最新章真链）；PC 孪生（如 `biquge5200.cc`/`b5200.org`）目录/搜索 OK，但手机 Cronet 对 `23.224.*` 60s timeout | **勿**浅判「站点活着就能修」；手机不可达孪生 → `skip`+留证据；可达再 migrate。Harness：`no_auto:PC探针+手机HTTP日志` |
 | 假详情 (wmp8) | list-empty + books≤1 + `/s.php` | **search** |

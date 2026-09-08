@@ -54,7 +54,7 @@ Create and repair share the same close-out / improve gate — do not wait for th
  (bookUrl → infoHtml trap).
 14. **After every source attempt (repair OR create: fixed/created / skip / fail), mandatory close-out**
     — do not pick the next URL / site until these finish:
-    1. **Document**: short note in `docs/postmortem/source-repair-retrospective.md` (or dated retro)
+    1. **Document**: short note in `docs/postmortem/2026-07-28-source-repair-retrospective.md` (or dated retro)
        + `source-cli ledger append` / `source-cli retro append`.
     2. **Reflect**: `source-cli retro append` with `trap` / `harness` / `script_fix` /
        `skill_fix` filled honestly (what burned time, what the agent missed).
@@ -166,5 +166,5 @@ Create SOT: `docs/guides/book-source-create.md` + skill `legado-book-source`.
 
 Cache: `temp/full_fix/cache/`. MCP: `config/mcp_defaults.json`. 
 Ledger: `temp/full_fix/repair_session_ledger.jsonl`.  
-Retros: `docs/postmortem/source-repair-retrospective.md`, `docs/postmortem/source-repair-retro-migrate-video-2026-07-26.md`,
+Retros: `docs/postmortem/2026-07-28-source-repair-retrospective.md`, `docs/postmortem/2026-07-26-retro-migrate-video.md`,
 `temp/full_fix/repair_serial_retro.jsonl`.

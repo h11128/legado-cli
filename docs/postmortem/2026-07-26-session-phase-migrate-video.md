@@ -2,7 +2,7 @@
 
 Append-only chronicle for the “继续 / 换域 / 影视 flow” slice.  
 Parent chat: `f14f2834-eeb7-45bb-b325-9ba29e01c2db`.  
-Retro: `docs/source-repair-retro-migrate-video-2026-07-26.md`.
+Retro: `docs/postmortem/2026-07-26-retro-migrate-video.md`.
 
 Use `python scripts/repair_session_log.py` for new lines going forward.
 

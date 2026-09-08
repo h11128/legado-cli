@@ -7,6 +7,7 @@ retro append before the next site — do not wait for the user to remind.
 
 Workspace may be `legado` while deep_active lives in sibling `legadoSkill` — search both.
 """
+
 from __future__ import annotations
 
 import json
@@ -21,14 +22,13 @@ def _candidate_roots(payload: dict) -> list[Path]:
         v = payload.get(key)
         if v:
             roots.append(Path(v))
-    for v in payload.get("workspace_roots") or []:
-        roots.append(Path(v))
+    roots.extend(Path(v) for v in payload.get("workspace_roots") or [])
     env = (os.environ.get("LEGADO_SKILL_ROOT") or "").strip()
     if env:
         roots.append(Path(env))
     # Sibling / fixed skill roots (agents often open legado, not legadoSkill)
     extra: list[Path] = []
-    for r in list(roots):
+    for r in roots:
         extra.append(r.parent / "legadoSkill")
         if r.name == "legado":
             extra.append(r.parent / "legadoSkill")
@@ -61,7 +61,7 @@ def _find_active(payload: dict) -> Path | None:
     return None
 
 
-def main() -> int:
+def main() -> int:  # noqa: PLR0911 - early-return dispatch reads clearer than nesting
     raw = sys.stdin.read() or "{}"
     try:
         payload = json.loads(raw)
@@ -77,7 +77,8 @@ def main() -> int:
         loop_count = int(payload.get("loop_count") or 0)
     except (TypeError, ValueError):
         loop_count = 0
-    if loop_count >= 3:
+    max_auto_nudges = 3
+    if loop_count >= max_auto_nudges:
         # Cap auto-nudges; leftover claim needs explicit closeout release.
         print("{}")
         return 0
@@ -107,7 +108,7 @@ def main() -> int:
         f"  source-cli retro append --url '{url}' --status fixed|skip|fail "
         "--trap '…' --skill-fix 0|1 --script-fix '…'\n"
         "Novel trap → update skill + harness (or script_fix=no_auto:<reason≥8>) "
-        "+ short note in docs/source-repair-retrospective.md → git commit.\n"
+        "+ short note in docs/postmortem/2026-07-28-source-repair-retrospective.md → git commit.\n"
         "Escape only: source-cli closeout release --url … --status skip"
     )
     print(json.dumps({"followup_message": msg}, ensure_ascii=False))
