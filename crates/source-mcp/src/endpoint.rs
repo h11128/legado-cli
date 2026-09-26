@@ -86,7 +86,8 @@ impl McpEndpoint {
     pub fn load_config(path: &Path) -> Result<DefaultsConfig, PortError> {
         let raw = fs::read_to_string(path)
             .map_err(|e| PortError::Permanent(format!("read {}: {e}", path.display())))?;
-        let data: DefaultsConfig = serde_json::from_str(&raw)
+        let raw = raw.trim_start_matches('\u{feff}');
+        let data: DefaultsConfig = serde_json::from_str(raw)
             .map_err(|e| PortError::ContractViolation(format!("mcp_defaults.json: {e}")))?;
         Ok(data)
     }

@@ -21,8 +21,10 @@ pub fn mcp_url_for(host: &str, port: u16) -> String {
 }
 
 pub fn probe_mcp(url: &str, token: &str, timeout_s: f64) -> bool {
+    let dur = Duration::from_millis((timeout_s.max(0.2) * 1000.0) as u64);
     let agent = ureq::AgentBuilder::new()
-        .timeout(Duration::from_secs_f64(timeout_s.max(1.0)))
+        .timeout_connect(dur)
+        .timeout(dur)
         .build();
     let body = serde_json::json!({
         "jsonrpc": "2.0",
@@ -187,10 +189,58 @@ fn discover_subnet(seed_host: &str, token: &str, port: u16, timeout_s: f64) -> V
     hits
 }
 
+fn discover_arp(token: &str, port: u16, timeout_s: f64) -> Vec<Value> {
+    let Ok(out) = Command::new("arp").arg("-a").output() else {
+        return Vec::new();
+    };
+    let text = String::from_utf8_lossy(&out.stdout);
+    let mut ips = Vec::new();
+    for line in text.lines() {
+        for word in line.split_whitespace() {
+            let parts: Vec<_> = word.split('.').collect();
+            if parts.len() == 4 && parts.iter().all(|p| p.parse::<u8>().is_ok()) {
+                let ip = word.trim();
+                if !ip.ends_with(".255")
+                    && !ip.starts_with("224.")
+                    && !ip.starts_with("239.")
+                    && !ip.starts_with("127.")
+                {
+                    ips.push(ip.to_string());
+                }
+            }
+        }
+    }
+    ips.sort();
+    ips.dedup();
+    let mut hits = Vec::new();
+    for ip in ips {
+        let Ok(addr) = format!("{ip}:{port}").parse::<std::net::SocketAddr>() else {
+            continue;
+        };
+        if std::net::TcpStream::connect_timeout(&addr, Duration::from_millis(300)).is_err() {
+            continue;
+        }
+        let url = mcp_url_for(&ip, port);
+        if probe_mcp(&url, token, timeout_s.min(1.0)) {
+            hits.push(json!({
+                "host": ip,
+                "port": port,
+                "mcp_url": url,
+                "via": "arp",
+            }));
+            break;
+        }
+    }
+    hits
+}
+
 pub fn discover_all(token: &str, timeout_s: f64) -> Vec<Value> {
     let mut hits = discover_dns_sd(token, DEFAULT_PORT, timeout_s);
     if hits.is_empty() {
         hits = discover_adb(token, DEFAULT_PORT, timeout_s);
+    }
+    if hits.is_empty() {
+        hits = discover_arp(token, DEFAULT_PORT, timeout_s);
     }
     if hits.is_empty() {
         if let Ok(ep) = McpEndpoint::load_defaults() {
@@ -334,11 +384,11 @@ fn dirs_home() -> PathBuf {
 
 pub fn apply_discovery(write: bool, timeout_s: f64, path: &Path) -> Result<Value, PortError> {
     let data = if path.is_file() {
-        serde_json::from_str::<Value>(
-            &fs::read_to_string(path)
-                .map_err(|e| PortError::Permanent(format!("read {}: {e}", path.display())))?,
-        )
-        .map_err(|e| PortError::Permanent(format!("json: {e}")))?
+        let text = fs::read_to_string(path)
+            .map_err(|e| PortError::Permanent(format!("read {}: {e}", path.display())))?;
+        let text = text.trim_start_matches('\u{feff}');
+        serde_json::from_str::<Value>(text)
+            .map_err(|e| PortError::Permanent(format!("json: {e}")))?
     } else {
         json!({})
     };
