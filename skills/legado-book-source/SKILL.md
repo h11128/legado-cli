@@ -290,6 +290,17 @@ Use when the user asks to **find sites** or make **出版/公版/古籍** source
 | IDE `save_source` escape | JSON 解析失败 / 规则被截断 | `source-cli source push --file` |
 | PC curl OK / phone list=0 | 同公网 IP + 手机 Cookie 已限流 | clear phone cookies；少用 PC 连搜同域 |
 | `source-cli` not found | command not found | `crates/target/debug/source-cli.exe` or `cargo install --path crates/source-cli` |
+| `whole_site_waf_pretends_one_chapter_empty` | 用户报"某书某章内容空"但其实是源**整站被 WAF / 域名失效**拦死；fresh search 和单章直访都 302→第三方(google.com / 停车页)。`debug_source` 表现为"列表为空,按详情页解析" → 章节 URL 也跳到 google | **先验证全站可达再改规则**: curl `/so/{key}` + 单章直访, 都跨域就归档源 + 推荐同站族替代(如 `bqquge` → `biquge2345`、`shudugu` → 其它笔趣阁). **绝对不动 `ruleContent`/`ruleToc`** —— 站点死了改规则无效. 还要沿 `bookSourceUrl` 的跨域重定向链 (`.com → .org → google`) 追到底, 别被中间跳板误导 |
+| `push_does_not_disable_source` | `source-cli source push --file <enabled-false.json>` 后 `source list` 仍显示 `enabled: true`; 新规则的 `enabled: false` 被 MCP `save_source` 的 `preserveEnabled=true` 默认行为吃掉. CLI 无覆盖 flag | **CLI 不能禁用既有源**. 归档路径: `source-cli source get --url … > temp/archive_<host>_full.json` 备份 → `source-cli source delete --urls <url>`. 不要 push 一个 `enabled:false` 替身期望它"覆盖", 会被 preserve. (详 §Disable 流程) |
+
+## Disable / archive a live source (don't try push)
+
+`source push` 不能禁用既有源（见上表 trap 行）。要归档一个源：
+
+1. **备份**：`source-cli source get --url "https://<host>" > temp/archive_<host>_full.json`（完整 JSON，含 exploreUrl / ruleContent / ruleToc 等，方便以后 migrate 或借鉴规则）。
+2. **删除**：`source-cli source delete --urls "https://<host>"`。删除后源从手机端消失，规则仅在 `temp/archive_*` 和 `temp/full_fix/cache/diagnose/*.json` 留底。
+3. **close-out**：`ledger append --url … --step check --result 'fail:…'` + `retro append --url … --status fail --trap '<trap_from_repair_skill>' --skill-fix --script-fix 'no_auto:<≥8 char reason>'`。
+4. **不要** push 一个 `enabled: false` 替身期望它覆盖——会被 preserve，且 `source list` 仍报 enabled。
 
 ## When MCP is missing
 
