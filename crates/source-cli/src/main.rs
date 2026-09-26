@@ -620,6 +620,7 @@ fn main() -> ExitCode {
         }),
         Cmd::Install { force } => run_install(force),
         Cmd::Mcp { cmd } => run_mcp(cmd),
+        Cmd::Chapter { cmd } => run_chapter(cmd),
         Cmd::Version => run_version(),
     }
 }

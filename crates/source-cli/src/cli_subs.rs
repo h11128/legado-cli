@@ -323,3 +323,32 @@ pub enum McpSub {
         timeout: f64,
     },
 }
+
+#[derive(Subcommand)]
+pub enum ChapterSub {
+    /// Find a chapter in a novel TOC by chapter number or title keyword.
+    Find {
+        #[arg(long)]
+        url: Option<String>,
+        #[arg(long)]
+        html: Option<PathBuf>,
+        #[arg(long)]
+        num: Option<u32>,
+        #[arg(long)]
+        title: Option<String>,
+        #[arg(long, default_value_t = 3)]
+        context: usize,
+    },
+    /// Inspect a chapter's content, detect anti-theft smells (antonym substitution, watermarks, truncation), and optionally extract clean text.
+    Inspect {
+        #[arg(long)]
+        url: Option<String>,
+        #[arg(long)]
+        html: Option<PathBuf>,
+        #[arg(long)]
+        out: Option<PathBuf>,
+        #[arg(long, default_value_t = 15)]
+        lines: usize,
+    },
+}
+

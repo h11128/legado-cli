@@ -264,6 +264,7 @@ source-cli progress next   # 先跑 closeout pending
 | **dict_url_decode_fake_name** (haici/dict.cn) | `name=@js:decodeURI(baseUrl…)` + `bookList=body` → 任意换源关键词都「书名命中」；详情「该词条未找到」 | bookList `@js` 遇未找到返回 `[]`；name 用页面 `tag.h1`/`.word`；换源侧 `isAcceptableChangeSourceHit`（空/假最新章、本地有作者却空作者、词典 intro）。Harness：`ChangeBookSourceQuality` |
 | **url_decode_fake_booklist_non_novel** (百度图片/知道) | `bookList=@js:[{title:decodeURIComponent(word…)}]` 把搜索词伪造成一书；非小说站 | `bookList=@js:[]`；换源 `isNonNovelSearchHost` 黑名单。Harness：`ChangeBookSourceQuality` |
 | **qq_search_state_not_items** (白浏览器/松鹤) | `bookList=$.data.state[*]` + 搜索 JSON 无 lastChapter → 换源空最新章被丢 | flatten `novel_search_list.items`；bookInfo 补 `lastSerialname`；App 侧作者+长简介可放行空最新章 |
+| **antonym_antitheft_corrupted_chapter** | VIP 章节反义词替换（“热却期开始”、“都没了小幅”、角色名轮换对调）；单页抓取了防盗版本 | **严禁**现场手写临时 Python 脚本。统一调用 `source-cli chapter find` 定位目录真链；`source-cli chapter inspect` 嗅探防盗标记（`has_antonym_smell`）、水印与截断；若仅单页防盗而后续（如 152+）正常，优先告知跳读/局部净化，勿做盲目全局词替换。Harness：`source-cli chapter` |
 
 ## Worked examples
 
@@ -306,6 +307,7 @@ source-cli progress next   # 先跑 closeout pending
 | **`source-cli check`** | channel / precheck / batch / full / **clear-cookies** |
 | **`source-cli source`** | triage / fetch / verify / log / **push --file** |
 | **`source-cli queue`** | refresh-index / rt queue |
+| **`source-cli chapter`** | **find** (目录章节定位与上下文) / **inspect** (正文提取+反义防盗/水印/截断嗅探) |
 | **Create guide** | `docs/guides/book-source-create.md` (CookieJar / debug keys / CLI path) |
 | **`source-cli wave` / `harvest` / `serial`** | Batch orchestration |
 | **`source-cli parse`** | Offline rule/url analysis |

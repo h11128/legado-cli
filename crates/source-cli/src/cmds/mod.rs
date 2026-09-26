@@ -1,6 +1,7 @@
 //! CLI subcommands for source-cli.
 
 mod cache_cmd;
+mod chapter_cmd;
 mod check_cmd;
 mod check_ops;
 mod claim_cmd;
@@ -54,6 +55,7 @@ mod source_cmd;
 mod version;
 mod video_route;
 
+pub use chapter_cmd::run_chapter;
 pub use claim_cmd::{run_claim, ClaimCmd};
 pub use closeout::{run_closeout, CloseoutArgs};
 pub use debug_vs_check::{run_debug_vs_check, DebugVsCheckArgs};

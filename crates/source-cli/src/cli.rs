@@ -1,8 +1,8 @@
 //! Clap CLI definition (kept out of main.rs for the 300-line limit).
 
 use crate::cli_subs::{
-    ClaimSub, CloseoutSub, LedgerSub, McpSub, ParseSub, PatternSub, ProgressSub, RetroSub,
-    SourceSub,
+    ChapterSub, ClaimSub, CloseoutSub, LedgerSub, McpSub, ParseSub, PatternSub, ProgressSub,
+    RetroSub, SourceSub,
 };
 use crate::ops_subs::{CacheSub, CheckSub, DbSub, KnowledgeSub, QueueSub};
 use clap::{Parser, Subcommand};
@@ -420,6 +420,11 @@ pub enum Cmd {
     Mcp {
         #[command(subcommand)]
         cmd: McpSub,
+    },
+    /// Novel chapter utilities: TOC chapter discovery & anti-theft smell inspection.
+    Chapter {
+        #[command(subcommand)]
+        cmd: ChapterSub,
     },
     Version,
 }
