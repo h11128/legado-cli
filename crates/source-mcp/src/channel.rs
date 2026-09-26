@@ -204,7 +204,7 @@ fn read_lock(path: &Path) -> Result<Option<Value>, PortError> {
     }
     let raw = fs::read_to_string(path)
         .map_err(|e| PortError::Permanent(format!("read {}: {e}", path.display())))?;
-    let trimmed = raw.trim();
+    let trimmed = raw.trim_start_matches('\u{feff}').trim();
     if trimmed.starts_with('{') {
         match serde_json::from_str::<Value>(trimmed) {
             Ok(v) => Ok(Some(v)),

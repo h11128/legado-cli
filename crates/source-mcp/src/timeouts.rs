@@ -56,7 +56,8 @@ impl McpTimeouts {
         let Ok(raw) = fs::read_to_string(path) else {
             return Self::default();
         };
-        let Ok(data) = serde_json::from_str::<TimeoutsFile>(&raw) else {
+        let raw = raw.trim_start_matches('\u{feff}');
+        let Ok(data) = serde_json::from_str::<TimeoutsFile>(raw) else {
             return Self::default();
         };
         let d = Self::default();

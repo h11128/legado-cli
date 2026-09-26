@@ -22,7 +22,8 @@ pub fn default_sqlite_path() -> Result<PathBuf, PortError> {
     let cfg_path = root.join("config/repair_db_defaults.json");
     if cfg_path.is_file() {
         if let Ok(raw) = std::fs::read_to_string(&cfg_path) {
-            if let Ok(v) = serde_json::from_str::<serde_json::Value>(&raw) {
+            let raw = raw.trim_start_matches('\u{feff}');
+            if let Ok(v) = serde_json::from_str::<serde_json::Value>(raw) {
                 if let Some(p) = v.get("db_path").and_then(|x| x.as_str()) {
                     let path = PathBuf::from(p);
                     return Ok(if path.is_absolute() {

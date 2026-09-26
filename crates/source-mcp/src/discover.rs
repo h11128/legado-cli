@@ -189,21 +189,25 @@ fn discover_subnet(seed_host: &str, token: &str, port: u16, timeout_s: f64) -> V
     hits
 }
 
-fn discover_arp(token: &str, port: u16, timeout_s: f64) -> Vec<Value> {
-    let Ok(out) = Command::new("arp").arg("-a").output() else {
-        return Vec::new();
-    };
-    let text = String::from_utf8_lossy(&out.stdout);
+pub(crate) fn parse_arp_text(text: &str) -> Vec<String> {
     let mut ips = Vec::new();
     for line in text.lines() {
-        for word in line.split_whitespace() {
-            let parts: Vec<_> = word.split('.').collect();
+        let trimmed_line = line.trim();
+        if trimmed_line.starts_with("Interface:") || trimmed_line.starts_with("接口:") {
+            continue;
+        }
+        for word in trimmed_line.split_whitespace() {
+            let clean = word.trim_matches(|c: char| c == '(' || c == ')' || c == '[' || c == ']');
+            let parts: Vec<_> = clean.split('.').collect();
             if parts.len() == 4 && parts.iter().all(|p| p.parse::<u8>().is_ok()) {
-                let ip = word.trim();
+                let ip = clean.trim();
                 if !ip.ends_with(".255")
                     && !ip.starts_with("224.")
                     && !ip.starts_with("239.")
                     && !ip.starts_with("127.")
+                    && !ip.starts_with("169.254.")
+                    && ip != "255.255.255.255"
+                    && ip != "0.0.0.0"
                 {
                     ips.push(ip.to_string());
                 }
@@ -212,6 +216,19 @@ fn discover_arp(token: &str, port: u16, timeout_s: f64) -> Vec<Value> {
     }
     ips.sort();
     ips.dedup();
+    ips
+}
+
+fn arp_ips() -> Vec<String> {
+    let Ok(out) = Command::new("arp").arg("-a").output() else {
+        return Vec::new();
+    };
+    let text = String::from_utf8_lossy(&out.stdout);
+    parse_arp_text(&text)
+}
+
+fn discover_arp(token: &str, port: u16, timeout_s: f64) -> Vec<Value> {
+    let ips = arp_ips();
     let mut hits = Vec::new();
     for ip in ips {
         let Ok(addr) = format!("{ip}:{port}").parse::<std::net::SocketAddr>() else {
@@ -293,6 +310,7 @@ pub fn discover(timeout_s: f64) -> Result<Value, PortError> {
         }
     }
     candidates.extend(adb_wlan_ips());
+    candidates.extend(arp_ips());
     candidates.sort();
     candidates.dedup();
     Ok(json!({ "found": false, "candidates": candidates, "hits": hits }))
@@ -312,7 +330,8 @@ pub fn sync_cursor_mcp_json(mcp_url: &str, token: &str) -> Value {
         out["error"] = json!("read");
         return out;
     };
-    let Ok(mut cfg) = serde_json::from_str::<Value>(&raw) else {
+    let raw = raw.trim_start_matches('\u{feff}');
+    let Ok(mut cfg) = serde_json::from_str::<Value>(raw) else {
         out["error"] = json!("json");
         return out;
     };
@@ -553,3 +572,37 @@ pub fn write_defaults(discovery: &Value, path: &Path) -> Result<(), PortError> {
     .map_err(|e| PortError::Permanent(e.to_string()))?;
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_arp_windows_format() {
+        let text = r#"
+Interface: 10.0.0.22 --- 0x14
+  Internet Address      Physical Address      Type
+  10.0.0.1              00-11-22-33-44-55     dynamic
+  10.0.0.43             aa-bb-cc-dd-ee-ff     dynamic
+  10.0.0.255            ff-ff-ff-ff-ff-ff     static
+  224.0.0.22            01-00-5e-00-00-16     static
+  239.255.255.250        01-00-5e-7f-ff-fa     static
+  255.255.255.255        ff-ff-ff-ff-ff-ff     static
+"#;
+        let ips = parse_arp_text(text);
+        assert_eq!(ips, vec!["10.0.0.1", "10.0.0.43"]);
+    }
+
+    #[test]
+    fn test_parse_arp_unix_format() {
+        let text = r#"
+? (10.0.0.1) at 0:11:22:33:44:55 on en0 ifscope [ethernet]
+router (192.168.1.1) at aa:bb:cc:dd:ee:ff on en0 ifscope [ethernet]
+? (10.0.0.255) at ff:ff:ff:ff:ff:ff on en0 ifscope [ethernet]
+? (127.0.0.1) at 0:0:0:0:0:0 on lo0 ifscope [loopback]
+"#;
+        let ips = parse_arp_text(text);
+        assert_eq!(ips, vec!["10.0.0.1", "192.168.1.1"]);
+    }
+}
+
