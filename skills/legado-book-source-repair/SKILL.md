@@ -26,7 +26,8 @@ Track: `source-cli progress status`.
 | Doc | Path |
 |-----|------|
 | MCP defaults (SOT) | `config/mcp_defaults.json` |
-| MCP discover | `source-cli discover --write`（内置 Rust 局域网 ARP 快速探针，秒级自愈并同步 Cursor `mcp.json`） |
+| MCP discover | `source-cli discover --write`（内置 Rust 局域网 ARP 快速探针，秒级自愈） |
+| Agent MCP 接入 | `source-cli mcp bridge`（stdio 转发；手机换 IP 时自动重新发现，Claude/Cursor/Codex 配置无需再改） |
 | Platform (Rust) | `docs/reference/repair-adapter-architecture.md` — **full Rust cutover 2026-07-28** |
 | Anti-stall matrix | `docs/reference/deep-diagnose-anti-stall.md` |
 
@@ -304,6 +305,7 @@ source-cli progress next   # 先跑 closeout pending
 | **`source-cli retro`** | Per-source reflection + optional ledger seal |
 | **`source-cli progress` / `ledger`** | Queue next + session log |
 | **`source-cli discover`** | MCP LAN probe + write mcp_defaults.json |
+| **`source-cli mcp bridge`** | stdio MCP 转发到手机；断连时自动重新发现并重放 initialize |
 | **`source-cli check`** | channel / precheck / batch / full / **clear-cookies** |
 | **`source-cli source`** | triage / fetch / verify / log / **push --file** |
 | **`source-cli queue`** | refresh-index / rt queue |

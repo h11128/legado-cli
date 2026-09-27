@@ -66,16 +66,21 @@ surface named `legado` (server may appear as `legado` / `user-legado`).
 - **Create new sources / 找站:** `docs/guides/book-source-discovery.md` + `source-cli site-probe`
 - **Repair failures:** skill **`legado-book-source-repair`** + `source-cli repair` (not ad-hoc Python)
 
-Config locations:
+Config locations — every agent launches the **stdio bridge** `source-cli mcp bridge` instead of a
+LAN URL. The bridge reads `mcp_defaults.json`, and when the phone is unreachable it re-discovers
+(remembered endpoints → adb/ARP/subnet), rewrites the SOT and replays `initialize` — so a DHCP
+change never requires editing agent configs.
 
-| Agent | Config |
+| Agent | Config (`legado` entry) |
 |-------|--------|
-| Cursor | `~/.cursor/mcp.json` → `mcpServers.legado` (kept in sync by `source-cli discover --sync-cursor`) |
-| Codex | `~/.codex/config.toml` → `[mcp_servers.legado]` |
-| Claude Code | `~/.claude.json` → `mcpServers.legado` (`type: http`) |
-| Hermes | `%LOCALAPPDATA%/hermes/config.yaml` → `mcp_servers.legado` |
+| Claude Code | `~/.claude.json` → `mcpServers.legado` = `{"type":"stdio","command":"<~/.cargo/bin/source-cli.exe>","args":["mcp","bridge"]}` |
+| Cursor | `~/.cursor/mcp.json` → `mcpServers.legado` = `{"command":"<source-cli.exe>","args":["mcp","bridge"]}` |
+| Codex | `~/.codex/config.toml` → `[mcp_servers.legado]` `command = '<source-cli.exe>'`, `args = ["mcp", "bridge"]` |
+| Hermes | `%LOCALAPPDATA%/hermes/config.yaml` → `mcp_servers.legado` (same command/args if added) |
 
-If **Cursor IDE** MCP tools still fail after discover wrote a new URL: reload MCP / restart the agent once. Do **not** ask the user to hand-edit the IP.
+`discover --sync-cursor` leaves bridge entries alone. If an agent still has a `url:` entry, switch it to
+the bridge rather than updating the IP. Bridge logs go to the agent's MCP stderr log
+(`[mcp-bridge] phone moved: A -> B`). Do **not** ask the user to hand-edit the IP.
 
 ### Tools
 

@@ -4,6 +4,7 @@
 //! `scripts/repair_wait.py`, `scripts/repair_session_log.py`.
 
 mod batch_verify;
+mod bridge;
 mod channel;
 mod channel_pid;
 mod client;
@@ -21,6 +22,7 @@ pub use channel::{
     clear_stale_locks, force_clear_locks, status as channel_status_raw, FsChannelGuard,
     FsChannelPort, BULK_STALE_S, REPAIR_STALE_S,
 };
+pub use bridge::run_stdio_bridge;
 pub use client::McpClient;
 pub use discover::{
     apply_discovery, discover, ensure_reachable, probe_mcp, sync_cursor_mcp_json,

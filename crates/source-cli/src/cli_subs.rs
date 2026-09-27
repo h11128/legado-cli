@@ -322,6 +322,9 @@ pub enum McpSub {
         #[arg(long, default_value_t = 3.0)]
         timeout: f64,
     },
+    /// stdio MCP server that forwards to the phone and re-discovers it when its IP changes.
+    /// Agent configs point here (`command: source-cli, args: [mcp, bridge]`) instead of a LAN URL.
+    Bridge,
 }
 
 #[derive(Subcommand)]

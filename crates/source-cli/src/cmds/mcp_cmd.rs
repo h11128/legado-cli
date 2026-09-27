@@ -1,7 +1,9 @@
 //! MCP multi-endpoint CLI command implementation.
 
 use crate::cli_subs::McpSub;
-use source_mcp::{probe_mcp, repo_root, sync_cursor_mcp_json, McpEndpoint, McpEndpointRecord};
+use source_mcp::{
+    probe_mcp, repo_root, run_stdio_bridge, sync_cursor_mcp_json, McpEndpoint, McpEndpointRecord,
+};
 use std::process::ExitCode;
 
 pub fn run_mcp(cmd: McpSub) -> ExitCode {
@@ -132,5 +134,12 @@ pub fn run_mcp(cmd: McpSub) -> ExitCode {
             eprintln!("All remembered endpoints are unreachable.");
             ExitCode::from(1)
         }
+        McpSub::Bridge => match run_stdio_bridge(&path) {
+            Ok(()) => ExitCode::SUCCESS,
+            Err(e) => {
+                eprintln!("[mcp-bridge] {e}");
+                ExitCode::from(1)
+            }
+        },
     }
 }

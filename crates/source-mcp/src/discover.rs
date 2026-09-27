@@ -2,8 +2,8 @@
 
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::process::Command;
-use std::time::Duration;
+use std::process::{Command, Output, Stdio};
+use std::time::{Duration, Instant};
 
 use serde_json::{json, Value};
 use source_types::PortError;
@@ -52,11 +52,44 @@ pub fn probe_mcp(url: &str, token: &str, timeout_s: f64) -> bool {
     }
 }
 
+/// Run a helper tool (adb/arp/dns-sd) without a console window, without
+/// inheriting our stdin (the stdio MCP bridge owns it) and with a hard deadline
+/// (`dns-sd -B` browses forever).
+fn run_quiet(program: &str, args: &[&str], timeout: Duration) -> Option<Output> {
+    let mut cmd = Command::new(program);
+    cmd.args(args)
+        .stdin(Stdio::null())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::null());
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+        cmd.creation_flags(CREATE_NO_WINDOW);
+    }
+    let mut child = cmd.spawn().ok()?;
+    let deadline = Instant::now() + timeout;
+    loop {
+        match child.try_wait() {
+            Ok(Some(_)) => return child.wait_with_output().ok(),
+            Ok(None) if Instant::now() < deadline => std::thread::sleep(Duration::from_millis(50)),
+            _ => {
+                let _ = child.kill();
+                return child.wait_with_output().ok();
+            }
+        }
+    }
+}
+
+const TOOL_TIMEOUT: Duration = Duration::from_secs(5);
+
 fn adb_wlan_ips() -> Vec<String> {
-    let out = Command::new("adb")
-        .args(["shell", "ip", "-f", "inet", "addr", "show", "wlan0"])
-        .output();
-    let Ok(out) = out else {
+    let out = run_quiet(
+        "adb",
+        &["shell", "ip", "-f", "inet", "addr", "show", "wlan0"],
+        TOOL_TIMEOUT,
+    );
+    let Some(out) = out else {
         return Vec::new();
     };
     if !out.status.success() {
@@ -79,10 +112,7 @@ fn adb_wlan_ips() -> Vec<String> {
 }
 
 fn adb_phone_ip_route() -> Option<String> {
-    let out = Command::new("adb")
-        .args(["shell", "ip", "route"])
-        .output()
-        .ok()?;
+    let out = run_quiet("adb", &["shell", "ip", "route"], TOOL_TIMEOUT)?;
     if !out.status.success() {
         return None;
     }
@@ -115,10 +145,11 @@ fn discover_adb(token: &str, port: u16, timeout_s: f64) -> Vec<Value> {
 }
 
 fn discover_dns_sd(token: &str, port: u16, timeout_s: f64) -> Vec<Value> {
-    let Ok(out) = Command::new("dns-sd")
-        .args(["-B", "_legado-mcp._tcp", "local."])
-        .output()
-    else {
+    let Some(out) = run_quiet(
+        "dns-sd",
+        &["-B", "_legado-mcp._tcp", "local."],
+        Duration::from_secs(3),
+    ) else {
         return Vec::new();
     };
     let text = String::from_utf8_lossy(&out.stdout);
@@ -129,10 +160,11 @@ fn discover_dns_sd(token: &str, port: u16, timeout_s: f64) -> Vec<Value> {
         }
         let parts: Vec<_> = line.split_whitespace().collect();
         if let Some(name) = parts.last() {
-            if let Ok(r) = Command::new("dns-sd")
-                .args(["-L", name, "_legado-mcp._tcp", "local."])
-                .output()
-            {
+            if let Some(r) = run_quiet(
+                "dns-sd",
+                &["-L", name, "_legado-mcp._tcp", "local."],
+                Duration::from_secs(3),
+            ) {
                 let body = String::from_utf8_lossy(&r.stdout);
                 if let Some(host) = body
                     .split("can be reached at")
@@ -220,7 +252,7 @@ pub(crate) fn parse_arp_text(text: &str) -> Vec<String> {
 }
 
 fn arp_ips() -> Vec<String> {
-    let Ok(out) = Command::new("arp").arg("-a").output() else {
+    let Some(out) = run_quiet("arp", &["-a"], TOOL_TIMEOUT) else {
         return Vec::new();
     };
     let text = String::from_utf8_lossy(&out.stdout);
@@ -351,6 +383,12 @@ pub fn sync_cursor_mcp_json(mcp_url: &str, token: &str) -> Value {
         out["error"] = json!("legado entry not an object");
         return out;
     };
+    // stdio bridge (`source-cli mcp bridge`) resolves the phone itself — never pin a URL back.
+    if entry.contains_key("command") {
+        out["bridge"] = json!(true);
+        out["unchanged"] = json!(true);
+        return out;
+    }
     let old = entry
         .get("url")
         .and_then(|v| v.as_str())
